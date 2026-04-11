@@ -6,15 +6,18 @@ export async function getStaticPaths() {
   const departments = await db.goldDepartment.findMany({
     include: { 
       productLines: {
-        include: { goldBrand: true }
+        include: { goldBrand: true },
+        orderBy: { mentionCount: 'desc' }
       }
     }
   });
 
-  return departments.map(dept => ({
-    params: { department: slugify(dept.canonicalName) },
-    props: { department: dept },
-  }));
+  return departments.map(dept => {
+    return {
+      params: { department: slugify(dept.canonicalName) },
+      props: { department: dept },
+    };
+  });
 }
 
 const { department } = Astro.props;
@@ -29,12 +32,12 @@ const { department } = Astro.props;
     <nav><a href="/">Home</a> &gt; {department.canonicalName}</nav>
     <h1>Department: {department.canonicalName}</h1>
     
-    <h2>Associated Product Lines</h2>
+    <h2>Top Associated Product Lines</h2>
     <ul>
-      {department.productLines.map((line) => (
+      {department.productLines.map((line: any) => (
         <li>
           <a href={`/product/${slugify(line.goldBrand.canonicalName)}/${slugify(line.canonicalName)}`}>
-            {line.goldBrand.canonicalName} {line.canonicalName}
+            {line.goldBrand.canonicalName} {line.canonicalName} ({line.mentionCount} Mentions)
           </a>
         </li>
       ))}

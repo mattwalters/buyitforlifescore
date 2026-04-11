@@ -6,21 +6,23 @@ export async function getStaticPaths() {
   const categories = await db.goldCategory.findMany({
     include: {
       productLines: {
-        include: { goldBrand: true }
+        include: { goldBrand: true },
+        orderBy: { mentionCount: 'desc' }
       }
     }
   });
 
-  // For the stub, we fetch a global pool to slice contextual suggestions from
   const allCategories = await db.goldCategory.findMany();
 
-  return categories.map(cat => ({
-    params: { category: slugify(cat.canonicalName) },
-    props: { 
-      category: cat,
-      relatedCategories: allCategories.filter(c => c.id !== cat.id).slice(0, 5)
-    },
-  }));
+  return categories.map(cat => {
+    return {
+      params: { category: slugify(cat.canonicalName) },
+      props: { 
+        category: cat,
+        relatedCategories: allCategories.filter(c => c.id !== cat.id).slice(0, 5)
+      },
+    };
+  });
 }
 
 const { category, relatedCategories } = Astro.props;
@@ -35,12 +37,12 @@ const { category, relatedCategories } = Astro.props;
     <nav><a href="/">Home</a> &gt; Category &gt; {category.canonicalName}</nav>
     <h1>Category: {category.canonicalName}</h1>
     
-    <h2>Top Products</h2>
+    <h2>Top Ranked Product Lines</h2>
     <ul>
-      {category.productLines.map((line) => (
+      {category.productLines.map((line: any) => (
         <li>
           <a href={`/product/${slugify(line.goldBrand.canonicalName)}/${slugify(line.canonicalName)}`}>
-            {line.goldBrand.canonicalName} {line.canonicalName}
+            {line.goldBrand.canonicalName} {line.canonicalName} ({line.mentionCount} Mentions)
           </a>
         </li>
       ))}

@@ -5,7 +5,13 @@ import { slugify } from "../../utils/slugify";
 export async function getStaticPaths() {
   const brands = await db.goldBrand.findMany({
     include: {
-      productLines: true
+      productLines: {
+        orderBy: { canonicalName: 'asc' }
+      },
+      products: {
+        where: { goldProductLineId: null },
+        orderBy: { mentionCount: 'desc' }
+      }
     }
   });
 
@@ -27,15 +33,34 @@ const { brand } = Astro.props;
     <nav><a href="/">Home</a> &gt; <a href="/brands">Brands</a> &gt; {brand.canonicalName}</nav>
     <h1>{brand.canonicalName}</h1>
     
-    <h2>Products</h2>
-    <ul>
-      {brand.productLines.map((line) => (
-        <li>
-          <a href={`/product/${slugify(brand.canonicalName)}/${slugify(line.canonicalName)}`}>
-            {brand.canonicalName} {line.canonicalName}
-          </a>
-        </li>
-      ))}
-    </ul>
+    {brand.productLines.length > 0 && (
+      <section>
+        <h2>Product Lines</h2>
+        <ul>
+          {brand.productLines.map((line: any) => (
+            <li>
+              <a href={`/product/${slugify(brand.canonicalName)}/${slugify(line.canonicalName)}`}>
+                {brand.canonicalName} {line.canonicalName}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    {brand.products.length > 0 && (
+      <section>
+        <h2>Standalone Products</h2>
+        <ul>
+          {brand.products.map((product: any) => (
+            <li>
+              <a href={`/product/${slugify(brand.canonicalName)}/standalone/${slugify(product.canonicalName)}`}>
+                {brand.canonicalName} {product.canonicalName} ({product.mentionCount} Mentions)
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
   </body>
 </html>

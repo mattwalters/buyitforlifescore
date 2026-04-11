@@ -3,43 +3,118 @@ import { prisma as db } from "@mono/db";
 import { slugify } from "../../../utils/slugify";
 
 export async function getStaticPaths() {
-  const lines = await db.goldProductLine.findMany({
+  const productLines = await db.goldProductLine.findMany({
     include: {
       goldBrand: true,
-      products: true
+      products: {
+        orderBy: { mentionCount: 'desc' }
+      },
+      mentions: true
     }
   });
 
-  return lines.map(line => ({
-    params: { 
-      brand: slugify(line.goldBrand.canonicalName),
-      line: slugify(line.canonicalName)
-    },
-    props: { line },
-  }));
+  return productLines.map(line => {
+    // Aggregations for generic mentions tied directly to the Product Line
+    const validPrices = line.mentions.map(m => m.acquiredPrice).filter(p => p !== null) as number[];
+    const avgPrice = validPrices.length ? (validPrices.reduce((a,b) => a+b, 0) / validPrices.length).toFixed(2) : null;
+    
+    const validDurations = line.mentions.map(m => m.ownershipDurationMonths).filter(p => p !== null) as number[];
+    const avgDuration = validDurations.length ? (validDurations.reduce((a,b) => a+b, 0) / validDurations.length / 12).toFixed(1) : null;
+
+    const caveats = line.mentions.map(m => m.flawOrCaveat).filter(f => f && f.length > 5).slice(0, 3);
+    const quotes = line.mentions.map(m => m.quote).filter(q => q && q.length > 5).slice(0, 3);
+
+    return {
+      params: { 
+        brand: slugify(line.goldBrand.canonicalName),
+        line: slugify(line.canonicalName) 
+      },
+      props: { 
+        line,
+        avgPrice,
+        avgDuration,
+        caveats,
+        quotes
+      },
+    };
+  });
 }
 
-const { line } = Astro.props;
+const { line, avgPrice, avgDuration, caveats, quotes } = Astro.props;
 ---
 
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>{line.goldBrand.canonicalName} {line.canonicalName} - BIFL</title>
+    <title>{line.goldBrand.canonicalName} {line.canonicalName} Reviews & Versions - BIFL</title>
   </head>
   <body>
-    <nav><a href="/">Home</a> &gt; <a href={`/brands/${slugify(line.goldBrand.canonicalName)}`}>{line.goldBrand.canonicalName}</a> &gt; {line.canonicalName}</nav>
-    <h1>{line.goldBrand.canonicalName} {line.canonicalName}</h1>
+    <nav>
+      <a href="/">Home</a> &gt; 
+      <a href={`/brands/${slugify(line.goldBrand.canonicalName)}`}>{line.goldBrand.canonicalName}</a> &gt; 
+      {line.canonicalName}
+    </nav>
     
-    <h2>Models / Versions</h2>
-    <ul>
-      {line.products.map((model) => (
-        <li>
-          <a href={`/product/${slugify(line.goldBrand.canonicalName)}/${slugify(line.canonicalName)}/${slugify(model.canonicalName)}`}>
-            {model.canonicalName}
-          </a>
-        </li>
-      ))}
-    </ul>
+    <header>
+      <h1>{line.goldBrand.canonicalName} {line.canonicalName}</h1>
+      <p><strong>Generic Series BIFL Score:</strong> {line.avgSentiment > 0 ? "Positive" : "Pending"} ({line.mentionCount} Mentions)</p>
+    </header>
+
+    <section>
+      <h2>Verified Community Experience (Generic)</h2>
+      <ul>
+        <li><strong>Average Price Paid:</strong> {avgPrice ? `$${avgPrice}` : 'Unknown'}</li>
+        <li><strong>Average Ownership:</strong> {avgDuration ? `${avgDuration} Years` : 'Unknown'}</li>
+      </ul>
+      
+      {quotes.length > 0 && (
+        <article>
+          <h3>What Users Say</h3>
+          <ul>
+            {quotes.map((q: string) => <li>"{q}"</li>)}
+          </ul>
+        </article>
+      )}
+
+      {caveats.length > 0 && (
+        <article>
+          <h3>Common Flaws &amp; Caveats</h3>
+          <ul>
+            {caveats.map((c: string) => <li>{c}</li>)}
+          </ul>
+        </article>
+      )}
+    </section>
+
+    {line.products.length > 0 && (
+      <section>
+        <hr/>
+        <h2>Specific Model Directory</h2>
+        <table border="1" cellpadding="8">
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>BIFL Mentions</th>
+              <th>Durability Sentiment</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {line.products.map((product: any) => (
+              <tr>
+                <td>{product.canonicalName}</td>
+                <td>{product.mentionCount}</td>
+                <td>{product.avgSentiment > 0 ? "High" : "Average"}</td>
+                <td>
+                  <a href={`/product/${slugify(line.goldBrand.canonicalName)}/${slugify(line.canonicalName)}/${slugify(product.canonicalName)}`}>
+                    Read Reviews
+                  </a>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+    )}
   </body>
 </html>

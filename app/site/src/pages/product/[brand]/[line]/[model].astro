@@ -8,26 +8,48 @@ export async function getStaticPaths() {
       goldBrand: true,
       goldProductLine: {
         include: { products: true, categories: true }
-      }
+      },
+      mentions: true
     }
   });
 
-  const validModels = models.filter(m => m.goldProductLine !== null);
+  return models.map(model => {
+    // Basic rollups for the frontend
+    const validPrices = model.mentions.map(m => m.acquiredPrice).filter(p => p !== null) as number[];
+    const avgPrice = validPrices.length ? (validPrices.reduce((a,b) => a+b, 0) / validPrices.length).toFixed(2) : null;
+    
+    const validDurations = model.mentions.map(m => m.ownershipDurationMonths).filter(p => p !== null) as number[];
+    const avgDuration = validDurations.length ? (validDurations.reduce((a,b) => a+b, 0) / validDurations.length / 12).toFixed(1) : null;
 
-  return validModels.map(model => ({
-    params: { 
-      brand: slugify(model.goldBrand.canonicalName),
-      line: slugify(model.goldProductLine!.canonicalName),
-      model: slugify(model.canonicalName)
-    },
-    props: { 
-      model,
-      siblingModels: model.goldProductLine!.products.filter(p => p.id !== model.id)
-    },
-  }));
+    const caveats = model.mentions.map(m => m.flawOrCaveat).filter(f => f && f.length > 5).slice(0, 3);
+    const quotes = model.mentions.map(m => m.quote).filter(q => q && q.length > 5).slice(0, 3);
+
+    const lineSlug = model.goldProductLine ? slugify(model.goldProductLine.canonicalName) : "standalone";
+    const lineDisplay = model.goldProductLine ? model.goldProductLine.canonicalName : "Standalone Gear";
+    // Only resolve siblings if it belongs to a line
+    const siblingModels = model.goldProductLine ? model.goldProductLine.products.filter(p => p.id !== model.id) : [];
+
+    return {
+      params: { 
+        brand: slugify(model.goldBrand.canonicalName),
+        line: lineSlug,
+        model: slugify(model.canonicalName)
+      },
+      props: { 
+        model,
+        avgPrice,
+        avgDuration,
+        caveats,
+        quotes,
+        siblingModels,
+        lineDisplay,
+        lineSlug
+      },
+    };
+  });
 }
 
-const { model, siblingModels } = Astro.props;
+const { model, siblingModels, avgPrice, avgDuration, caveats, quotes, lineDisplay, lineSlug } = Astro.props;
 ---
 
 <html lang="en">
@@ -39,16 +61,49 @@ const { model, siblingModels } = Astro.props;
     <nav>
       <a href="/">Home</a> &gt; 
       <a href={`/brands/${slugify(model.goldBrand.canonicalName)}`}>{model.goldBrand.canonicalName}</a> &gt; 
-      <a href={`/product/${slugify(model.goldBrand.canonicalName)}/${slugify(model.goldProductLine!.canonicalName)}`}>{model.goldProductLine!.canonicalName}</a> &gt; 
+      {model.goldProductLine ? (
+         <a href={`/product/${slugify(model.goldBrand.canonicalName)}/${lineSlug}`}>{lineDisplay}</a>
+      ) : (
+         lineDisplay
+      )} &gt; 
       {model.canonicalName}
     </nav>
     
-    <h1>{model.goldBrand.canonicalName} {model.canonicalName}</h1>
-    <p>Sentiment: {model.avgSentiment > 0 ? "Positive" : "Unknown"}</p>
-    <p>Mentions: {model.mentionCount}</p>
+    <header>
+      <h1>{model.goldBrand.canonicalName} {model.canonicalName}</h1>
+      <p><strong>BIFL Score:</strong> {model.avgSentiment > 0 ? "Positive" : "Pending"} ({model.mentionCount} Mentions)</p>
+      <!-- Tier 1 Affiliate Placeholder -->
+      <a href={`https://amazon.com/s?k=${encodeURIComponent(model.goldBrand.canonicalName + ' ' + model.canonicalName)}&tag=biflscore-20`} target="_blank" rel="nofollow noopener">Check Price on Amazon</a>
+    </header>
+
+    <section>
+      <h2>Verified Community Experience</h2>
+      <ul>
+        <li><strong>Average Price Paid:</strong> {avgPrice ? `$${avgPrice}` : 'Unknown'}</li>
+        <li><strong>Average Ownership:</strong> {avgDuration ? `${avgDuration} Years` : 'Unknown'}</li>
+      </ul>
+      
+      {quotes.length > 0 && (
+        <article>
+          <h3>What Users Say</h3>
+          <ul>
+            {quotes.map((q: string) => <li>"{q}"</li>)}
+          </ul>
+        </article>
+      )}
+
+      {caveats.length > 0 && (
+        <article>
+          <h3>Common Flaws &amp; Caveats</h3>
+          <ul>
+            {caveats.map((c: string) => <li>{c}</li>)}
+          </ul>
+        </article>
+      )}
+    </section>
     
     {siblingModels.length > 0 && (
-      <>
+      <section>
         <hr/>
         <h2>Other Models in the {model.goldProductLine!.canonicalName} Line</h2>
         <ul>
@@ -60,7 +115,7 @@ const { model, siblingModels } = Astro.props;
              </li>
           ))}
         </ul>
-      </>
+      </section>
     )}
   </body>
 </html>

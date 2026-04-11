@@ -124,6 +124,7 @@ model GoldBrand {
   productLines    GoldProductLine[]
   products        GoldProduct[]
   mentions        SilverProductMention[]
+  affiliateLinks  AffiliateLink[]
 }
 
 model GoldProductLine {
@@ -153,6 +154,7 @@ model GoldProductLine {
   goldBrand       GoldBrand @relation(fields: [goldBrandId], references: [id], onDelete: Cascade)
   products        GoldProduct[]
   mentions        SilverProductMention[]
+  affiliateLinks  AffiliateLink[]
 }
 
 model GoldProduct {
@@ -184,6 +186,7 @@ model GoldProduct {
   goldBrand         GoldBrand @relation(fields: [goldBrandId], references: [id], onDelete: Cascade)
   goldProductLine   GoldProductLine? @relation(fields: [goldProductLineId], references: [id], onDelete: SetNull)
   mentions          SilverProductMention[]
+  affiliateLinks  AffiliateLink[]
 }
 
 // --- SILVER LAYER (EXTRACTED PRIMITIVES) ---
@@ -248,3 +251,22 @@ model AiSpend {
   submission      BronzeRedditSubmission? @relation(fields: [submissionId], references: [id], onDelete: Cascade)
 }
 
+// --- MONETIZATION LAYER ---
+model AffiliateLink {
+  id                String   @id @default(cuid())
+  provider          String   // e.g., "AMAZON", "SHAREASALE", "AVANTLINK"
+  url               String   // The explicit tracking URL or ASIN
+  isVerified        Boolean  @default(false)
+  
+  // Relations
+  goldBrandId       String?
+  goldProductLineId String?
+  goldProductId     String?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  goldBrand         GoldBrand?       @relation(fields: [goldBrandId], references: [id], onDelete: Cascade)
+  goldProductLine   GoldProductLine? @relation(fields: [goldProductLineId], references: [id], onDelete: Cascade)
+  goldProduct       GoldProduct?     @relation(fields: [goldProductId], references: [id], onDelete: Cascade)
+}
