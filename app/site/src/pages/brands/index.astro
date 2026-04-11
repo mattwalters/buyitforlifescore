@@ -1,0 +1,28 @@
+---
+import { prisma as db } from "@mono/db";
+import { slugify } from "../../utils/slugify";
+
+const brands = await db.goldBrand.findMany({
+  orderBy: { canonicalName: 'asc' }
+});
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>All Brands - BIFL</title>
+  </head>
+  <body>
+    <nav><a href="/">Home</a> &gt; Brands</nav>
+    <h1>Buy It For Life Brands</h1>
+    <ul>
+      {brands.map((brand) => (
+        <li>
+          <a href={`/brands/${slugify(brand.canonicalName)}`}>
+            {brand.canonicalName}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </body>
+</html>

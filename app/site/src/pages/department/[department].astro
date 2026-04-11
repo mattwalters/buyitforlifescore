@@ -1,0 +1,43 @@
+---
+import { prisma as db } from "@mono/db";
+import { slugify } from "../../utils/slugify";
+
+export async function getStaticPaths() {
+  const departments = await db.goldDepartment.findMany({
+    include: { 
+      productLines: {
+        include: { goldBrand: true }
+      }
+    }
+  });
+
+  return departments.map(dept => ({
+    params: { department: slugify(dept.canonicalName) },
+    props: { department: dept },
+  }));
+}
+
+const { department } = Astro.props;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>{department.canonicalName} - BIFL</title>
+  </head>
+  <body>
+    <nav><a href="/">Home</a> &gt; {department.canonicalName}</nav>
+    <h1>Department: {department.canonicalName}</h1>
+    
+    <h2>Associated Product Lines</h2>
+    <ul>
+      {department.productLines.map((line) => (
+        <li>
+          <a href={`/product/${slugify(line.goldBrand.canonicalName)}/${slugify(line.canonicalName)}`}>
+            {line.goldBrand.canonicalName} {line.canonicalName}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </body>
+</html>

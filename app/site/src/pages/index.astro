@@ -1,0 +1,50 @@
+---
+import { prisma as db } from "@mono/db";
+import { slugify } from "../utils/slugify";
+
+const departments = await db.goldDepartment.findMany({
+  orderBy: { canonicalName: 'asc' }
+});
+
+const categories = await db.goldCategory.findMany({
+  orderBy: { canonicalName: 'asc' }
+});
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Buy It For Life - Stub</title>
+  </head>
+  <body>
+    <h1>Buy It For Life Directory</h1>
+    
+    <h2>Top Categories</h2>
+    <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+      {categories.map((cat) => (
+        <a href={`/category/${slugify(cat.canonicalName)}`}>
+          {cat.canonicalName}
+        </a>
+      ))}
+    </div>
+
+    <hr/>
+
+    <h2>Departments</h2>
+    <ul>
+      {departments.map((dept) => (
+        <li>
+          <a href={`/department/${slugify(dept.canonicalName)}`}>
+            {dept.canonicalName}
+          </a>
+        </li>
+      ))}
+    </ul>
+    <hr />
+    <h2>Explore</h2>
+    <ul>
+      <li><a href="/brands">All Brands Directory</a></li>
+    </ul>
+  </body>
+</html>

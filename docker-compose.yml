@@ -1,0 +1,55 @@
+version: "3.8"
+services:
+  postgres:
+    image: pgvector/pgvector:pg15
+    container_name: buyitforlifeclub-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: buyitforlifeclub
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+  redis:
+    image: redis:alpine
+    container_name: buyitforlifeclub-redis
+    ports:
+      - "6379:6379"
+    restart: always
+
+  postgres-test:
+    image: pgvector/pgvector:pg15
+    container_name: buyitforlifeclub-postgres-test
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: buyitforlifeclub_test
+    ports:
+      - "15432:5432"
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    restart: always
+
+  redis-test:
+    image: redis:alpine
+    container_name: buyitforlifeclub-redis-test
+    ports:
+      - "16379:6379"
+    restart: always
+
+  mailpit:
+    image: axllent/mailpit
+    container_name: buyitforlifeclub-mailpit
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    environment:
+      MP_MAX_MESSAGES: 500
+    restart: always
+
+volumes:
+  postgres_data:
+  postgres_test_data:

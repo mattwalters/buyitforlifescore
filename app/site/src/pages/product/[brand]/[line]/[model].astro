@@ -1,0 +1,66 @@
+---
+import { prisma as db } from "@mono/db";
+import { slugify } from "../../../../utils/slugify";
+
+export async function getStaticPaths() {
+  const models = await db.goldProduct.findMany({
+    include: {
+      goldBrand: true,
+      goldProductLine: {
+        include: { products: true, categories: true }
+      }
+    }
+  });
+
+  const validModels = models.filter(m => m.goldProductLine !== null);
+
+  return validModels.map(model => ({
+    params: { 
+      brand: slugify(model.goldBrand.canonicalName),
+      line: slugify(model.goldProductLine!.canonicalName),
+      model: slugify(model.canonicalName)
+    },
+    props: { 
+      model,
+      siblingModels: model.goldProductLine!.products.filter(p => p.id !== model.id)
+    },
+  }));
+}
+
+const { model, siblingModels } = Astro.props;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>{model.goldBrand.canonicalName} {model.canonicalName} Review - BIFL</title>
+  </head>
+  <body>
+    <nav>
+      <a href="/">Home</a> &gt; 
+      <a href={`/brands/${slugify(model.goldBrand.canonicalName)}`}>{model.goldBrand.canonicalName}</a> &gt; 
+      <a href={`/product/${slugify(model.goldBrand.canonicalName)}/${slugify(model.goldProductLine!.canonicalName)}`}>{model.goldProductLine!.canonicalName}</a> &gt; 
+      {model.canonicalName}
+    </nav>
+    
+    <h1>{model.goldBrand.canonicalName} {model.canonicalName}</h1>
+    <p>Sentiment: {model.avgSentiment > 0 ? "Positive" : "Unknown"}</p>
+    <p>Mentions: {model.mentionCount}</p>
+    
+    {siblingModels.length > 0 && (
+      <>
+        <hr/>
+        <h2>Other Models in the {model.goldProductLine!.canonicalName} Line</h2>
+        <ul>
+          {siblingModels.map((sibling: any) => (
+             <li>
+               <a href={`/product/${slugify(model.goldBrand.canonicalName)}/${slugify(model.goldProductLine!.canonicalName)}/${slugify(sibling.canonicalName)}`}>
+                 {sibling.canonicalName}
+               </a>
+             </li>
+          ))}
+        </ul>
+      </>
+    )}
+  </body>
+</html>

@@ -1,0 +1,36 @@
+import { createEnv } from "@t3-oss/env-core";
+import { z } from "zod";
+
+export const env = createEnv({
+  skipValidation: !!process.env.SKIP_ENV_VALIDATION,
+  server: {
+    HOST: z.string().default("127.0.0.1"),
+    NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+    DATABASE_URL: z.string().url(),
+    REDIS_URL: z.string().url(),
+    RESEND_API_KEY: z.string().optional(),
+    DISCORD_BOT_TOKEN: z.string().optional(),
+    REDDIT_ACCESS_TOKEN: z.string().optional(),
+    REDDIT_ACCOUNT_ID: z.string().optional(),
+    POSTHOG_API_KEY: z.string().optional(),
+    POSTHOG_PROJECT_ID: z.string().optional(),
+    PORT: z.coerce.number().int().positive().default(3001),
+    SMTP_HOST: z.string().optional(),
+    SMTP_PORT: z.string().optional(),
+    DISCORD_GUILD_ID: z.string().optional(),
+    DISCORD_WRITER_ROLE_ID: z.string().optional(),
+    AGENT_SECRET: z.string().optional(),
+    NEXT_PUBLIC_APP_URL: z.string().url().optional(),
+    NEXT_PUBLIC_POSTHOG_TOKEN: z.string().optional(),
+    NEXT_PUBLIC_POSTHOG_HOST: z.string().url().optional(),
+    GOOGLE_CLOUD_PROJECT: z.string().optional(),
+    GEMINI_API_KEY: z.string().min(1, "GEMINI_API_KEY is required!"),
+    AI_MOCK_URL: z.string().optional(),
+    GCP_SERVICE_ACCOUNT_KEY: z.string().optional(),
+    STORAGE_DRIVER: z.enum(["local", "s3", "gcs"]).optional(),
+    STORAGE_BUCKET: z.string().optional(),
+    IMPORT_BUCKET: z.string().optional(),
+  },
+  runtimeEnv: process.env,
+  emptyStringAsUndefined: true,
+});

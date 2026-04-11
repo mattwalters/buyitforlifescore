@@ -1,0 +1,36 @@
+{
+  "name": "@mono/db",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "scripts": {
+    "db:generate": "prisma generate --no-hints",
+    "clean": "rm -rf dist",
+    "build": "tsc",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio",
+    "db:deploy": "prisma migrate deploy",
+    "db:push": "prisma db push",
+    "db:status": "prisma migrate status",
+    "db:reset": "npx prisma migrate reset",
+    "format": "prettier --check .",
+    "format:write": "prettier --write .",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.6.0",
+    "@prisma/client": "^7.6.0",
+    "dotenv": "^17.4.1",
+    "pg": "^8.20.0"
+  },
+  "devDependencies": {
+    "@mono/eslint-config": "*",
+    "@types/pg": "^8.20.0",
+    "prisma": "^7.6.0"
+  }
+}

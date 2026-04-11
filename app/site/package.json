@@ -1,0 +1,22 @@
+{
+  "name": "@mono/site",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "dotenv -e ../../.env -- astro dev --host 127.0.0.3 --port 3008",
+    "build": "dotenv -e ../../.env -- astro build",
+    "start": "dotenv -e ../../.env -- astro preview --host 127.0.0.3 --port 3008",
+    "lint": "eslint .",
+    "clean": "rm -rf .turbo node_modules dist .astro",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "astro": "^6.1.5",
+    "@mono/db": "*"
+  },
+  "devDependencies": {
+    "@mono/eslint-config": "*",
+    "prettier": "^3.8.1"
+  }
+}

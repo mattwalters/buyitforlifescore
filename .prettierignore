@@ -1,0 +1,27 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Build Outputs & Generated Files (Global)
+dist
+public
+build
+out
+.next
+storybook-static
+coverage
+.turbo
+
+# Misc
+.DS_Store
+*.pem
+.env
+.env.*
+**/.auth
+.claude
+
+# Package Managers
+package-lock.json
+pnpm-lock.yaml
+yarn.lock

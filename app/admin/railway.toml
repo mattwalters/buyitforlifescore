@@ -1,0 +1,8 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "app/admin/Dockerfile"
+
+[deploy]
+startCommand = "npm run start:admin"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10

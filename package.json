@@ -1,0 +1,78 @@
+{
+  "name": "@mono/mono",
+  "private": true,
+  "workspaces": [
+    "app/*",
+    "lib/*"
+  ],
+  "scripts": {
+    "dev": "concurrently --kill-others --names \"DOCKER,TURBO\" -c \"blue,magenta\" \"docker compose up\" \"dotenv -e .env -- turbo run dev\"",
+    "dev:admin": "dotenv -e .env -- npm run dev -w @mono/admin",
+    "build:admin": "dotenv -e .env -- npm run build -w @mono/admin",
+    "start:admin": "dotenv -e .env -- npm run start -w @mono/admin",
+    "dev:worker": "dotenv -e .env -- npm run dev -w @mono/worker",
+    "build:worker": "dotenv -e .env -- npm run build -w @mono/worker",
+    "start:worker": "dotenv -e .env -- npm run start -w @mono/worker",
+    "clean": "npm run clean --workspaces --if-present",
+    "build:libs": "turbo build --filter='./lib/*'",
+    "build:docker": "node scripts/build-docker.mjs",
+    "build": "dotenv -e .env -- turbo build",
+    "seed": "dotenv -e .env -- npm run seed --workspaces --if-present",
+    "test": "dotenv -e .env -- turbo test",
+    "perf": "npm run perf --workspaces --if-present",
+    "test:unit": "dotenv -e .env -- turbo test:unit",
+    "test:prepare": "docker compose up -d postgres-test redis-test && dotenv -e .env.test -- npm run db:push -w @mono/db",
+    "lint": "dotenv -e .env -- turbo lint",
+    "db:generate": "dotenv -e .env -- npm run db:generate -w @mono/db",
+    "db:migrate": "dotenv -e .env -- npm run db:migrate -w @mono/db",
+    "db:reset": "dotenv -e .env -- npm run db:reset -w @mono/db && dotenv -e .env.test -- npm run db:reset -w @mono/db",
+    "db:studio": "dotenv -e .env -- npm run db:studio -w @mono/db",
+    "db:push": "dotenv -e .env -- npm run db:push -w @mono/db",
+    "db:status": "dotenv -e .env -- npm run db:status -w @mono/db",
+    "db:clobber": "dotenv -e .env -- npx tsx scripts/clobber.ts",
+    "db:admin": "npm run db:admin -w @mono/admin",
+    "bronze:ingest": "npm run bronze:ingest -w @mono/admin --",
+    "silver:generate": "npm run silver:generate -w @mono/admin --",
+    "gold:generate": "npm run gold:generate -w @mono/admin --",
+    "deploy:admin": "git push origin origin/main:deploy/admin --force",
+    "deploy:worker": "git push origin origin/main:deploy/worker --force",
+    "deploy": "npm run deploy:worker && npm run deploy:admin",
+    "ssh": "railway ssh -s admin",
+    "format": "prettier --check .",
+    "format:write": "prettier --write .",
+    "nuke_node_modules": "./scripts/nuke_node_modules.sh",
+    "nuke": "npm run clean && npm run nuke_node_modules",
+    "set-host": "./scripts/set-host.sh"
+  },
+  "engines": {
+    "node": "22.22.2"
+  },
+  "overrides": {
+    "next": "16.2.2",
+    "fetch-blob": "^3.2.0",
+    "whatwg-encoding": "npm:@exodus/bytes@latest",
+    "magicast": "0.5.2",
+    "esbuild": "^0.28.0"
+  },
+  "devDependencies": {
+    "@prisma/client": "^7.6.0",
+    "@react-email/preview-server": "^5.3.0-canary.2",
+    "@types/node": "^22.19.17",
+    "@types/uuid": "^10.0.0",
+    "concurrently": "^9.2.1",
+    "dotenv-cli": "^11.0.0",
+    "eslint": "^9.39.4",
+    "lighthouse": "^12.8.2",
+    "next": "16.2.2",
+    "playwright-lighthouse": "^4.0.0",
+    "prettier": "^3.8.1",
+    "turbo": "^2.9.4",
+    "typescript": "^6.0.2",
+    "vite": "^8.0.5",
+    "vitest": "^4.1.2"
+  },
+  "packageManager": "npm@10.9.8",
+  "dependencies": {
+    "@clack/prompts": "^1.2.0"
+  }
+}

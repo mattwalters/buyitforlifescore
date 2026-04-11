@@ -1,0 +1,57 @@
+---
+import { prisma as db } from "@mono/db";
+import { slugify } from "../../utils/slugify";
+
+export async function getStaticPaths() {
+  const categories = await db.goldCategory.findMany({
+    include: {
+      productLines: {
+        include: { goldBrand: true }
+      }
+    }
+  });
+
+  // For the stub, we fetch a global pool to slice contextual suggestions from
+  const allCategories = await db.goldCategory.findMany();
+
+  return categories.map(cat => ({
+    params: { category: slugify(cat.canonicalName) },
+    props: { 
+      category: cat,
+      relatedCategories: allCategories.filter(c => c.id !== cat.id).slice(0, 5)
+    },
+  }));
+}
+
+const { category, relatedCategories } = Astro.props;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>{category.canonicalName} - BIFL</title>
+  </head>
+  <body>
+    <nav><a href="/">Home</a> &gt; Category &gt; {category.canonicalName}</nav>
+    <h1>Category: {category.canonicalName}</h1>
+    
+    <h2>Top Products</h2>
+    <ul>
+      {category.productLines.map((line) => (
+        <li>
+          <a href={`/product/${slugify(line.goldBrand.canonicalName)}/${slugify(line.canonicalName)}`}>
+            {line.goldBrand.canonicalName} {line.canonicalName}
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <hr/>
+    <h2>Related Categories</h2>
+    <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+      {relatedCategories.map((rc: any) => (
+        <a href={`/category/${slugify(rc.canonicalName)}`}>{rc.canonicalName}</a>
+      ))}
+    </div>
+  </body>
+</html>

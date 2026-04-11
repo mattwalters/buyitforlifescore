@@ -1,0 +1,257 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DATABASE_URL: "postgresql://postgres:password@127.0.0.1:5432/mono_test"
+  REDIS_URL: "redis://127.0.0.1:6379"
+  AUTH_SECRET: "fake-secret"
+  AUTH_ADMIN_SECRET: "fake-admin-secret"
+  AUTH_ADMIN_GOOGLE_ID: "fake-google-id"
+  AUTH_ADMIN_GOOGLE_SECRET: "fake-google-secret"
+  AUTH_GOOGLE_ID: "fake-google-id"
+  AUTH_GOOGLE_SECRET: "fake-google-secret"
+  AUTH_URL: "http://127.0.0.1:3000"
+  NEXT_PUBLIC_APP_URL: "http://127.0.0.1:3000"
+  STORAGE_DRIVER: "local"
+  STORAGE_BUCKET: "mono-storage-test"
+  IMPORT_BUCKET: "mono-import-test"
+  AGENT_SECRET: "fake-secret"
+  STRIPE_SECRET_KEY: "fake-secret"
+  STRIPE_WEBHOOK_SECRET: "fake-secret"
+  NEXT_PUBLIC_POSTHOG_HOST: "https://us.i.posthog.com"
+  SMTP_HOST: "127.0.0.1"
+  GOOGLE_CLOUD_PROJECT: "test-project"
+
+jobs:
+  lint-and-format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+      - name: Install dependencies
+        run: npm ci
+      - name: Run Lint
+        run: npm run lint
+      - name: Run Format Check
+        run: npm run format
+
+  docker-build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [web, worker, marketing, admin]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker Image
+        run: npm run build:docker ${{ matrix.service }}
+        env:
+          NEXT_PUBLIC_APP_URL: "http://127.0.0.1:3000"
+          NEXT_PUBLIC_POSTHOG_HOST: "https://us.i.posthog.com"
+          GOOGLE_CLOUD_PROJECT: "test-project"
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+      - name: Install dependencies
+        run: npm ci
+      - name: Generate Prisma Client
+        run: npm run db:generate
+      - name: Run Build
+        run: npm run build
+  test-unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+      - name: Install dependencies
+        run: npm ci
+      # Prisma generate is needed if unit tests import code that uses Prisma (even if mocked)
+      - name: Generate Prisma Client
+        run: npm run db:generate
+      # Build libs (prose, db)
+      - name: Build Libraries
+        run: npm run build:libs
+
+      - name: Run Unit Tests
+        run: npm run test:unit
+
+  test-components:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+      - name: Install dependencies
+        run: npm ci
+      - name: Install Playwright Browsers
+        run: npx playwright install chromium --with-deps
+      - name: Generate Prisma Client
+        run: npm run db:generate
+      - name: Build Libraries
+        run: npm run build:libs
+
+      - name: Run Storybook Tests
+        run: npm run test:storybook
+      - name: Run Component Tests
+        run: npm run test:components
+
+  test-e2e:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.59.1-jammy
+      options: --user 1001
+      env:
+        HOME: /root
+    strategy:
+      fail-fast: false
+      matrix:
+        shardIndex: [1, 2]
+        shardTotal: [2]
+
+    # Define Services
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: myuser
+          POSTGRES_PASSWORD: mypassword
+          POSTGRES_DB: mono_test
+        ports:
+          - 5432:5432
+        # Set health checks to wait until postgres is ready
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npm run db:generate
+
+      # Push the schema to the test database
+      - name: Push Database Schema
+        run: npm run db:push
+        env:
+          DATABASE_URL: postgres://myuser:mypassword@postgres:5432/mono_test
+
+      # Build libs (prose, db)
+      - name: Build Libraries
+        run: npm run build:libs
+
+      # Build web app for production (much faster and more stable than dev mode)
+      - name: Build Web App
+        run: npm run build:web
+        env:
+          DATABASE_URL: postgres://myuser:mypassword@postgres:5432/mono_test
+          AUTH_SECRET: fake-secret
+          STRIPE_SECRET_KEY: fake-secret
+          STRIPE_WEBHOOK_SECRET: fake-secret
+
+      - name: Run E2E Tests
+        # Call workspace directly to ensure arguments are passed to the underlying script
+        # npm run -w @mono/web test:e2e -- --shard=...
+        run: npm run test:e2e -w @mono/web -- --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+        env:
+          # Ensure the app connects to the test DB
+          # When running in a container, services are available at their hostname 'postgres'
+          DATABASE_URL: postgres://myuser:mypassword@postgres:5432/mono_test
+          REDIS_URL: redis://redis:6379
+          AUTH_SECRET: fake-secret
+          AUTH_TRUST_HOST: "true"
+          STRIPE_SECRET_KEY: fake-secret
+          STRIPE_WEBHOOK_SECRET: fake-secret
+          STORAGE_DRIVER: "local"
+          NEXT_PUBLIC_APP_URL: "http://127.0.0.1:3000"
+          AUTH_URL: "http://127.0.0.1:3000"
+          AGENT_SECRET: "fake-secret"
+          NEXT_PUBLIC_POSTHOG_HOST: "https://us.i.posthog.com"
+          SMTP_HOST: "127.0.0.1"
+          GOOGLE_CLOUD_PROJECT: "mono-test-project"
+          RESEND_API_KEY: "re_test1234"
+          GEMINI_API_KEY: "dummy-key"
+          AI_MOCK_URL: "http://127.0.0.1:13005"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-${{ matrix.shardIndex }}
+          path: app/web/playwright-report/
+          retention-days: 30
+
+  performance-marketing:
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.59.1-jammy
+      options: --user 1001
+      env:
+        HOME: /root
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        run: npx playwright install chromium
+
+      # Build marketing app
+      - name: Build Marketing App
+        run: npm run build:marketing
+
+      - name: Run Performance Tests
+        run: npm run test:perf
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-marketing
+          path: app/marketing/playwright-report/
+          retention-days: 30

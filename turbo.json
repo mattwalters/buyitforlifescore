@@ -1,0 +1,54 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalEnv": [
+    "HOST",
+    "PORT",
+    "DATABASE_URL",
+    "AUTH_SECRET",
+    "AUTH_ADMIN_SECRET",
+    "AUTH_ADMIN_GOOGLE_ID",
+    "AUTH_ADMIN_GOOGLE_SECRET",
+    "AUTH_GOOGLE_ID",
+    "AUTH_GOOGLE_SECRET",
+    "POSTHOG_API_KEY",
+    "POSTHOG_PROJECT_ID",
+    "NEXT_PUBLIC_POSTHOG_HOST",
+    "STANDALONE_BUILD",
+    "AGENT_SECRET",
+    "STORAGE_DRIVER",
+    "STORAGE_BUCKET",
+    "IMPORT_BUCKET",
+    "REDIS_URL",
+    "AUTH_URL",
+    "SMTP_HOST",
+    "GOOGLE_CLOUD_PROJECT",
+    "GEMINI_API_KEY"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build", "^db:generate", "db:generate"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
+    },
+    "@mono/ui#build": {
+      "outputs": []
+    },
+    "lint": {
+      "dependsOn": ["^build"]
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**/*.tsx", "src/**/*.ts", "test/**/*.ts", "test/**/*.tsx"]
+    },
+    "test:unit": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**/*.tsx", "src/**/*.ts", "test/**/*.ts", "test/**/*.tsx"]
+    },
+    "db:generate": {
+      "cache": false
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}
