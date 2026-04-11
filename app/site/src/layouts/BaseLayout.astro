@@ -1,0 +1,42 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "Discover the most durable products backed by raw data and real community experience." } = Astro.props;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="description" content={description} />
+    <title>{title} | BuyItForLifeScore</title>
+  </head>
+  <body>
+    <header>
+      <div class="container">
+        <a href="/" class="site-logo">BuyItForLifeScore</a>
+        <nav>
+          <a href="/brands">Brands</a> | 
+          <a href="/department/categories">Categories</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      <slot />
+    </main>
+
+    <footer>
+      <div class="container">
+        <p>&copy; {new Date().getFullYear()} BuyItForLifeScore.com. The Heritage Ledger.</p>
+        <p>Scores driven by transparent, aggregated community analysis.</p>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -2,91 +2,119 @@
                 BIFL Data Pipeline Orchestrator
 ================================================================
 
-Applying limit: 12
+Applying limit: 100
 Applying random shuffling!
-Applying limit: 10
+Applying limit: 18
 🟢 EXTRACTION PHASE: Bootstrapping Silver Extractions
 This uses Gemini Flash to concurrently analyze Reddit Threads and produce
 structured Silver Mentions. Embeddings are decoupled.
 
 > @mono/admin@0.1.0 silver:generate
-> dotenv -e ../../.env -- tsx scripts/generate-silvers.ts --concurrency 10 --limit 10 --random
+> dotenv -e ../../.env -- tsx scripts/generate-silvers.ts --concurrency 10 --limit 18 --random
 
 ◇ injected env (0) from ../../.env // tip: ◈ secrets for agents [www.dotenvx.com]
-[Extraction] 🧹 Fetching unprocessed Bronze Submissions (limit 10, random: true, seed: 42)...
-[Extraction] 📦 Churning 10 Threads into Silver Mentions (concurrency: 10)...
+[Extraction] 🧹 Fetching unprocessed Bronze Submissions (limit 18, random: true, seed: 42)...
+[Extraction] 📦 Churning 18 Threads into Silver Mentions (concurrency: 10)...
 
-[Extraction] 🔍 [1/10] Analyzing Topic: "25% off at American Giant. Just follow this link." | Comments: 0 | Chunks: 1
-   [Extraction] 🧠 Sending 325 estimated tokens to Gemini (Chunk 1/1)...
+[Extraction] 🔍 [1/18] Analyzing Topic: "Zero-loft aerogel jacket and pants " | Comments: 0 | Chunks: 1
+   [Extraction] 🧠 Sending 331 estimated tokens to Gemini (Chunk 1/1)...
 
-[Extraction] 🔍 [2/10] Analyzing Topic: "Steel case leap v2 neck pain?" | Comments: 2 | Chunks: 1
-   [Extraction] 🧠 Sending 685 estimated tokens to Gemini (Chunk 1/1)...
+[Extraction] 🔍 [2/18] Analyzing Topic: "buy plus 1 plus 1 fanss" | Comments: 0 | Chunks: 1
+   [Extraction] 🧠 Sending 318 estimated tokens to Gemini (Chunk 1/1)...
 
-[Extraction] 🔍 [3/10] Analyzing Topic: "[Request] Slip-on leather men's casual shoes that can be resoled for life" | Comments: 13 | Chunks: 1
-   [Extraction] 🧠 Sending 1131 estimated tokens to Gemini (Chunk 1/1)...
+[Extraction] 🔍 [3/18] Analyzing Topic: "iPhone 6s kaufen: Jetzt überall verfügbar! | Apple iPhone 7: Release Date, Technische Daten, Bilder und Preise" | Comments: 0 | Chunks: 1
+   [Extraction] 🧠 Sending 340 estimated tokens to Gemini (Chunk 1/1)...
 
-[Extraction] 🔍 [4/10] Analyzing Topic: "[Request] Belt for a larger guy" | Comments: 31 | Chunks: 2
-   [Extraction] 🧠 Sending 2140 estimated tokens to Gemini (Chunk 1/2)...
-   [Extraction] 🧠 Sending 775 estimated tokens to Gemini (Chunk 2/2)...
+[Extraction] 🔍 [4/18] Analyzing Topic: "Glasses brands/makes" | Comments: 14 | Chunks: 1
+   [Extraction] 🧠 Sending 1278 estimated tokens to Gemini (Chunk 1/1)...
 
-[Extraction] 🔍 [5/10] Analyzing Topic: "New demand for very old farm tractors specifically because they're low tech" | Comments: 55 | Chunks: 3
-   [Extraction] 🧠 Sending 1975 estimated tokens to Gemini (Chunk 1/3)...
-   [Extraction] 🧠 Sending 2311 estimated tokens to Gemini (Chunk 2/3)...
-   [Extraction] 🧠 Sending 604 estimated tokens to Gemini (Chunk 3/3)...
+[Extraction] 🔍 [5/18] Analyzing Topic: "Vintage A2000 info request" | Comments: 0 | Chunks: 1
+   [Extraction] 🧠 Sending 321 estimated tokens to Gemini (Chunk 1/1)...
 
-[Extraction] 🔍 [6/10] Analyzing Topic: "Reddit API Request Tutorial - Where do We Get Reddit API Client ID | For Reddit Apps" | Comments: 1 | Chunks: 1
-   [Extraction] 🧠 Sending 438 estimated tokens to Gemini (Chunk 1/1)...
+[Extraction] 🔍 [6/18] Analyzing Topic: "Steelcase Leap v2" | Comments: 1 | Chunks: 1
+   [Extraction] 🧠 Sending 430 estimated tokens to Gemini (Chunk 1/1)...
 
-[Extraction] 🔍 [7/10] Analyzing Topic: "Consider a diamond file for glass repair" | Comments: 6 | Chunks: 1
-   [Extraction] 🧠 Sending 893 estimated tokens to Gemini (Chunk 1/1)...
+[Extraction] 🔍 [7/18] Analyzing Topic: "The Secret Formula of An Amazon Entrepreneur" | Comments: 0 | Chunks: 1
+   [Extraction] 🧠 Sending 323 estimated tokens to Gemini (Chunk 1/1)...
 
-[Extraction] 🔍 [8/10] Analyzing Topic: "Bulk buy comfy black joggers with zip pockets? [UK]" | Comments: 4 | Chunks: 1
-   [Extraction] 🧠 Sending 585 estimated tokens to Gemini (Chunk 1/1)...
+[Extraction] 🔍 [8/18] Analyzing Topic: "Spong coffee grinder" | Comments: 7 | Chunks: 1
+   [Extraction] 🧠 Sending 736 estimated tokens to Gemini (Chunk 1/1)...
 
-[Extraction] 🔍 [9/10] Analyzing Topic: "PSA: Do not purchase Darn Tough socks through Amazon." | Comments: 177 | Chunks: 8
-   [Extraction] 🧠 Sending 1695 estimated tokens to Gemini (Chunk 1/8)...
-   [Extraction] 🧠 Sending 1663 estimated tokens to Gemini (Chunk 2/8)...
-   [Extraction] 🧠 Sending 1341 estimated tokens to Gemini (Chunk 3/8)...
-   [Extraction] 🧠 Sending 1516 estimated tokens to Gemini (Chunk 4/8)...
-   [Extraction] 🧠 Sending 1562 estimated tokens to Gemini (Chunk 5/8)...
-   [Extraction] 🧠 Sending 1338 estimated tokens to Gemini (Chunk 6/8)...
-   [Extraction] 🧠 Sending 1415 estimated tokens to Gemini (Chunk 7/8)...
-   [Extraction] 🧠 Sending 475 estimated tokens to Gemini (Chunk 8/8)...
+[Extraction] 🔍 [9/18] Analyzing Topic: "My friend gave me his grandma’s rice cooker that looks like it’s from the 80s. It works really well and is a lot easier than cooking rice in a pan." | Comments: 94 | Chunks: 4
+   [Extraction] 🧠 Sending 917 estimated tokens to Gemini (Chunk 1/4)...
+   [Extraction] 🧠 Sending 1219 estimated tokens to Gemini (Chunk 2/4)...
+   [Extraction] 🧠 Sending 1260 estimated tokens to Gemini (Chunk 3/4)...
+   [Extraction] 🧠 Sending 1080 estimated tokens to Gemini (Chunk 4/4)...
 
-[Extraction] 🔍 [10/10] Analyzing Topic: "i bought my clothes from zeswear , it's good store they have many discounts also" | Comments: 0 | Chunks: 1
-   [Extraction] 🧠 Sending 332 estimated tokens to Gemini (Chunk 1/1)...
+[Extraction] 🔍 [10/18] Analyzing Topic: "Are we all posting 40yr old denim jackets now?" | Comments: 1 | Chunks: 1
+   [Extraction] 🧠 Sending 474 estimated tokens to Gemini (Chunk 1/1)...
    [Extraction] 📉 Output array empty. No valid models detected in Chunk 1.
-[Extraction] 🎉 Finished Thread [6/10]. Found 0 Extracted Entities.
-   [Extraction] 📉 Output array empty. No valid models detected in Chunk 3.
+[Extraction] 🎉 Finished Thread [10/18]. Found 0 Extracted Entities.
+
+[Extraction] 🔍 [11/18] Analyzing Topic: "Best tan leather duffle under $350?" | Comments: 1 | Chunks: 1
+   [Extraction] 🧠 Sending 470 estimated tokens to Gemini (Chunk 1/1)...
    [Extraction] 📉 Output array empty. No valid models detected in Chunk 1.
-[Extraction] 🎉 Finished Thread [1/10]. Found 0 Extracted Entities.
+[Extraction] 🎉 Finished Thread [5/18]. Found 0 Extracted Entities.
+
+[Extraction] 🔍 [12/18] Analyzing Topic: "Looking to buy a power washer in EU under 120Euro" | Comments: 5 | Chunks: 1
+   [Extraction] 🧠 Sending 427 estimated tokens to Gemini (Chunk 1/1)...
+   [Extraction] 📉 Output array empty. No valid models detected in Chunk 1.
+[Extraction] 🎉 Finished Thread [7/18]. Found 0 Extracted Entities.
+
+[Extraction] 🔍 [13/18] Analyzing Topic: "Le Creuset vs Emile Henry lasagna pan" | Comments: 31 | Chunks: 2
+   [Extraction] 🧠 Sending 2061 estimated tokens to Gemini (Chunk 1/2)...
+   [Extraction] 🧠 Sending 636 estimated tokens to Gemini (Chunk 2/2)...
+   [Extraction] 📉 Output array empty. No valid models detected in Chunk 1.
+[Extraction] 🎉 Finished Thread [2/18]. Found 0 Extracted Entities.
+
+[Extraction] 🔍 [14/18] Analyzing Topic: "Crazy cookie contraptions" | Comments: 12 | Chunks: 1
+   [Extraction] 🧠 Sending 979 estimated tokens to Gemini (Chunk 1/1)...
+   [Extraction] 📉 Output array empty. No valid models detected in Chunk 1.
+[Extraction] 🎉 Finished Thread [1/18]. Found 0 Extracted Entities.
+
+[Extraction] 🔍 [15/18] Analyzing Topic: "Looking For Warm and Waterproof Winter Boots. I'm Moving North of the Arctic Circle!" | Comments: 0 | Chunks: 1
+   [Extraction] 🧠 Sending 336 estimated tokens to Gemini (Chunk 1/1)...
    [Extraction] ✨ Extracted 1 valid products in Chunk 1. Saving to Database...
-   [Extraction] ✨ Extracted 2 valid products in Chunk 1. Saving to Database...
-[Extraction] 🎉 Finished Thread [10/10]. Found 1 Extracted Entities.
-[Extraction] 🎉 Finished Thread [2/10]. Found 2 Extracted Entities.
-   [Extraction] ✨ Extracted 6 valid products in Chunk 2. Saving to Database...
-   [Extraction] ✨ Extracted 2 valid products in Chunk 1. Saving to Database...
-[Extraction] 🎉 Finished Thread [7/10]. Found 2 Extracted Entities.
-   [Extraction] ✨ Extracted 6 valid products in Chunk 7. Saving to Database...
-   [Extraction] ✨ Extracted 3 valid products in Chunk 1. Saving to Database...
-[Extraction] 🎉 Finished Thread [8/10]. Found 3 Extracted Entities.
-   [Extraction] ✨ Extracted 10 valid products in Chunk 1. Saving to Database...
-   [Extraction] ✨ Extracted 7 valid products in Chunk 4. Saving to Database...
-   [Extraction] ✨ Extracted 4 valid products in Chunk 6. Saving to Database...
-   [Extraction] ✨ Extracted 10 valid products in Chunk 1. Saving to Database...
-   [Extraction] ✨ Extracted 17 valid products in Chunk 1. Saving to Database...
-[Extraction] 🎉 Finished Thread [3/10]. Found 17 Extracted Entities.
-   [Extraction] ✨ Extracted 12 valid products in Chunk 2. Saving to Database...
-   [Extraction] ✨ Extracted 1 valid products in Chunk 8. Saving to Database...
-   [Extraction] ✨ Extracted 11 valid products in Chunk 3. Saving to Database...
-   [Extraction] ✨ Extracted 16 valid products in Chunk 2. Saving to Database...
-[Extraction] 🎉 Finished Thread [5/10]. Found 26 Extracted Entities.
-   [Extraction] ✨ Extracted 19 valid products in Chunk 1. Saving to Database...
-[Extraction] 🎉 Finished Thread [4/10]. Found 25 Extracted Entities.
-   [Extraction] ✨ Extracted 15 valid products in Chunk 5. Saving to Database...
-[Extraction] 🎉 Finished Thread [9/10]. Found 66 Extracted Entities.
+[Extraction] 🎉 Finished Thread [6/18]. Found 1 Extracted Entities.
 
-[Extraction] ✅ Silver Sweep complete! Fully processed 10 threads, resulting in 8 successful multi-product AI extraction runs.
+[Extraction] 🔍 [16/18] Analyzing Topic: "Ska-ska-vroom! 1978 Case 222" | Comments: 16 | Chunks: 1
+   [Extraction] 🧠 Sending 906 estimated tokens to Gemini (Chunk 1/1)...
+   [Extraction] ✨ Extracted 4 valid products in Chunk 3. Saving to Database...
+   [Extraction] ✨ Extracted 2 valid products in Chunk 1. Saving to Database...
+[Extraction] 🎉 Finished Thread [3/18]. Found 2 Extracted Entities.
+
+[Extraction] 🔍 [17/18] Analyzing Topic: "Which Zojirushi functions are most replicable through a MacGyver hack or the instant pot?" | Comments: 0 | Chunks: 1
+   [Extraction] 🧠 Sending 337 estimated tokens to Gemini (Chunk 1/1)...
+   [Extraction] ✨ Extracted 7 valid products in Chunk 1. Saving to Database...
+[Extraction] 🎉 Finished Thread [8/18]. Found 7 Extracted Entities.
+   [Extraction] ✨ Extracted 5 valid products in Chunk 1. Saving to Database...
+
+[Extraction] 🔍 [18/18] Analyzing Topic: "What are your favorite day to day running errands pants that are super comfortable but you know actually look nice? " | Comments: 7 | Chunks: 1
+   [Extraction] 🧠 Sending 686 estimated tokens to Gemini (Chunk 1/1)...
+   [Extraction] 📉 Output array empty. No valid models detected in Chunk 1.
+[Extraction] 🎉 Finished Thread [11/18]. Found 0 Extracted Entities.
+   [Extraction] 📉 Output array empty. No valid models detected in Chunk 1.
+[Extraction] 🎉 Finished Thread [15/18]. Found 0 Extracted Entities.
+   [Extraction] ✨ Extracted 10 valid products in Chunk 4. Saving to Database...
+   [Extraction] ✨ Extracted 7 valid products in Chunk 1. Saving to Database...
+[Extraction] 🎉 Finished Thread [4/18]. Found 7 Extracted Entities.
+   [Extraction] ✨ Extracted 8 valid products in Chunk 2. Saving to Database...
+[Extraction] 🎉 Finished Thread [9/18]. Found 27 Extracted Entities.
+   [Extraction] ✨ Extracted 1 valid products in Chunk 1. Saving to Database...
+[Extraction] 🎉 Finished Thread [12/18]. Found 1 Extracted Entities.
+   [Extraction] ✨ Extracted 6 valid products in Chunk 2. Saving to Database...
+   [Extraction] ✨ Extracted 6 valid products in Chunk 1. Saving to Database...
+[Extraction] 🎉 Finished Thread [14/18]. Found 6 Extracted Entities.
+   [Extraction] ✨ Extracted 1 valid products in Chunk 1. Saving to Database...
+[Extraction] 🎉 Finished Thread [17/18]. Found 1 Extracted Entities.
+   [Extraction] ✨ Extracted 4 valid products in Chunk 1. Saving to Database...
+[Extraction] 🎉 Finished Thread [18/18]. Found 4 Extracted Entities.
+   [Extraction] ✨ Extracted 10 valid products in Chunk 1. Saving to Database...
+[Extraction] 🎉 Finished Thread [16/18]. Found 10 Extracted Entities.
+   [Extraction] ✨ Extracted 35 valid products in Chunk 1. Saving to Database...
+[Extraction] 🎉 Finished Thread [13/18]. Found 41 Extracted Entities.
+
+[Extraction] ✅ Silver Sweep complete! Fully processed 18 threads, resulting in 11 successful multi-product AI extraction runs.
 
 🟢 EMBEDDING PHASE: Vectorizing Silver Mentions
 This sweeps the database for mentions without vectors and embeds them.
@@ -94,681 +122,618 @@ This sweeps the database for mentions without vectors and embeds them.
 > @mono/admin@0.1.0 silver:embed
 > dotenv -e ../../.env -- tsx scripts/embed-silvers.ts --concurrency 10
 
-◇ injected env (0) from ../../.env // tip: ⌘ suppress logs { quiet: true }
+◇ injected env (0) from ../../.env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
 [Embedding] 🧹 Fetching Silver mentions without embeddings...
-[Embedding] 📦 Embedding 142 Silver Mentions (Batch Size: 20)...
+[Embedding] 📦 Embedding 107 Silver Mentions (Batch Size: 20)...
 
-[Embedding] 🔍 Batch [1/8] Embedding 20 items natively in ONNX...
+[Embedding] 🔍 Batch [1/6] Embedding 20 items natively in ONNX...
 [ONNX] Booting local embedding engine: mixedbread-ai/mxbai-embed-large-v1...
 [ONNX] Engine online and loaded into memory!
 
-[Embedding] 🔍 Batch [2/8] Embedding 20 items natively in ONNX...
+[Embedding] 🔍 Batch [2/6] Embedding 20 items natively in ONNX...
 
-[Embedding] 🔍 Batch [3/8] Embedding 20 items natively in ONNX...
+[Embedding] 🔍 Batch [3/6] Embedding 20 items natively in ONNX...
 
-[Embedding] 🔍 Batch [4/8] Embedding 20 items natively in ONNX...
+[Embedding] 🔍 Batch [4/6] Embedding 20 items natively in ONNX...
 
-[Embedding] 🔍 Batch [5/8] Embedding 20 items natively in ONNX...
+[Embedding] 🔍 Batch [5/6] Embedding 20 items natively in ONNX...
 
-[Embedding] 🔍 Batch [6/8] Embedding 20 items natively in ONNX...
+[Embedding] 🔍 Batch [6/6] Embedding 7 items natively in ONNX...
 
-[Embedding] 🔍 Batch [7/8] Embedding 20 items natively in ONNX...
-
-[Embedding] 🔍 Batch [8/8] Embedding 2 items natively in ONNX...
-
-[Embedding] ✅ Silver Embedding Sweep complete! Successfully embedded 142/142 products.
+[Embedding] ✅ Silver Embedding Sweep complete! Successfully embedded 107/107 products.
 
 🟢 ROLLUP PHASE: Clustering Centroids (Brands -> Lines -> Models)
 
 > @mono/admin@0.1.0 gold:generate:brands
 > dotenv -e ../../.env -- tsx scripts/roll-up-brands.ts
 
-◇ injected env (0) from ../../.env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+◇ injected env (0) from ../../.env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
 [Rollup] 🧹 Sweeping for unmapped Silver mentions...
-[Rollup] 📦 Processing 142 mentions for BRAND rollup...
+[Rollup] 📦 Processing 135 mentions for BRAND rollup...
 
-[Rollup] ⏭️  [1/142] Skipping excluded generic brand: "unspecified"
+[Rollup] ⏭️  [1/135] Skipping excluded generic brand: "unspecified"
 
-[Rollup] 🔍 [2/142] Evaluating Brand: "darn tough"
+[Rollup] 🔍 [2/135] Evaluating Brand: "steelcase"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwz6po001g1w19tgwt71jj
+
+[Rollup] 🔍 [3/135] Evaluating Brand: "bialetti"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
 [ONNX] Booting local embedding engine: mixedbread-ai/mxbai-embed-large-v1...
 [ONNX] Engine online and loaded into memory!
-   [Rollup] ✨ CREATED new GoldBrand: cmntwyz0z00001w191dtck57f (Darn Tough) with pure centroid.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukanxe0000qm19uuddnec2 (Bialetti) with pure centroid.
 
-[Rollup] 🔍 [3/142] Evaluating Brand: "darn tough"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwyz0z00001w191dtck57f
-
-[Rollup] 🔍 [4/142] Evaluating Brand: "duluth"
+[Rollup] 🔍 [4/135] Evaluating Brand: "panasonic"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwyz2700011w19ohetsbmf (Duluth) with pure centroid.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukany40001qm19j9bg1ylt (Panasonic) with pure centroid.
 
-[Rollup] 🔍 [5/142] Evaluating Brand: "darn tough"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwyz0z00001w191dtck57f
-
-[Rollup] 🔍 [6/142] Evaluating Brand: "narragansett leathers"
+[Rollup] 🔍 [5/135] Evaluating Brand: "apple"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwyz3300021w19ui0v4lrl (Narragansett Leathers) with pure centroid.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukanyp0002qm199k4zyd2g (Apple) with pure centroid.
 
-[Rollup] 🔍 [7/142] Evaluating Brand: "icebreaker"
+[Rollup] 🔍 [6/135] Evaluating Brand: "nintendo"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwyz8a000b1w19uq5vqv1r
+
+[Rollup] 🔍 [7/135] Evaluating Brand: "1zpresso"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwyz3n00031w199w8j628d (Icebreaker) with pure centroid.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukanzc0003qm198a7ci5ls (1Zpresso) with pure centroid.
 
-[Rollup] 🔍 [8/142] Evaluating Brand: "fruit loom"
+[Rollup] 🔍 [8/135] Evaluating Brand: "spong"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwyz4f00041w19atkbfwsx (Fruit Loom) with pure centroid.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukanzs0004qm192mgfj4br (Spong) with pure centroid.
 
-[Rollup] 🔍 [9/142] Evaluating Brand: "grip6"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwyz5000051w19jj37qfco (Grip6) with pure centroid.
-
-[Rollup] 🔍 [10/142] Evaluating Brand: "darn tough"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwyz0z00001w191dtck57f
-
-[Rollup] 🔍 [11/142] Evaluating Brand: "darn tough"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwyz0z00001w191dtck57f
-
-[Rollup] 🔍 [12/142] Evaluating Brand: "fachioo"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwyz5q00061w19qbg4pszy (FACHIOO) with pure centroid.
-
-[Rollup] 🔍 [13/142] Evaluating Brand: "bahfir"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwyz6c00071w19p8fkeoy4 (Bahfir) with pure centroid.
-
-[Rollup] 🔍 [14/142] Evaluating Brand: "darn tough"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwyz0z00001w191dtck57f
-
-[Rollup] 🔍 [15/142] Evaluating Brand: "inui"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwyz6w00081w19fox7gagt (INUI) with pure centroid.
-
-[Rollup] 🔍 [16/142] Evaluating Brand: "rhisophy"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwyz7d00091w1901vr8vjy (RhisoPhy) with pure centroid.
-
-[Rollup] 🔍 [17/142] Evaluating Brand: "mingda"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwyz7t000a1w1921hcbp19 (Mingda) with pure centroid.
-
-[Rollup] 🔍 [18/142] Evaluating Brand: "nintendo"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwyz8a000b1w19uq5vqv1r (Nintendo) with pure centroid.
-
-[Rollup] 🔍 [19/142] Evaluating Brand: "darn tough"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwyz0z00001w191dtck57f
-
-[Rollup] 🔍 [20/142] Evaluating Brand: "darn tough"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwyz0z00001w191dtck57f
-
-[Rollup] 🔍 [21/142] Evaluating Brand: "rei"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwyz8x000c1w19ky5fzpo8 (REI) with pure centroid.
-
-[Rollup] 🔍 [22/142] Evaluating Brand: "thorlo"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwyz9g000d1w19bk69u4h7 (Thorlo) with pure centroid.
-
-[Rollup] 🔍 [23/142] Evaluating Brand: "darn tough"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwyz0z00001w191dtck57f
-
-[Rollup] 🔍 [24/142] Evaluating Brand: "darn tough"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwyz0z00001w191dtck57f
-
-[Rollup] 🔍 [25/142] Evaluating Brand: "speed queen"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwyza6000e1w19c4ot8boq (Speed Queen) with pure centroid.
-
-[Rollup] 🔍 [26/142] Evaluating Brand: "john deere"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwyzb3000f1w19uc0uskmz (John Deere) with pure centroid.
-
-[Rollup] 🔍 [27/142] Evaluating Brand: "geox"
+[Rollup] 🔍 [9/135] Evaluating Brand: "kinu"
    [Rollup] 🤖 LLM REJECTED all candidates. Must be a novel brand.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz0gq000h1w19ouq2zxxp (Geox) with pure centroid.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukaped0006qm19ogk0enid (Kinu) with pure centroid.
 
-[Rollup] 🔍 [28/142] Evaluating Brand: "quoddy"
+[Rollup] ⏭️  [10/135] Skipping excluded generic brand: "unspecified"
+
+[Rollup] 🔍 [11/135] Evaluating Brand: "zojirushi"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz0he000i1w19ephb6ope (Quoddy) with pure centroid.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukapf50007qm19x61p2qi0 (Zojirushi) with pure centroid.
 
-[Rollup] 🔍 [29/142] Evaluating Brand: "wesco"
+[Rollup] 🔍 [12/135] Evaluating Brand: "instant pot"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz0hv000j1w19d4snzk3t (Wesco) with pure centroid.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukapft0008qm19at4snfev (Instant Pot) with pure centroid.
 
-[Rollup] 🔍 [30/142] Evaluating Brand: "russell moccasin"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz0ib000k1w19dfx8a1fu (Russell Moccasin) with pure centroid.
+[Rollup] 🔍 [13/135] Evaluating Brand: "panasonic"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukany40001qm19j9bg1ylt
 
-[Rollup] 🔍 [31/142] Evaluating Brand: "salvatore ferragamo"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz0ix000l1w19v2cit03d (Salvatore Ferragamo) with pure centroid.
+[Rollup] ⏭️  [14/135] Skipping excluded generic brand: "unspecified"
 
-[Rollup] 🔍 [32/142] Evaluating Brand: "salvatore ferragamo"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwz0ix000l1w19v2cit03d
+[Rollup] ⏭️  [15/135] Skipping excluded generic brand: "unknown"
 
-[Rollup] 🔍 [33/142] Evaluating Brand: "allen edmonds"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz0ji000m1w19anndkiyb (Allen Edmonds) with pure centroid.
+[Rollup] ⏭️  [16/135] Skipping excluded generic brand: "unspecified"
 
-[Rollup] 🔍 [34/142] Evaluating Brand: "g.h. bass"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz0jz000n1w19dagrrv1j (G.H. Bass) with pure centroid.
+[Rollup] ⏭️  [17/135] Skipping excluded generic brand: "unknown"
 
-[Rollup] 🔍 [35/142] Evaluating Brand: "rockport"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz0ke000o1w194ymq5tx8 (Rockport) with pure centroid.
+[Rollup] ⏭️  [18/135] Skipping excluded generic brand: "unknown"
 
-[Rollup] 🔍 [36/142] Evaluating Brand: "walk-over"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz0kt000p1w19hbl7mjnd (Walk-Over) with pure centroid.
+[Rollup] ⏭️  [19/135] Skipping excluded generic brand: "unknown"
 
-[Rollup] 🔍 [37/142] Evaluating Brand: "frye"
+[Rollup] 🔍 [20/135] Evaluating Brand: "zojirushi"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukapf50007qm19x61p2qi0
+
+[Rollup] 🔍 [21/135] Evaluating Brand: "zojirushi"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukapf50007qm19x61p2qi0
+
+[Rollup] ⏭️  [22/135] Skipping excluded generic brand: "unspecified"
+
+[Rollup] ⏭️  [23/135] Skipping excluded generic brand: "unknown"
+
+[Rollup] ⏭️  [24/135] Skipping excluded generic brand: "unspecified"
+
+[Rollup] ⏭️  [25/135] Skipping excluded generic brand: "unspecified"
+
+[Rollup] ⏭️  [26/135] Skipping excluded generic brand: "unspecified"
+
+[Rollup] ⏭️  [27/135] Skipping excluded generic brand: "Unspecified"
+
+[Rollup] ⏭️  [28/135] Skipping excluded generic brand: "unspecified"
+
+[Rollup] ⏭️  [29/135] Skipping excluded generic brand: "unspecified"
+
+[Rollup] 🔍 [30/135] Evaluating Brand: "salt"
    [Rollup] 🤖 LLM REJECTED all candidates. Must be a novel brand.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz1s3000r1w19yavuod4k (Frye) with pure centroid.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukaqw9000aqm199aplem9l (Salt) with pure centroid.
 
-[Rollup] 🔍 [38/142] Evaluating Brand: "darn tough"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwyz0z00001w191dtck57f
-
-[Rollup] 🔍 [39/142] Evaluating Brand: "alden"
+[Rollup] 🔍 [31/135] Evaluating Brand: "hamilton beach"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz1sv000s1w19023uvlur (Alden) with pure centroid.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukaqx1000bqm19wsbb03xq (Hamilton Beach) with pure centroid.
 
-[Rollup] 🔍 [40/142] Evaluating Brand: "rancourt & company"
+[Rollup] 🔍 [32/135] Evaluating Brand: "american optical"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz1tl000t1w1970givrad (Rancourt & Company) with pure centroid.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukaqxq000cqm19pg8fspby (American Optical) with pure centroid.
 
-[Rollup] 🔍 [41/142] Evaluating Brand: "rancourt"
-   [Rollup] 🤖 LLM MATCHED TYPO: Option -> cmntwz1tl000t1w1970givrad (Rancourt & Company)
-
-[Rollup] 🔍 [42/142] Evaluating Brand: "allen edmonds"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwz0ji000m1w19anndkiyb
-
-[Rollup] 🔍 [43/142] Evaluating Brand: "nettleton"
+[Rollup] 🔍 [33/135] Evaluating Brand: "crock-pot"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz3lq000v1w19vlffzb68 (Nettleton) with pure centroid.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukaqye000dqm19hiquwfii (Crock-Pot) with pure centroid.
 
-[Rollup] 🔍 [44/142] Evaluating Brand: "mckinlays"
+[Rollup] 🔍 [34/135] Evaluating Brand: "tom davies"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz3mw000w1w19t0a7xnlv (McKinlays) with pure centroid.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukaqyu000eqm19a7mstzva (Tom Davies) with pure centroid.
 
-[Rollup] 🔍 [45/142] Evaluating Brand: "darn tough"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwyz0z00001w191dtck57f
-
-[Rollup] 🔍 [46/142] Evaluating Brand: "yellow box"
+[Rollup] 🔍 [35/135] Evaluating Brand: "ogi"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz3ny000x1w19fs8gpx3k (Yellow Box) with pure centroid.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukaqz8000fqm19b8bjq85g (Ogi) with pure centroid.
 
-[Rollup] 🔍 [47/142] Evaluating Brand: "darn tough"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwyz0z00001w191dtck57f
+[Rollup] 🔍 [36/135] Evaluating Brand: "panasonic"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukany40001qm19j9bg1ylt
 
-[Rollup] 🔍 [48/142] Evaluating Brand: "darn tough"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwyz0z00001w191dtck57f
-
-[Rollup] 🔍 [49/142] Evaluating Brand: "darn tough"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwyz0z00001w191dtck57f
-
-[Rollup] 🔍 [50/142] Evaluating Brand: "kershaw"
+[Rollup] 🔍 [37/135] Evaluating Brand: "emile henry"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz3op000y1w19iel458xa (Kershaw) with pure centroid.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukaqzq000gqm19vqqkaz7y (Emile Henry) with pure centroid.
 
-[Rollup] 🔍 [51/142] Evaluating Brand: "hot target"
+[Rollup] 🔍 [38/135] Evaluating Brand: "le creuset"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz3p3000z1w19tjpgc53h (HOT TARGET) with pure centroid.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukar06000hqm192bwj3cbm (Le Creuset) with pure centroid.
 
-[Rollup] 🔍 [52/142] Evaluating Brand: "darn tough"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwyz0z00001w191dtck57f
+[Rollup] 🔍 [39/135] Evaluating Brand: "zojirushi"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukapf50007qm19x61p2qi0
 
-[Rollup] 🔍 [53/142] Evaluating Brand: "darn tough"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwyz0z00001w191dtck57f
+[Rollup] 🔍 [40/135] Evaluating Brand: "emile henry"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukaqzq000gqm19vqqkaz7y
 
-[Rollup] ⏭️  [54/142] Skipping excluded generic brand: "unspecified"
+[Rollup] 🔍 [41/135] Evaluating Brand: "zojirushi"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukapf50007qm19x61p2qi0
 
-[Rollup] ⏭️  [55/142] Skipping excluded generic brand: "unknown"
+[Rollup] 🔍 [42/135] Evaluating Brand: "zojirushi"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukapf50007qm19x61p2qi0
 
-[Rollup] ⏭️  [56/142] Skipping excluded generic brand: "unspecified"
+[Rollup] 🔍 [43/135] Evaluating Brand: "emile henry"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukaqzq000gqm19vqqkaz7y
 
-[Rollup] ⏭️  [57/142] Skipping excluded generic brand: "unknown"
-
-[Rollup] ⏭️  [58/142] Skipping excluded generic brand: "unknown"
-
-[Rollup] 🔍 [59/142] Evaluating Brand: "toyota"
+[Rollup] 🔍 [44/135] Evaluating Brand: "kränzle"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz3pl00101w19jf4w3ftf (Toyota) with pure centroid.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukar0y000iqm193hm5br6w (Kränzle) with pure centroid.
 
-[Rollup] 🔍 [60/142] Evaluating Brand: "mbz"
+[Rollup] 🔍 [45/135] Evaluating Brand: "atlas marcato"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz3pz00111w194qadp89l (MBZ) with pure centroid.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukar1e000jqm19nxuvdqpj (Atlas Marcato) with pure centroid.
 
-[Rollup] 🔍 [61/142] Evaluating Brand: "toyota"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwz3pl00101w19jf4w3ftf
-
-[Rollup] 🔍 [62/142] Evaluating Brand: "subaru"
+[Rollup] 🔍 [46/135] Evaluating Brand: "oxo"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz3qf00121w19bq2cfhuf (Subaru) with pure centroid.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukar1t000kqm19v3stferf (Oxo) with pure centroid.
 
-[Rollup] ⏭️  [63/142] Skipping excluded generic brand: "unknown"
+[Rollup] ⏭️  [47/135] Skipping excluded generic brand: "unknown"
 
-[Rollup] 🔍 [64/142] Evaluating Brand: "subaru"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwz3qf00121w19bq2cfhuf
-
-[Rollup] 🔍 [65/142] Evaluating Brand: "carhartt"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz3qw00131w19i66qcpz1 (Carhartt) with pure centroid.
-
-[Rollup] 🔍 [66/142] Evaluating Brand: "lucchese"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz3rc00141w19th4cqqec (Lucchese) with pure centroid.
-
-[Rollup] 🔍 [67/142] Evaluating Brand: "grip6"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwyz5000051w19jj37qfco
-
-[Rollup] 🔍 [68/142] Evaluating Brand: "galco"
+[Rollup] 🔍 [48/135] Evaluating Brand: "sawa"
    [Rollup] 🤖 LLM REJECTED all candidates. Must be a novel brand.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz4qc00161w19772f0sne (Galco) with pure centroid.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukas8c000mqm19xo3hu60j (Sawa) with pure centroid.
 
-[Rollup] 🔍 [69/142] Evaluating Brand: "henrysshoerepair.com"
+[Rollup] 🔍 [49/135] Evaluating Brand: "fjallraven"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz4ra00171w19t858zo2l (Henrysshoerepair.com) with pure centroid.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukas96000nqm19a0nad82a (Fjallraven) with pure centroid.
 
-[Rollup] 🔍 [70/142] Evaluating Brand: "thirteen50"
+[Rollup] 🔍 [50/135] Evaluating Brand: "5.11"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz4rv00181w19xvja7504 (Thirteen50) with pure centroid.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukas9u000oqm190187iirk (5.11) with pure centroid.
 
-[Rollup] 🔍 [71/142] Evaluating Brand: "duluth trading"
+[Rollup] 🔍 [51/135] Evaluating Brand: "case"
    [Rollup] 🤖 LLM REJECTED all candidates. Must be a novel brand.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz6lx001a1w19mpaferq0 (Duluth Trading) with pure centroid.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukaub5000qqm19jiilybyq (Case) with pure centroid.
 
-[Rollup] 🔍 [72/142] Evaluating Brand: "henry's"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz6mp001b1w19c6jcqczk (Henry's) with pure centroid.
+[Rollup] 🔍 [52/135] Evaluating Brand: "case"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukaub5000qqm19jiilybyq
 
-[Rollup] 🔍 [73/142] Evaluating Brand: "hank's belts"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz6ng001c1w191hhuzqoq (Hank's Belts) with pure centroid.
+[Rollup] 🔍 [53/135] Evaluating Brand: "case"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukaub5000qqm19jiilybyq
 
-[Rollup] 🔍 [74/142] Evaluating Brand: "darn tough"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwyz0z00001w191dtck57f
+[Rollup] 🔍 [54/135] Evaluating Brand: "case"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukaub5000qqm19jiilybyq
 
-[Rollup] 🔍 [75/142] Evaluating Brand: "fox creek leather"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz6o6001d1w19eaajmw9e (Fox Creek Leather) with pure centroid.
+[Rollup] 🔍 [55/135] Evaluating Brand: "case"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukaub5000qqm19jiilybyq
 
-[Rollup] 🔍 [76/142] Evaluating Brand: "the wilderness"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz6ol001e1w19q08kdkdm (The Wilderness) with pure centroid.
+[Rollup] 🔍 [56/135] Evaluating Brand: "case"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukaub5000qqm19jiilybyq
 
-[Rollup] 🔍 [77/142] Evaluating Brand: "duluth trading"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwz6lx001a1w19mpaferq0
+[Rollup] 🔍 [57/135] Evaluating Brand: "case"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukaub5000qqm19jiilybyq
 
-[Rollup] 🔍 [78/142] Evaluating Brand: "darn tough"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwyz0z00001w191dtck57f
+[Rollup] 🔍 [58/135] Evaluating Brand: "case"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukaub5000qqm19jiilybyq
 
-[Rollup] 🔍 [79/142] Evaluating Brand: "henry's"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwz6mp001b1w19c6jcqczk
+[Rollup] 🔍 [59/135] Evaluating Brand: "le creuset"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukar06000hqm192bwj3cbm
 
-[Rollup] 🔍 [80/142] Evaluating Brand: "darn tough"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwyz0z00001w191dtck57f
+[Rollup] 🔍 [60/135] Evaluating Brand: "emile henry"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukaqzq000gqm19vqqkaz7y
 
-[Rollup] ⏭️  [81/142] Skipping excluded generic brand: "unspecified"
+[Rollup] 🔍 [61/135] Evaluating Brand: "le creuset"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukar06000hqm192bwj3cbm
 
-[Rollup] 🔍 [82/142] Evaluating Brand: "zeswear"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz6pa001f1w19t2bd0y61 (Zeswear) with pure centroid.
+[Rollup] 🔍 [62/135] Evaluating Brand: "emile henry"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukaqzq000gqm19vqqkaz7y
 
-[Rollup] 🔍 [83/142] Evaluating Brand: "steelcase"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz6po001g1w19tgwt71jj (Steelcase) with pure centroid.
+[Rollup] 🔍 [63/135] Evaluating Brand: "emile henry"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukaqzq000gqm19vqqkaz7y
 
-[Rollup] 🔍 [84/142] Evaluating Brand: "orion"
+[Rollup] 🔍 [64/135] Evaluating Brand: "le creuset"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukar06000hqm192bwj3cbm
+
+[Rollup] 🔍 [65/135] Evaluating Brand: "pyrex"
    [Rollup] 🤖 LLM REJECTED all candidates. Must be a novel brand.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz87s001i1w19bkfnp063 (Orion) with pure centroid.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukawb7000sqm196j5laeod (Pyrex) with pure centroid.
 
-[Rollup] 🔍 [85/142] Evaluating Brand: "thirteen50"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwz4rv00181w19xvja7504
-
-[Rollup] 🔍 [86/142] Evaluating Brand: "duluth"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwyz2700011w19ohetsbmf
-
-[Rollup] 🔍 [87/142] Evaluating Brand: "steelcase"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwz6po001g1w19tgwt71jj
-
-[Rollup] 🔍 [88/142] Evaluating Brand: "darn tough"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwyz0z00001w191dtck57f
-
-[Rollup] 🔍 [89/142] Evaluating Brand: "3m"
+[Rollup] 🔍 [66/135] Evaluating Brand: "stainless steel"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz88s001j1w19ypz7qn46 (3M) with pure centroid.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukawc1000tqm1932lek7wv (Stainless Steel) with pure centroid.
 
-[Rollup] ⏭️  [90/142] Skipping excluded generic brand: "unknown"
-
-[Rollup] 🔍 [91/142] Evaluating Brand: "charles tyrwhitt"
+[Rollup] 🔍 [67/135] Evaluating Brand: "commercial"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz89f001k1w1946gha80c (Charles Tyrwhitt) with pure centroid.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukawcl000uqm19w72o82e3 (Commercial) with pure centroid.
 
-[Rollup] 🔍 [92/142] Evaluating Brand: "charles tyrwhitt"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwz89f001k1w1946gha80c
+[Rollup] 🔍 [68/135] Evaluating Brand: "pyrex"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukawb7000sqm196j5laeod
 
-[Rollup] 🔍 [93/142] Evaluating Brand: "darn tough"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwyz0z00001w191dtck57f
+[Rollup] 🔍 [69/135] Evaluating Brand: "pyrex"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukawb7000sqm196j5laeod
 
-[Rollup] 🔍 [94/142] Evaluating Brand: "goldtoe"
+[Rollup] 🔍 [70/135] Evaluating Brand: "fat daddio"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz89y001l1w199hk2s5lv (Goldtoe) with pure centroid.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukawda000vqm195csa9ymk (Fat Daddio) with pure centroid.
 
-[Rollup] 🔍 [95/142] Evaluating Brand: "yeti"
+[Rollup] ⏭️  [71/135] Skipping excluded generic brand: "Unspecified"
+
+[Rollup] ⏭️  [72/135] Skipping excluded generic brand: "unspecified"
+
+[Rollup] ⏭️  [73/135] Skipping excluded generic brand: "unspecified"
+
+[Rollup] ⏭️  [74/135] Skipping excluded generic brand: "unspecified"
+
+[Rollup] 🔍 [75/135] Evaluating Brand: "anchor"
+   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukawdp000wqm19jpytk08p (Anchor) with pure centroid.
+
+[Rollup] 🔍 [76/135] Evaluating Brand: "pyrex"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukawb7000sqm196j5laeod
+
+[Rollup] 🔍 [77/135] Evaluating Brand: "anchor"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukawdp000wqm19jpytk08p
+
+[Rollup] 🔍 [78/135] Evaluating Brand: "pyrex"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukawb7000sqm196j5laeod
+
+[Rollup] 🔍 [79/135] Evaluating Brand: "pyrex"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukawb7000sqm196j5laeod
+
+[Rollup] 🔍 [80/135] Evaluating Brand: "corning"
+   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukawed000xqm19214f097c (Corning) with pure centroid.
+
+[Rollup] 🔍 [81/135] Evaluating Brand: "pyrex"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukawb7000sqm196j5laeod
+
+[Rollup] 🔍 [82/135] Evaluating Brand: "emile henry"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukaqzq000gqm19vqqkaz7y
+
+[Rollup] 🔍 [83/135] Evaluating Brand: "le creuset"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukar06000hqm192bwj3cbm
+
+[Rollup] 🔍 [84/135] Evaluating Brand: "glass bake-wear"
+   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukawf1000yqm19axbranw2 (glass bake-wear) with pure centroid.
+
+[Rollup] 🔍 [85/135] Evaluating Brand: "emile henry"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukaqzq000gqm19vqqkaz7y
+
+[Rollup] 🔍 [86/135] Evaluating Brand: "oxo"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukar1t000kqm19v3stferf
+
+[Rollup] 🔍 [87/135] Evaluating Brand: "oxo"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukar1t000kqm19v3stferf
+
+[Rollup] 🔍 [88/135] Evaluating Brand: "fat daddio"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukawda000vqm195csa9ymk
+
+[Rollup] 🔍 [89/135] Evaluating Brand: "ceramic bakeware"
    [Rollup] 🤖 LLM REJECTED all candidates. Must be a novel brand.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz9hi001n1w19qi69wtka (Yeti) with pure centroid.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukay320010qm191kcwc7k4 (Ceramic Bakeware) with pure centroid.
 
-[Rollup] 🔍 [96/142] Evaluating Brand: "darn tough"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwyz0z00001w191dtck57f
+[Rollup] 🔍 [90/135] Evaluating Brand: "le creuset"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukar06000hqm192bwj3cbm
 
-[Rollup] 🔍 [97/142] Evaluating Brand: "dearborn supply"
+[Rollup] 🔍 [91/135] Evaluating Brand: "le creuset"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukar06000hqm192bwj3cbm
+
+[Rollup] 🔍 [92/135] Evaluating Brand: "emile henry"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukaqzq000gqm19vqqkaz7y
+
+[Rollup] ⏭️  [93/135] Skipping excluded generic brand: "Unspecified"
+
+[Rollup] ⏭️  [94/135] Skipping excluded generic brand: "unspecified"
+
+[Rollup] ⏭️  [95/135] Skipping excluded generic brand: "unspecified"
+
+[Rollup] 🔍 [96/135] Evaluating Brand: "apple"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukanyp0002qm199k4zyd2g
+
+[Rollup] ⏭️  [97/135] Skipping excluded generic brand: "unspecified"
+
+[Rollup] 🔍 [98/135] Evaluating Brand: "pyrex"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukawb7000sqm196j5laeod
+
+[Rollup] 🔍 [99/135] Evaluating Brand: "mirro"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz9ib001o1w19udz9u7ng (Dearborn Supply) with pure centroid.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukay4d0011qm19d4og1vgg (Mirro) with pure centroid.
 
-[Rollup] 🔍 [98/142] Evaluating Brand: "darn tough"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwyz0z00001w191dtck57f
+[Rollup] 🔍 [100/135] Evaluating Brand: "emile henry"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukaqzq000gqm19vqqkaz7y
 
-[Rollup] 🔍 [99/142] Evaluating Brand: "john deere"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwyzb3000f1w19uc0uskmz
+[Rollup] ⏭️  [101/135] Skipping excluded generic brand: "Unspecified"
 
-[Rollup] 🔍 [100/142] Evaluating Brand: "austin-healey"
+[Rollup] 🔍 [102/135] Evaluating Brand: "1zpresso"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukanzc0003qm198a7ci5ls
+
+[Rollup] 🔍 [103/135] Evaluating Brand: "lindberg"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz9j4001p1w19f5b7sc8k (Austin-Healey) with pure centroid.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukay530012qm19403zbrsz (Lindberg) with pure centroid.
 
-[Rollup] ⏭️  [101/142] Skipping excluded generic brand: "unspecified"
+[Rollup] 🔍 [104/135] Evaluating Brand: "zojirushi"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukapf50007qm19x61p2qi0
 
-[Rollup] ⏭️  [102/142] Skipping excluded generic brand: "unspecified"
-
-[Rollup] 🔍 [103/142] Evaluating Brand: "john deere"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwyzb3000f1w19uc0uskmz
-
-[Rollup] ⏭️  [104/142] Skipping excluded generic brand: "Unspecified"
-
-[Rollup] 🔍 [105/142] Evaluating Brand: "case"
+[Rollup] 🔍 [105/135] Evaluating Brand: "devium usa"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz9jk001q1w19n1kwbk7m (Case) with pure centroid.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukay5n0013qm19isb10952 (Devium USA) with pure centroid.
 
-[Rollup] ⏭️  [106/142] Skipping excluded generic brand: "unspecified"
+[Rollup] ⏭️  [106/135] Skipping excluded generic brand: "Unspecified"
 
-[Rollup] ⏭️  [107/142] Skipping excluded generic brand: "unspecified"
+[Rollup] 🔍 [107/135] Evaluating Brand: "1zpresso"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukanzc0003qm198a7ci5ls
 
-[Rollup] 🔍 [108/142] Evaluating Brand: "john deere"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwyzb3000f1w19uc0uskmz
+[Rollup] ⏭️  [108/135] Skipping excluded generic brand: "unspecified"
 
-[Rollup] 🔍 [109/142] Evaluating Brand: "subaru"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwz3qf00121w19bq2cfhuf
+[Rollup] 🔍 [109/135] Evaluating Brand: "le creuset"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukar06000hqm192bwj3cbm
 
-[Rollup] 🔍 [110/142] Evaluating Brand: "jaguar"
+[Rollup] ⏭️  [110/135] Skipping excluded generic brand: "Unspecified"
+
+[Rollup] 🔍 [111/135] Evaluating Brand: "tiger"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz9k2001r1w19k144vcsz (Jaguar) with pure centroid.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukay6a0014qm19hn53m99z (Tiger) with pure centroid.
 
-[Rollup] ⏭️  [111/142] Skipping excluded generic brand: "Unspecified"
-
-[Rollup] ⏭️  [112/142] Skipping excluded generic brand: "unspecified"
-
-[Rollup] 🔍 [113/142] Evaluating Brand: "subaru"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwz3qf00121w19bq2cfhuf
-
-[Rollup] ⏭️  [114/142] Skipping excluded generic brand: "unspecified"
-
-[Rollup] ⏭️  [115/142] Skipping excluded generic brand: "unspecified"
-
-[Rollup] 🔍 [116/142] Evaluating Brand: "mercedes"
+[Rollup] 🔍 [112/135] Evaluating Brand: "flexon"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz9ki001s1w19h9vymooo (Mercedes) with pure centroid.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukay6p0015qm19grlh0q0s (Flexon) with pure centroid.
 
-[Rollup] ⏭️  [117/142] Skipping excluded generic brand: "Unspecified"
+[Rollup] 🔍 [113/135] Evaluating Brand: "zojirushi"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukapf50007qm19x61p2qi0
 
-[Rollup] ⏭️  [118/142] Skipping excluded generic brand: "unspecified"
+[Rollup] 🔍 [114/135] Evaluating Brand: "le creuset"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukar06000hqm192bwj3cbm
 
-[Rollup] 🔍 [119/142] Evaluating Brand: "massey"
+[Rollup] 🔍 [115/135] Evaluating Brand: "emile henry"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukaqzq000gqm19vqqkaz7y
+
+[Rollup] ⏭️  [116/135] Skipping excluded generic brand: "Unspecified"
+
+[Rollup] 🔍 [117/135] Evaluating Brand: "spong"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukanzs0004qm192mgfj4br
+
+[Rollup] 🔍 [118/135] Evaluating Brand: "panasonic"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukany40001qm19j9bg1ylt
+
+[Rollup] 🔍 [119/135] Evaluating Brand: "instant pot"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukapft0008qm19at4snfev
+
+[Rollup] 🔍 [120/135] Evaluating Brand: "aluminum"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz9kz001t1w19z6mxcy0g (Massey) with pure centroid.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukay7h0016qm19ib4qx8a4 (Aluminum) with pure centroid.
 
-[Rollup] 🔍 [120/142] Evaluating Brand: "the wilderness"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwz6ol001e1w19q08kdkdm
+[Rollup] ⏭️  [121/135] Skipping excluded generic brand: "unspecified"
 
-[Rollup] ⏭️  [121/142] Skipping excluded generic brand: "unspecified"
+[Rollup] 🔍 [122/135] Evaluating Brand: "tiger"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukay6a0014qm19hn53m99z
 
-[Rollup] 🔍 [122/142] Evaluating Brand: "mercedes"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwz9ki001s1w19h9vymooo
+[Rollup] ⏭️  [123/135] Skipping excluded generic brand: "unspecified"
 
-[Rollup] ⏭️  [123/142] Skipping excluded generic brand: "Unspecified"
+[Rollup] 🔍 [124/135] Evaluating Brand: "case"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukaub5000qqm19jiilybyq
 
-[Rollup] 🔍 [124/142] Evaluating Brand: "subaru"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwz3qf00121w19bq2cfhuf
+[Rollup] ⏭️  [125/135] Skipping excluded generic brand: "unspecified"
 
-[Rollup] 🔍 [125/142] Evaluating Brand: "the wilderness"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwz6ol001e1w19q08kdkdm
+[Rollup] ⏭️  [126/135] Skipping excluded generic brand: "unspecified"
 
-[Rollup] 🔍 [126/142] Evaluating Brand: "darn tough"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwyz0z00001w191dtck57f
-
-[Rollup] ⏭️  [127/142] Skipping excluded generic brand: "Unspecified"
-
-[Rollup] 🔍 [128/142] Evaluating Brand: "john deere"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwyzb3000f1w19uc0uskmz
-
-[Rollup] 🔍 [129/142] Evaluating Brand: "darn tough"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwyz0z00001w191dtck57f
-
-[Rollup] ⏭️  [130/142] Skipping excluded generic brand: "Unspecified"
-
-[Rollup] 🔍 [131/142] Evaluating Brand: "kore essentials"
+[Rollup] 🔍 [127/135] Evaluating Brand: "see eyeware"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz9ls001u1w19t03ijq35 (Kore Essentials) with pure centroid.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukay850017qm19p1lz7iu7 (See Eyeware) with pure centroid.
 
-[Rollup] 🔍 [132/142] Evaluating Brand: "darn tough"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwyz0z00001w191dtck57f
+[Rollup] 🔍 [128/135] Evaluating Brand: "garde"
+   [Rollup] ❌ Error processing mention cmnuka0yh001uob19x2mgzn5o: {"error":{"code":503,"message":"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.","status":"UNAVAILABLE"}}
 
-[Rollup] ⏭️  [133/142] Skipping excluded generic brand: "Unspecified"
+[Rollup] 🔍 [129/135] Evaluating Brand: "case"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukaub5000qqm19jiilybyq
 
-[Rollup] 🔍 [134/142] Evaluating Brand: "grip6"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwyz5000051w19jj37qfco
-
-[Rollup] 🔍 [135/142] Evaluating Brand: "adidas"
+[Rollup] 🔍 [130/135] Evaluating Brand: "black & decker"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwz9m9001v1w19st77l5gv (Adidas) with pure centroid.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukayoa0018qm19binop47u (Black & Decker) with pure centroid.
 
-[Rollup] 🔍 [136/142] Evaluating Brand: "costco"
-   [Rollup] 🤖 LLM REJECTED all candidates. Must be a novel brand.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwzaos001x1w19r3ri7ln1 (Costco) with pure centroid.
+[Rollup] 🔍 [131/135] Evaluating Brand: "tatung"
+   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukaypd0019qm19lskqmmis (Tatung) with pure centroid.
 
-[Rollup] 🔍 [137/142] Evaluating Brand: "toyota"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwz3pl00101w19jf4w3ftf
+[Rollup] 🔍 [132/135] Evaluating Brand: "m&s"
+   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
+   [Rollup] ✨ CREATED new GoldBrand: cmnukayq1001aqm193y3k8nn0 (M&S) with pure centroid.
 
-[Rollup] ⏭️  [138/142] Skipping excluded generic brand: "unspecified"
+[Rollup] 🔍 [133/135] Evaluating Brand: "emile henry"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmnukaqzq000gqm19vqqkaz7y
 
-[Rollup] 🔍 [139/142] Evaluating Brand: "ford"
-   [Rollup] 🤖 LLM REJECTED all candidates. Must be a novel brand.
-   [Rollup] ✨ CREATED new GoldBrand: cmntwzc62001z1w19zd29au89 (Ford) with pure centroid.
+[Rollup] ⏭️  [134/135] Skipping excluded generic brand: "Unspecified"
 
-[Rollup] ⏭️  [140/142] Skipping excluded generic brand: "Unspecified"
-
-[Rollup] 🔍 [141/142] Evaluating Brand: "grip6"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand cmntwyz5000051w19jj37qfco
-
-[Rollup] ⏭️  [142/142] Skipping excluded generic brand: "unspecified"
+[Rollup] ⏭️  [135/135] Skipping excluded generic brand: "unspecified"
 
 > @mono/admin@0.1.0 gold:generate:lines
 > dotenv -e ../../.env -- tsx scripts/roll-up-product-lines.ts
 
-◇ injected env (0) from ../../.env // tip: ⌁ auth for agents [www.vestauth.com]
+◇ injected env (0) from ../../.env // tip: ⌘ enable debugging { debug: true }
 [Rollup] 🧹 Sweeping for unmapped PRODUCT_LINE Silver mentions...
-[Rollup] 📦 Processing 37 mentions for PRODUCT LINE rollup...
+[Rollup] 📦 Processing 27 mentions for PRODUCT LINE rollup...
 
-[Rollup] 🔍 [1/37] Evaluating Line: "grip6 belt"
+[Rollup] 🔍 [1/27] Evaluating Line: "nintendo game boy"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
 [ONNX] Booting local embedding engine: mixedbread-ai/mxbai-embed-large-v1...
 [ONNX] Engine online and loaded into memory!
-   [Rollup] ✨ CREATED new GoldProductLine: cmntwzl1w00003419gmcvbdjq (belt) with pure centroid.
+   [Rollup] ✨ CREATED new GoldProductLine: cmnukb7m80000rr19d5pmq14d (Game Boy) with pure centroid.
 
-[Rollup] 🔍 [2/37] Evaluating Line: "mingda magician x2"
+[Rollup] 🔍 [2/27] Evaluating Line: "bialetti moka pot"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldProductLine: cmntwzl3200013419v632atte (Magician X2) with pure centroid.
+   [Rollup] ✨ CREATED new GoldProductLine: cmnukb7nd0001rr191ct38l2c (Moka Pot) with pure centroid.
 
-[Rollup] 🔍 [3/37] Evaluating Line: "nintendo amiibo cards"
+[Rollup] 🔍 [3/27] Evaluating Line: "kinu pharos"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldProductLine: cmntwzl3q00023419swkqc4hy (amiibo cards) with pure centroid.
+   [Rollup] ✨ CREATED new GoldProductLine: cmnukb7o50002rr190121ggws (Pharos) with pure centroid.
 
-[Rollup] 🔍 [4/37] Evaluating Line: "duluth pants"
+[Rollup] 🔍 [4/27] Evaluating Line: "1zpresso lido"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldProductLine: cmntwzl4e00033419qrlhu9sw (pants) with pure centroid.
+   [Rollup] ✨ CREATED new GoldProductLine: cmnukb7p00003rr19kx71cixs (Lido) with pure centroid.
 
-[Rollup] 🔍 [5/37] Evaluating Line: "narragansett leathers leather belt"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldProductLine: cmntwzl5800043419ab98bq7b (leather belt) with pure centroid.
-
-[Rollup] 🔍 [6/37] Evaluating Line: "icebreaker merino tees"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldProductLine: cmntwzl5z00053419dmso2gxh (merino tees) with pure centroid.
-
-[Rollup] 🔍 [7/37] Evaluating Line: "fruit loom original t-shirt"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldProductLine: cmntwzl6p00063419zge8ztp9 (Original T-Shirt) with pure centroid.
-
-[Rollup] 🔍 [8/37] Evaluating Line: "wesco romeo"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldProductLine: cmntwzl7b00073419bex8733j (Romeo) with pure centroid.
-
-[Rollup] 🔍 [9/37] Evaluating Line: "g.h. bass weejuns"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldProductLine: cmntwzl81000834191ebmf7l7 (Weejuns) with pure centroid.
-
-[Rollup] 🔍 [10/37] Evaluating Line: "rancourt loafers"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldProductLine: cmntwzl8n000934197alvgrz8 (loafers) with pure centroid.
-
-[Rollup] 🔍 [11/37] Evaluating Line: "darn tough micro-crew lightweight hikers"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldProductLine: cmntwzl9d000a34195eygxoxk (micro-crew lightweight hikers) with pure centroid.
-
-[Rollup] 🔍 [12/37] Evaluating Line: "john deere x000 and x000 ten series"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldProductLine: cmntwzlad000b34197vveziuj (X000 and X000 Ten series) with pure centroid.
-
-[Rollup] 🔍 [13/37] Evaluating Line: "salvatore ferragamo penny loafers and driving moccasins"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldProductLine: cmntwzlb9000c3419y5ent6u3 (penny loafers and driving moccasins) with pure centroid.
-
-[Rollup] 🔍 [14/37] Evaluating Line: "toyota truck"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldProductLine: cmntwzlbs000d34190ysk1syt (truck) with pure centroid.
-
-[Rollup] 🔍 [15/37] Evaluating Line: "subaru forester"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldProductLine: cmntwzlcd000e34190l63t18x (Forester) with pure centroid.
-
-[Rollup] 🔍 [16/37] Evaluating Line: "subaru forester"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Product Line cmntwzlcd000e34190l63t18x
-
-[Rollup] 🔍 [17/37] Evaluating Line: "toyota truck"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Product Line cmntwzlbs000d34190ysk1syt
-
-[Rollup] 🔍 [18/37] Evaluating Line: "henry's moose hide choppers"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldProductLine: cmntwzldd000f3419l7zky18k (moose hide choppers) with pure centroid.
-
-[Rollup] 🔍 [19/37] Evaluating Line: "the wilderness tactical belt"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldProductLine: cmntwzldz000g3419bzqx7rkn (tactical belt) with pure centroid.
-
-[Rollup] 🔍 [20/37] Evaluating Line: "duluth trading lifetime belts"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldProductLine: cmntwzlek000h34195tok66eh (lifetime belts) with pure centroid.
-
-[Rollup] 🔍 [21/37] Evaluating Line: "galco gun belt"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldProductLine: cmntwzlf5000i3419p5y0kmbo (gun belt) with pure centroid.
-
-[Rollup] 🔍 [22/37] Evaluating Line: "henrysshoerepair.com moose hide belt"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldProductLine: cmntwzlfw000j3419s6gz4v8n (moose hide belt) with pure centroid.
-
-[Rollup] 🔍 [23/37] Evaluating Line: "unspecified light bulb"
+[Rollup] 🔍 [5/27] Evaluating Line: "unspecified light bulb"
    [Rollup] ⚠️ Skipped: Parent Brand not mapped. (Run brands script first, or it was an excluded generic brand.)
 
-[Rollup] 🔍 [24/37] Evaluating Line: "orion belt"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldProductLine: cmntwzlge000k34190cadb4rn (belt) with pure centroid.
-
-[Rollup] 🔍 [25/37] Evaluating Line: "thirteen50 belt"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldProductLine: cmntwzlh0000l3419qvhi8bel (belt) with pure centroid.
-
-[Rollup] 🔍 [26/37] Evaluating Line: "duluth belt"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldProductLine: cmntwzlhk000m3419hbgtsypv (Belt) with pure centroid.
-
-[Rollup] 🔍 [27/37] Evaluating Line: "3m trizact hook & loop disc"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldProductLine: cmntwzlia000n3419ixbwfdbf (Trizact Hook & Loop Disc) with pure centroid.
-
-[Rollup] 🔍 [28/37] Evaluating Line: "charles tyrwhitt jersey lounge trousers"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldProductLine: cmntwzliz000o34194hlpz9ht (jersey lounge trousers) with pure centroid.
-
-[Rollup] 🔍 [29/37] Evaluating Line: "charles tyrwhitt jersey lounge trousers"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Product Line cmntwzliz000o34194hlpz9ht
-
-[Rollup] 🔍 [30/37] Evaluating Line: "unspecified gun belt"
+[Rollup] 🔍 [6/27] Evaluating Line: "unspecified gun belt"
    [Rollup] ⚠️ Skipped: Parent Brand not mapped. (Run brands script first, or it was an excluded generic brand.)
 
-[Rollup] 🔍 [31/37] Evaluating Line: "subaru forester"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Product Line cmntwzlcd000e34190l63t18x
+[Rollup] 🔍 [7/27] Evaluating Line: "american optical aviators"
+   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
+   [Rollup] ✨ CREATED new GoldProductLine: cmnukb7po0004rr194af9zw7r (aviators) with pure centroid.
 
-[Rollup] 🔍 [32/37] Evaluating Line: "unspecified high efficiency air filter"
-   [Rollup] ⚠️ Skipped: Parent Brand not mapped. (Run brands script first, or it was an excluded generic brand.)
+[Rollup] 🔍 [8/27] Evaluating Line: "le creuset dutch oven"
+   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
+   [Rollup] ✨ CREATED new GoldProductLine: cmnukb7qd0005rr19ezt58ui8 (Dutch Oven) with pure centroid.
 
-[Rollup] 🔍 [33/37] Evaluating Line: "subaru forester"
-   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Product Line cmntwzlcd000e34190l63t18x
+[Rollup] 🔍 [9/27] Evaluating Line: "emile henry bakeware"
+   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
+   [Rollup] ✨ CREATED new GoldProductLine: cmnukb7r00006rr195wp4fij3 (Bakeware) with pure centroid.
 
-[Rollup] 🔍 [34/37] Evaluating Line: "subaru outback"
+[Rollup] 🔍 [10/27] Evaluating Line: "emile henry bakeware"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Product Line cmnukb7r00006rr195wp4fij3
+
+[Rollup] 🔍 [11/27] Evaluating Line: "le creuset bakeware"
    [Rollup] 🤖 LLM REJECTED all candidates. Must be a novel product line.
-   [Rollup] ✨ CREATED new GoldProductLine: cmntwzmoy000q3419trdfw0e4 (Outback) with pure centroid.
+   [Rollup] ✨ CREATED new GoldProductLine: cmnukb9kh0008rr19btgfg08e (Bakeware) with pure centroid.
 
-[Rollup] 🔍 [35/37] Evaluating Line: "kore essentials reinforced gun belt"
+[Rollup] 🔍 [12/27] Evaluating Line: "commercial cake pan"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldProductLine: cmntwzmpv000r3419u4rkqigw (reinforced gun belt) with pure centroid.
+   [Rollup] ✨ CREATED new GoldProductLine: cmnukb9l60009rr199pnk6d21 (Cake Pan) with pure centroid.
 
-[Rollup] 🔍 [36/37] Evaluating Line: "adidas stan smith"
+[Rollup] 🔍 [13/27] Evaluating Line: "fat daddio proseries"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   [Rollup] ✨ CREATED new GoldProductLine: cmntwzmqk000s3419aurp9ory (Stan Smith) with pure centroid.
+   [Rollup] ✨ CREATED new GoldProductLine: cmnukb9lw000arr19z84nof7n (ProSeries) with pure centroid.
 
-[Rollup] 🔍 [37/37] Evaluating Line: "toyota trucks"
-   [Rollup] 🤖 LLM MATCHED TYPO: Option -> cmntwzlbs000d34190ysk1syt (truck)
+[Rollup] 🔍 [14/27] Evaluating Line: "unspecified high efficiency air filter"
+   [Rollup] ⚠️ Skipped: Parent Brand not mapped. (Run brands script first, or it was an excluded generic brand.)
+
+[Rollup] 🔍 [15/27] Evaluating Line: "emile henry bakeware"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Product Line cmnukb7r00006rr195wp4fij3
+
+[Rollup] 🔍 [16/27] Evaluating Line: "oxo good grips"
+   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
+   [Rollup] ✨ CREATED new GoldProductLine: cmnukb9mk000brr19qz8x27av (Good Grips) with pure centroid.
+
+[Rollup] 🔍 [17/27] Evaluating Line: "oxo borosilicate bakeware"
+   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
+   [Rollup] ✨ CREATED new GoldProductLine: cmnukb9n9000crr19oo8d3otx (Borosilicate Bakeware) with pure centroid.
+
+[Rollup] 🔍 [18/27] Evaluating Line: "le creuset ceramic cookware"
+   [Rollup] 🤖 LLM REJECTED all candidates. Must be a novel product line.
+   [Rollup] ✨ CREATED new GoldProductLine: cmnukbc2v000err19ov6esmbt (Ceramic Cookware) with pure centroid.
+
+[Rollup] 🔍 [19/27] Evaluating Line: "le creuset enameled cast iron"
+   [Rollup] 🤖 LLM REJECTED all candidates. Must be a novel product line.
+   [Rollup] ✨ CREATED new GoldProductLine: cmnukbeo6000grr19gbnr1lcw (Enameled Cast Iron) with pure centroid.
+
+[Rollup] 🔍 [20/27] Evaluating Line: "emile henry pie dish"
+   [Rollup] 🤖 LLM REJECTED all candidates. Must be a novel product line.
+   [Rollup] ✨ CREATED new GoldProductLine: cmnukbfzd000irr19yaaehv35 (Pie Dish) with pure centroid.
+
+[Rollup] 🔍 [21/27] Evaluating Line: "emile henry ceramic dishes"
+   [Rollup] 🤖 LLM MATCHED TYPO: Option -> cmnukb7r00006rr195wp4fij3 (Bakeware)
+
+[Rollup] 🔍 [22/27] Evaluating Line: "1zpresso lido"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Product Line cmnukb7p00003rr19kx71cixs
+
+[Rollup] 🔍 [23/27] Evaluating Line: "devium usa toiler chino"
+   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
+   [Rollup] ✨ CREATED new GoldProductLine: cmnukbifn000krr19okeogzcc (toiler chino) with pure centroid.
+
+[Rollup] 🔍 [24/27] Evaluating Line: "le creuset enameled cast iron"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Product Line cmnukbeo6000grr19gbnr1lcw
+
+[Rollup] 🔍 [25/27] Evaluating Line: "tatung steam rice cooker"
+   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
+   [Rollup] ✨ CREATED new GoldProductLine: cmnukbigm000lrr19scm99jl5 (steam rice cooker) with pure centroid.
+
+[Rollup] 🔍 [26/27] Evaluating Line: "m&s flex stretch jeans"
+   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
+   [Rollup] ✨ CREATED new GoldProductLine: cmnukbih5000mrr190h8jg3e7 (flex stretch jeans) with pure centroid.
+
+[Rollup] 🔍 [27/27] Evaluating Line: "emile henry bakeware"
+   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Product Line cmnukb7r00006rr195wp4fij3
 
 > @mono/admin@0.1.0 gold:generate:models
 > dotenv -e ../../.env -- tsx scripts/roll-up-exact-models.ts
 
-◇ injected env (0) from ../../.env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+◇ injected env (0) from ../../.env // tip: ◈ encrypted .env [www.dotenvx.com]
 [Rollup] 🧹 Sweeping for unmapped EXACT_MODEL Silver mentions...
-[Rollup] 📦 Processing 6 mentions for EXACT MODEL rollup...
+[Rollup] 📦 Processing 15 mentions for EXACT MODEL rollup...
 
-🔍 [1/6] Evaluating: "hank's belts premier double layer gun belt"
+🔍 [1/15] Evaluating: "apple iphone 7"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
 [ONNX] Booting local embedding engine: mixedbread-ai/mxbai-embed-large-v1...
 [ONNX] Engine online and loaded into memory!
-   ✨ CREATED new GoldProduct: cmntwzwj100004b19f9mor0gx (Premier Double Layer Gun Belt) with pure centroid.
+   ✨ CREATED new GoldProduct: cmnukbr9q0000sx19w09aq26l (iPhone 7) with pure centroid.
 
-🔍 [2/6] Evaluating: "grip6 classic black belt"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   ✨ CREATED new GoldProduct: cmntwzwk300014b19yzq7o8fh (Classic Black Belt) with pure centroid.
-
-🔍 [3/6] Evaluating: "steelcase leap v2"
-   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   ✨ CREATED new GoldProduct: cmntwzwkv00024b19psnmyt1y (Leap V2) with pure centroid.
-
-🔍 [4/6] Evaluating: "steelcase leap v2"
+🔍 [2/15] Evaluating: "steelcase leap v2"
    ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches cmntwzwkv00024b19psnmyt1y
 
-🔍 [5/6] Evaluating: "case stx425 tractor"
+🔍 [3/15] Evaluating: "hamilton beach 40930"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   ✨ CREATED new GoldProduct: cmntwzwlo00034b196jwyxgcf (STX425 tractor) with pure centroid.
+   ✨ CREATED new GoldProduct: cmnukbraw0001sx19qipmr7vs (40930) with pure centroid.
 
-🔍 [6/6] Evaluating: "massey 4880 tractor"
+🔍 [4/15] Evaluating: "case 446"
    [Rollup] 📉 No valid PGVector candidates found within distance threshold.
-   ✨ CREATED new GoldProduct: cmntwzwma00044b19k59bzp6o (4880 tractor) with pure centroid.
+   ✨ CREATED new GoldProduct: cmnukbrbk0002sx19uzxnq6xy (446) with pure centroid.
+
+🔍 [5/15] Evaluating: "case 646 loader"
+   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
+   ✨ CREATED new GoldProduct: cmnukbrc70003sx19ho7swj5n (646 loader) with pure centroid.
+
+🔍 [6/15] Evaluating: "case 222"
+   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
+   ✨ CREATED new GoldProduct: cmnukbrcr0004sx1979ucah4m (222) with pure centroid.
+
+🔍 [7/15] Evaluating: "case 224"
+   [Rollup] 🤖 LLM REJECTED all candidates. Must be a novel product.
+   ✨ CREATED new GoldProduct: cmnukbtor0006sx19hktmvn04 (224) with pure centroid.
+
+🔍 [8/15] Evaluating: "case 446"
+   ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches cmnukbrbk0002sx19uzxnq6xy
+
+🔍 [9/15] Evaluating: "case 448"
+   [Rollup] 🤖 LLM REJECTED all candidates. Must be a novel product.
+   ✨ CREATED new GoldProduct: cmnukbwah0008sx1991cfttcx (448) with pure centroid.
+
+🔍 [10/15] Evaluating: "case 646b"
+   [Rollup] 🤖 LLM REJECTED all candidates. Must be a novel product.
+   ✨ CREATED new GoldProduct: cmnukbykc000asx19jnbgdr75 (646B) with pure centroid.
+
+🔍 [11/15] Evaluating: "case 224"
+   ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches cmnukbtor0006sx19hktmvn04
+
+🔍 [12/15] Evaluating: "apple iphone 6s"
+   [Rollup] 🤖 LLM REJECTED all candidates. Must be a novel product.
+   ✨ CREATED new GoldProduct: cmnukbzy6000csx19rv7ngf48 (iPhone 6s) with pure centroid.
+
+🔍 [13/15] Evaluating: "1zpresso lido 2"
+   [Rollup] 📉 No valid PGVector candidates found within distance threshold.
+   ✨ CREATED new GoldProduct: cmnukbzz0000dsx19ru99bhjr (Lido 2) with pure centroid.
+
+🔍 [14/15] Evaluating: "case 646"
+   [Rollup] 🤖 LLM MATCHED TYPO: Option -> cmnukbykc000asx19jnbgdr75 (646B)
+
+🔍 [15/15] Evaluating: "garde fc38sc"
+   [Rollup] ⚠️ Skipped: Parent Brand not mapped. (Run brands script first, or it was an excluded generic brand.)
 
 🟢 TITLING PHASE: Executing LLM Canonical Name Normalization
 
@@ -777,349 +742,284 @@ This sweeps the database for mentions without vectors and embeds them.
 
 ◇ injected env (0) from ../../.env // tip: ◈ encrypted .env [www.dotenvx.com]
 [Titling] 🧹 Fetching [brands] for Titling phase...
-[Titling] 📦 Titling 63 brands...
+[Titling] 📦 Titling 41 brands...
 
-[Titling] 🔍 [1/63] Inspecting Canonical Name: "Geox"
+[Titling] 🔍 [1/41] Inspecting Canonical Name: "M&S"
 
-[Titling] 🔍 [2/63] Inspecting Canonical Name: "Nettleton"
+[Titling] 🔍 [2/41] Inspecting Canonical Name: "Tom Davies"
 
-[Titling] 🔍 [3/63] Inspecting Canonical Name: "Quoddy"
+[Titling] 🔍 [3/41] Inspecting Canonical Name: "Ogi"
 
-[Titling] 🔍 [4/63] Inspecting Canonical Name: "Steelcase"
+[Titling] 🔍 [4/41] Inspecting Canonical Name: "Emile Henry"
 
-[Titling] 🔍 [5/63] Inspecting Canonical Name: "Narragansett Leathers"
+[Titling] 🔍 [5/41] Inspecting Canonical Name: "Anchor"
 
-[Titling] 🔍 [6/63] Inspecting Canonical Name: "Wesco"
+[Titling] 🔍 [6/41] Inspecting Canonical Name: "Bialetti"
 
-[Titling] 🔍 [7/63] Inspecting Canonical Name: "Icebreaker"
+[Titling] 🔍 [7/41] Inspecting Canonical Name: "Apple"
 
-[Titling] 🔍 [8/63] Inspecting Canonical Name: "Fruit Loom"
+[Titling] 🔍 [8/41] Inspecting Canonical Name: "Pyrex"
 
-[Titling] 🔍 [9/63] Inspecting Canonical Name: "Russell Moccasin"
+[Titling] 🔍 [9/41] Inspecting Canonical Name: "See Eyeware"
 
-[Titling] 🔍 [10/63] Inspecting Canonical Name: "McKinlays"
-   [Titling] 👍 Name is already perfect. [Russell Moccasin]
+[Titling] 🔍 [10/41] Inspecting Canonical Name: "Case"
+   [Titling] 👍 Name is already perfect. [Tom Davies]
 
-[Titling] 🔍 [11/63] Inspecting Canonical Name: "FACHIOO"
-   [Titling] 👍 Name is already perfect. [McKinlays]
+[Titling] 🔍 [11/41] Inspecting Canonical Name: "Kinu"
+   [Titling] 👍 Name is already perfect. [Anchor]
 
-[Titling] 🔍 [12/63] Inspecting Canonical Name: "Bahfir"
-   [Titling] 👍 Name is already perfect. [Quoddy]
+[Titling] 🔍 [12/41] Inspecting Canonical Name: "Corning"
+   [Titling] 👍 Name is already perfect. [Ogi]
 
-[Titling] 🔍 [13/63] Inspecting Canonical Name: "Salvatore Ferragamo"
-   [Titling] 👍 Name is already perfect. [Geox]
+[Titling] 🔍 [13/41] Inspecting Canonical Name: "Flexon"
+   [Titling] 👍 Name is already perfect. [See Eyeware]
 
-[Titling] 🔍 [14/63] Inspecting Canonical Name: "INUI"
-   [Titling] 👍 Name is already perfect. [Icebreaker]
-
-[Titling] 🔍 [15/63] Inspecting Canonical Name: "RhisoPhy"
-   [Titling] 👍 Name is already perfect. [Narragansett Leathers]
-
-[Titling] 🔍 [16/63] Inspecting Canonical Name: "Mingda"
-   [Titling] 👍 Name is already perfect. [Nettleton]
-
-[Titling] 🔍 [17/63] Inspecting Canonical Name: "Nintendo"
-   [Titling] ✨ RENAMING: "Fruit Loom"  ➡️  "Fruit of the Loom"
+[Titling] 🔍 [14/41] Inspecting Canonical Name: "Zojirushi"
+   [Titling] ✨ RENAMING: "M&S"  ➡️  "Marks & Spencer"
 [ONNX] Booting local embedding engine: mixedbread-ai/mxbai-embed-large-v1...
+   [Titling] 👍 Name is already perfect. [Bialetti]
+
+[Titling] 🔍 [15/41] Inspecting Canonical Name: "Le Creuset"
 [ONNX] Engine online and loaded into memory!
-   [Titling] 👍 Name is already perfect. [Wesco]
-   [Titling] 👍 Name is already perfect. [Steelcase]
 
-[Titling] 🔍 [18/63] Inspecting Canonical Name: "Yellow Box"
+[Titling] 🔍 [16/41] Inspecting Canonical Name: "Mirro"
+   [Titling] 👍 Name is already perfect. [Emile Henry]
 
-[Titling] 🔍 [19/63] Inspecting Canonical Name: "G.H. Bass"
+[Titling] 🔍 [17/41] Inspecting Canonical Name: "Salt"
+   [Titling] 👍 Name is already perfect. [Pyrex]
 
-[Titling] 🔍 [20/63] Inspecting Canonical Name: "REI"
-   [Titling] 👍 Name is already perfect. [Salvatore Ferragamo]
+[Titling] 🔍 [18/41] Inspecting Canonical Name: "Kränzle"
+   [Titling] 👍 Name is already perfect. [Case]
 
-[Titling] 🔍 [21/63] Inspecting Canonical Name: "Thorlo"
-   [Titling] ✨ RENAMING: "Mingda"  ➡️  "Mingda Magician X2"
+[Titling] 🔍 [19/41] Inspecting Canonical Name: "Hamilton Beach"
+   [Titling] 👍 Name is already perfect. [Apple]
 
-[Titling] 🔍 [22/63] Inspecting Canonical Name: "Rockport"
-   [Titling] 👍 Name is already perfect. [INUI]
+[Titling] 🔍 [20/41] Inspecting Canonical Name: "American Optical"
+   [Titling] 👍 Name is already perfect. [Corning]
 
-[Titling] 🔍 [23/63] Inspecting Canonical Name: "Mercedes"
-   [Titling] ✨ RENAMING: "Bahfir"  ➡️  "Bahfir Sonic Toothbrush"
+[Titling] 🔍 [21/41] Inspecting Canonical Name: "Crock-Pot"
+   [Titling] 👍 Name is already perfect. [Flexon]
 
-[Titling] 🔍 [24/63] Inspecting Canonical Name: "Speed Queen"
-   [Titling] 👍 Name is already perfect. [Nintendo]
+[Titling] 🔍 [22/41] Inspecting Canonical Name: "Atlas Marcato"
+   [Titling] 👍 Name is already perfect. [Zojirushi]
 
-[Titling] 🔍 [25/63] Inspecting Canonical Name: "Carhartt"
-   [Titling] 👍 Name is already perfect. [FACHIOO]
+[Titling] 🔍 [23/41] Inspecting Canonical Name: "Sawa"
+   [Titling] 👍 Name is already perfect. [Le Creuset]
 
-[Titling] 🔍 [26/63] Inspecting Canonical Name: "Walk-Over"
-   [Titling] 👍 Name is already perfect. [Yellow Box]
+[Titling] 🔍 [24/41] Inspecting Canonical Name: "Spong"
+   [Titling] 👍 Name is already perfect. [Mirro]
 
-[Titling] 🔍 [27/63] Inspecting Canonical Name: "Frye"
-   [Titling] 👍 Name is already perfect. [RhisoPhy]
+[Titling] 🔍 [25/41] Inspecting Canonical Name: "Fjallraven"
+   [Titling] ✨ RENAMING: "Kinu"  ➡️  "Pharos"
 
-[Titling] 🔍 [28/63] Inspecting Canonical Name: "Kershaw"
-   [Titling] 👍 Name is already perfect. [Thorlo]
+[Titling] 🔍 [26/41] Inspecting Canonical Name: "5.11"
+   [Titling] 👍 Name is already perfect. [Crock-Pot]
 
-[Titling] 🔍 [29/63] Inspecting Canonical Name: "Alden"
-   [Titling] 👍 Name is already perfect. [REI]
+[Titling] 🔍 [27/41] Inspecting Canonical Name: "glass bake-wear"
+   [Titling] 👍 Name is already perfect. [American Optical]
 
-[Titling] 🔍 [30/63] Inspecting Canonical Name: "Lucchese"
-   [Titling] 👍 Name is already perfect. [Rockport]
+[Titling] 🔍 [28/41] Inspecting Canonical Name: "Stainless Steel"
+   [Titling] 👍 Name is already perfect. [Kränzle]
 
-[Titling] 🔍 [31/63] Inspecting Canonical Name: "Rancourt & Company"
-   [Titling] 👍 Name is already perfect. [G.H. Bass]
+[Titling] 🔍 [29/41] Inspecting Canonical Name: "Panasonic"
+   [Titling] 👍 Name is already perfect. [Atlas Marcato]
 
-[Titling] 🔍 [32/63] Inspecting Canonical Name: "Allen Edmonds"
-   [Titling] 👍 Name is already perfect. [Mercedes]
+[Titling] 🔍 [30/41] Inspecting Canonical Name: "Lindberg"
+   [Titling] 👍 Name is already perfect. [Sawa]
 
-[Titling] 🔍 [33/63] Inspecting Canonical Name: "Toyota"
-   [Titling] 👍 Name is already perfect. [Carhartt]
+[Titling] 🔍 [31/41] Inspecting Canonical Name: "Commercial"
+   [Titling] 👍 Name is already perfect. [Fjallraven]
 
-[Titling] 🔍 [34/63] Inspecting Canonical Name: "HOT TARGET"
-   [Titling] 👍 Name is already perfect. [Speed Queen]
+[Titling] 🔍 [32/41] Inspecting Canonical Name: "Oxo"
+   [Titling] 👍 Name is already perfect. [Hamilton Beach]
 
-[Titling] 🔍 [35/63] Inspecting Canonical Name: "Duluth Trading"
-   [Titling] 👍 Name is already perfect. [Kershaw]
+[Titling] 🔍 [33/41] Inspecting Canonical Name: "Black & Decker"
+   [Titling] 👍 Name is already perfect. [Salt]
 
-[Titling] 🔍 [36/63] Inspecting Canonical Name: "Galco"
-   [Titling] 👍 Name is already perfect. [Lucchese]
+[Titling] 🔍 [34/41] Inspecting Canonical Name: "Fat Daddio"
+   [Titling] 👍 Name is already perfect. [5.11]
 
-[Titling] 🔍 [37/63] Inspecting Canonical Name: "MBZ"
-   [Titling] 👍 Name is already perfect. [Allen Edmonds]
+[Titling] 🔍 [35/41] Inspecting Canonical Name: "Instant Pot"
+   [Titling] 👍 Name is already perfect. [Panasonic]
 
-[Titling] 🔍 [38/63] Inspecting Canonical Name: "Grip6"
-   [Titling] 👍 Name is already perfect. [Alden]
+[Titling] 🔍 [36/41] Inspecting Canonical Name: "Devium USA"
+   [Titling] 👍 Name is already perfect. [Lindberg]
 
-[Titling] 🔍 [39/63] Inspecting Canonical Name: "Henrysshoerepair.com"
-   [Titling] 👍 Name is already perfect. [Walk-Over]
+[Titling] 🔍 [37/41] Inspecting Canonical Name: "Ceramic Bakeware"
+   [Titling] ✨ RENAMING: "Spong"  ➡️  "Baratza Encore"
 
-[Titling] 🔍 [40/63] Inspecting Canonical Name: "Hank's Belts"
-   [Titling] 👍 Name is already perfect. [Toyota]
+[Titling] 🔍 [38/41] Inspecting Canonical Name: "1Zpresso"
+   [Titling] 👍 Name is already perfect. [Black & Decker]
 
-[Titling] 🔍 [41/63] Inspecting Canonical Name: "Goldtoe"
-   [Titling] 👍 Name is already perfect. [Duluth Trading]
+[Titling] 🔍 [39/41] Inspecting Canonical Name: "Aluminum"
+   [Titling] ✨ RENAMING: "Oxo"  ➡️  "OXO"
 
-[Titling] 🔍 [42/63] Inspecting Canonical Name: "Henry's"
-   [Titling] 👍 Name is already perfect. [Frye]
+[Titling] 🔍 [40/41] Inspecting Canonical Name: "Tiger"
+   [Titling] 👍 Name is already perfect. [Instant Pot]
 
-[Titling] 🔍 [43/63] Inspecting Canonical Name: "Fox Creek Leather"
-   [Titling] 👍 Name is already perfect. [Rancourt & Company]
+[Titling] 🔍 [41/41] Inspecting Canonical Name: "Tatung"
+   [Titling] 👍 Name is already perfect. [Devium USA]
+   [Titling] 👍 Name is already perfect. [Fat Daddio]
+   [Titling] ✨ RENAMING: "Commercial"  ➡️  "Commercial Cake Pan"
+   [Titling] ✨ RENAMING: "glass bake-wear"  ➡️  "Glass Bakeware"
+   [Titling] 👍 Name is already perfect. [Tatung]
+   [Titling] 👍 Name is already perfect. [1Zpresso]
+   ⚠️ LLM failed (attempt 1/3): {"error":{"code":503,"message":"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.","status":"UNAVAILABLE"}}
+   [Titling] 👍 Name is already perfect. [Ceramic Bakeware]
+   [Titling] 👍 Name is already perfect. [Aluminum]
+   [Titling] 👍 Name is already perfect. [Stainless Steel]
+   [Titling] 👍 Name is already perfect. [Tiger]
 
-[Titling] 🔍 [44/63] Inspecting Canonical Name: "Charles Tyrwhitt"
-   [Titling] 👍 Name is already perfect. [Galco]
-   [Titling] 👍 Name is already perfect. [Grip6]
-
-[Titling] 🔍 [45/63] Inspecting Canonical Name: "Orion"
-
-[Titling] 🔍 [46/63] Inspecting Canonical Name: "Zeswear"
-   [Titling] 👍 Name is already perfect. [HOT TARGET]
-
-[Titling] 🔍 [47/63] Inspecting Canonical Name: "Thirteen50"
-   [Titling] ✨ RENAMING: "MBZ"  ➡️  "Mercedes-Benz"
-
-[Titling] 🔍 [48/63] Inspecting Canonical Name: "Duluth"
-   [Titling] ✨ RENAMING: "Goldtoe"  ➡️  "Gold Toe"
-
-[Titling] 🔍 [49/63] Inspecting Canonical Name: "3M"
-   [Titling] 👍 Name is already perfect. [Fox Creek Leather]
-
-[Titling] 🔍 [50/63] Inspecting Canonical Name: "John Deere"
-   [Titling] 👍 Name is already perfect. [Charles Tyrwhitt]
-
-[Titling] 🔍 [51/63] Inspecting Canonical Name: "Yeti"
-   [Titling] ✨ RENAMING: "Hank's Belts"  ➡️  "Hank's"
-
-[Titling] 🔍 [52/63] Inspecting Canonical Name: "Dearborn Supply"
-   [Titling] 👍 Name is already perfect. [Zeswear]
-
-[Titling] 🔍 [53/63] Inspecting Canonical Name: "Austin-Healey"
-   [Titling] 👍 Name is already perfect. [Duluth]
-
-[Titling] 🔍 [54/63] Inspecting Canonical Name: "Case"
-   [Titling] ✨ RENAMING: "Henrysshoerepair.com"  ➡️  "Henry's Shoe Repair"
-
-[Titling] 🔍 [55/63] Inspecting Canonical Name: "The Wilderness"
-   [Titling] 👍 Name is already perfect. [Thirteen50]
-
-[Titling] 🔍 [56/63] Inspecting Canonical Name: "Jaguar"
-   [Titling] 👍 Name is already perfect. [Orion]
-
-[Titling] 🔍 [57/63] Inspecting Canonical Name: "Subaru"
-   [Titling] 👍 Name is already perfect. [Henry's]
-
-[Titling] 🔍 [58/63] Inspecting Canonical Name: "Massey"
-   [Titling] 👍 Name is already perfect. [John Deere]
-
-[Titling] 🔍 [59/63] Inspecting Canonical Name: "Darn Tough"
-   [Titling] 👍 Name is already perfect. [Yeti]
-
-[Titling] 🔍 [60/63] Inspecting Canonical Name: "Kore Essentials"
-   [Titling] 👍 Name is already perfect. [Austin-Healey]
-
-[Titling] 🔍 [61/63] Inspecting Canonical Name: "Adidas"
-   [Titling] 👍 Name is already perfect. [Dearborn Supply]
-
-[Titling] 🔍 [62/63] Inspecting Canonical Name: "Costco"
-   [Titling] 👍 Name is already perfect. [3M]
-
-[Titling] 🔍 [63/63] Inspecting Canonical Name: "Ford"
-   [Titling] 👍 Name is already perfect. [Jaguar]
-   [Titling] 👍 Name is already perfect. [Kore Essentials]
-   [Titling] 👍 Name is already perfect. [Costco]
-   [Titling] 👍 Name is already perfect. [Adidas]
-   [Titling] ✨ RENAMING: "Case"  ➡️  "Case STX425"
-   [Titling] ✨ RENAMING: "The Wilderness"  ➡️  "Wilderness Tactical Belt"
-   [Titling] 👍 Name is already perfect. [Darn Tough]
-   [Titling] ✨ RENAMING: "Massey"  ➡️  "Massey Ferguson"
-   [Titling] 👍 Name is already perfect. [Subaru]
-   [Titling] 👍 Name is already perfect. [Ford]
-
-[Titling] ✅ Titling complete! Renamed 10/63 items.
+[Titling] ✅ Titling complete! Renamed 6/41 items.
 
 > @mono/admin@0.1.0 gold:titling:lines
 > dotenv -e ../../.env -- tsx scripts/titling-phase.ts --target lines --concurrency 10
 
-◇ injected env (0) from ../../.env // tip: ⌘ override existing { override: true }
+◇ injected env (0) from ../../.env // tip: ◈ encrypted .env [www.dotenvx.com]
 [Titling] 🧹 Fetching [lines] for Titling phase...
-[Titling] 📦 Titling 28 lines...
+[Titling] 📦 Titling 18 lines...
 
-[Titling] 🔍 [1/28] Inspecting Canonical Name: "belt"
+[Titling] 🔍 [1/18] Inspecting Canonical Name: "Moka Pot"
 
-[Titling] 🔍 [2/28] Inspecting Canonical Name: "Magician X2"
+[Titling] 🔍 [2/18] Inspecting Canonical Name: "aviators"
 
-[Titling] 🔍 [3/28] Inspecting Canonical Name: "amiibo cards"
+[Titling] 🔍 [3/18] Inspecting Canonical Name: "Pharos"
 
-[Titling] 🔍 [4/28] Inspecting Canonical Name: "pants"
+[Titling] 🔍 [4/18] Inspecting Canonical Name: "Bakeware"
 
-[Titling] 🔍 [5/28] Inspecting Canonical Name: "moose hide choppers"
+[Titling] 🔍 [5/18] Inspecting Canonical Name: "Game Boy"
 
-[Titling] 🔍 [6/28] Inspecting Canonical Name: "leather belt"
+[Titling] 🔍 [6/18] Inspecting Canonical Name: "Bakeware"
 
-[Titling] 🔍 [7/28] Inspecting Canonical Name: "merino tees"
+[Titling] 🔍 [7/18] Inspecting Canonical Name: "Dutch Oven"
 
-[Titling] 🔍 [8/28] Inspecting Canonical Name: "Original T-Shirt"
+[Titling] 🔍 [8/18] Inspecting Canonical Name: "Cake Pan"
 
-[Titling] 🔍 [9/28] Inspecting Canonical Name: "tactical belt"
+[Titling] 🔍 [9/18] Inspecting Canonical Name: "Lido"
 
-[Titling] 🔍 [10/28] Inspecting Canonical Name: "Romeo"
-   [Titling] ✨ RENAMING: "belt"  ➡️  "Belt"
+[Titling] 🔍 [10/18] Inspecting Canonical Name: "ProSeries"
+   [Titling] ✨ RENAMING: "aviators"  ➡️  "Aviators"
 [ONNX] Booting local embedding engine: mixedbread-ai/mxbai-embed-large-v1...
-   [Titling] 👍 Name is already perfect. [Magician X2]
-
-[Titling] 🔍 [11/28] Inspecting Canonical Name: "Weejuns"
 [ONNX] Engine online and loaded into memory!
-   [Titling] 👍 Name is already perfect. [Original T-Shirt]
-   [Titling] ✨ RENAMING: "merino tees"  ➡️  "Merino Tees"
-   [Titling] 👍 Name is already perfect. [amiibo cards]
-   [Titling] 👍 Name is already perfect. [Romeo]
+   [Titling] 👍 Name is already perfect. [Cake Pan]
+   [Titling] 👍 Name is already perfect. [Pharos]
+   [Titling] 👍 Name is already perfect. [Bakeware]
 
-[Titling] 🔍 [12/28] Inspecting Canonical Name: "loafers"
+[Titling] 🔍 [11/18] Inspecting Canonical Name: "Good Grips"
 
-[Titling] 🔍 [13/28] Inspecting Canonical Name: "lifetime belts"
+[Titling] 🔍 [12/18] Inspecting Canonical Name: "Borosilicate Bakeware"
 
-[Titling] 🔍 [14/28] Inspecting Canonical Name: "micro-crew lightweight hikers"
+[Titling] 🔍 [13/18] Inspecting Canonical Name: "Ceramic Cookware"
 
-[Titling] 🔍 [15/28] Inspecting Canonical Name: "X000 and X000 Ten series"
+[Titling] 🔍 [14/18] Inspecting Canonical Name: "Pie Dish"
+   [Titling] 👍 Name is already perfect. [Moka Pot]
 
-[Titling] 🔍 [16/28] Inspecting Canonical Name: "jersey lounge trousers"
-   [Titling] ✨ RENAMING: "leather belt"  ➡️  "Leather Belt"
-   [Titling] ✨ RENAMING: "pants"  ➡️  "Pants"
+[Titling] 🔍 [15/18] Inspecting Canonical Name: "toiler chino"
+   [Titling] 👍 Name is already perfect. [Game Boy]
 
-[Titling] 🔍 [17/28] Inspecting Canonical Name: "penny loafers and driving moccasins"
+[Titling] 🔍 [16/18] Inspecting Canonical Name: "Enameled Cast Iron"
+   [Titling] 👍 Name is already perfect. [Bakeware]
 
-[Titling] 🔍 [18/28] Inspecting Canonical Name: "gun belt"
-   [Titling] ✨ RENAMING: "tactical belt"  ➡️  "Tactical Belt"
+[Titling] 🔍 [17/18] Inspecting Canonical Name: "steam rice cooker"
+   [Titling] 👍 Name is already perfect. [Dutch Oven]
 
-[Titling] 🔍 [19/28] Inspecting Canonical Name: "Forester"
-   [Titling] 👍 Name is already perfect. [Weejuns]
+[Titling] 🔍 [18/18] Inspecting Canonical Name: "flex stretch jeans"
+   [Titling] 👍 Name is already perfect. [Lido]
+   [Titling] 👍 Name is already perfect. [ProSeries]
+   [Titling] 👍 Name is already perfect. [Enameled Cast Iron]
+   [Titling] 👍 Name is already perfect. [Borosilicate Bakeware]
+   [Titling] ✨ RENAMING: "toiler chino"  ➡️  "Toiler Chino"
+   [Titling] 👍 Name is already perfect. [Pie Dish]
+   [Titling] 👍 Name is already perfect. [Good Grips]
+   [Titling] 👍 Name is already perfect. [Ceramic Cookware]
+   [Titling] ✨ RENAMING: "flex stretch jeans"  ➡️  "Flex Stretch Jeans"
+   [Titling] ✨ RENAMING: "steam rice cooker"  ➡️  "Steam Rice Cooker"
 
-[Titling] 🔍 [20/28] Inspecting Canonical Name: "moose hide belt"
-   [Titling] ✨ RENAMING: "moose hide choppers"  ➡️  "Moose Hide Mittens"
-
-[Titling] 🔍 [21/28] Inspecting Canonical Name: "belt"
-   [Titling] ✨ RENAMING: "loafers"  ➡️  "Loafers"
-   [Titling] ✨ RENAMING: "micro-crew lightweight hikers"  ➡️  "Micro-Crew Lightweight Hikers"
-
-[Titling] 🔍 [22/28] Inspecting Canonical Name: "Outback"
-
-[Titling] 🔍 [23/28] Inspecting Canonical Name: "belt"
-   [Titling] ✨ RENAMING: "lifetime belts"  ➡️  "Lifetime Belts"
-
-[Titling] 🔍 [24/28] Inspecting Canonical Name: "Belt"
-   [Titling] ✨ RENAMING: "jersey lounge trousers"  ➡️  "Jersey Lounge Trousers"
-
-[Titling] 🔍 [25/28] Inspecting Canonical Name: "Trizact Hook & Loop Disc"
-   [Titling] 👍 Name is already perfect. [Forester]
-
-[Titling] 🔍 [26/28] Inspecting Canonical Name: "reinforced gun belt"
-   [Titling] ✨ RENAMING: "X000 and X000 Ten series"  ➡️  "X000 Ten series"
-
-[Titling] 🔍 [27/28] Inspecting Canonical Name: "Stan Smith"
-   [Titling] 👍 Name is already perfect. [Belt]
-   [Titling] 👍 Name is already perfect. [Outback]
-   [Titling] ✨ RENAMING: "moose hide belt"  ➡️  "Moose Hide Belt"
-
-[Titling] 🔍 [28/28] Inspecting Canonical Name: "truck"
-   [Titling] ✨ RENAMING: "gun belt"  ➡️  "Gun Belt"
-   [Titling] ✨ RENAMING: "belt"  ➡️  "Thirteen50"
-   [Titling] 👍 Name is already perfect. [Stan Smith]
-   [Titling] ✨ RENAMING: "penny loafers and driving moccasins"  ➡️  "Penny Loafers & Driving Moccasins"
-   [Titling] ✨ RENAMING: "belt"  ➡️  "Orion Belt"
-   [Titling] ✨ RENAMING: "reinforced gun belt"  ➡️  "Reinforced Gun Belt"
-   [Titling] 👍 Name is already perfect. [Trizact Hook & Loop Disc]
-   [Titling] ✨ RENAMING: "truck"  ➡️  "Pickup"
-
-[Titling] ✅ Titling complete! Renamed 18/28 items.
+[Titling] ✅ Titling complete! Renamed 4/18 items.
 
 > @mono/admin@0.1.0 gold:titling:models
 > dotenv -e ../../.env -- tsx scripts/titling-phase.ts --target models --concurrency 10
 
-◇ injected env (0) from ../../.env // tip: ◈ secrets for agents [www.dotenvx.com]
+◇ injected env (0) from ../../.env // tip: ⌘ suppress logs { quiet: true }
 [Titling] 🧹 Fetching [models] for Titling phase...
-[Titling] 📦 Titling 5 models...
+[Titling] 📦 Titling 10 models...
 
-[Titling] 🔍 [1/5] Inspecting Canonical Name: "Premier Double Layer Gun Belt"
+[Titling] 🔍 [1/10] Inspecting Canonical Name: "446"
 
-[Titling] 🔍 [2/5] Inspecting Canonical Name: "Classic Black Belt"
+[Titling] 🔍 [2/10] Inspecting Canonical Name: "448"
 
-[Titling] 🔍 [3/5] Inspecting Canonical Name: "Leap V2"
+[Titling] 🔍 [3/10] Inspecting Canonical Name: "224"
 
-[Titling] 🔍 [4/5] Inspecting Canonical Name: "STX425 tractor"
+[Titling] 🔍 [4/10] Inspecting Canonical Name: "iPhone 6s"
 
-[Titling] 🔍 [5/5] Inspecting Canonical Name: "4880 tractor"
-   [Titling] 👍 Name is already perfect. [Premier Double Layer Gun Belt]
-   [Titling] 👍 Name is already perfect. [Leap V2]
-   [Titling] ✨ RENAMING: "4880 tractor"  ➡️  "4880"
+[Titling] 🔍 [5/10] Inspecting Canonical Name: "Lido 2"
+
+[Titling] 🔍 [6/10] Inspecting Canonical Name: "646B"
+
+[Titling] 🔍 [7/10] Inspecting Canonical Name: "iPhone 7"
+
+[Titling] 🔍 [8/10] Inspecting Canonical Name: "40930"
+
+[Titling] 🔍 [9/10] Inspecting Canonical Name: "646 loader"
+
+[Titling] 🔍 [10/10] Inspecting Canonical Name: "222"
+   [Titling] 👍 Name is already perfect. [iPhone 7]
+   [Titling] 👍 Name is already perfect. [222]
+   [Titling] 👍 Name is already perfect. [iPhone 6s]
+   [Titling] 👍 Name is already perfect. [646B]
+   [Titling] 👍 Name is already perfect. [446]
+   [Titling] 👍 Name is already perfect. [Lido 2]
+   [Titling] ✨ RENAMING: "646 loader"  ➡️  "646 Loader"
 [ONNX] Booting local embedding engine: mixedbread-ai/mxbai-embed-large-v1...
-   [Titling] ✨ RENAMING: "STX425 tractor"  ➡️  "STX425"
+   [Titling] ✨ RENAMING: "40930"  ➡️  "Compact Kettle"
 [ONNX] Booting local embedding engine: mixedbread-ai/mxbai-embed-large-v1...
-   [Titling] 👍 Name is already perfect. [Classic Black Belt]
 [ONNX] Engine online and loaded into memory!
+   [Titling] 👍 Name is already perfect. [224]
+   [Titling] 👍 Name is already perfect. [448]
 [ONNX] Engine online and loaded into memory!
 
-[Titling] ✅ Titling complete! Renamed 2/5 items.
+[Titling] ✅ Titling complete! Renamed 2/10 items.
 
 🟢 HIERARCHY PHASE: Executing Market Taxonomy Linker
 
 > @mono/admin@0.1.0 gold:link
 > dotenv -e ../../.env -- tsx scripts/link-hierarchy.ts --concurrency 10
 
-◇ injected env (0) from ../../.env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+◇ injected env (0) from ../../.env // tip: ⌘ enable debugging { debug: true }
 [Hierarchy] 🧹 Fetching unlinked GoldProducts...
-[Hierarchy] 📦 Analyzing 5 Extra Models for Hierarchy Links (concurrency: 10)...
+[Hierarchy] 📦 Analyzing 10 Extra Models for Hierarchy Links (concurrency: 10)...
 
-[Hierarchy] 🔍 [1/5] Inspecting Model: "Premier Double Layer Gun Belt"
-   [Hierarchy] ⏭️ Skipping: No product lines exist for brand "Hank's".
+[Hierarchy] 🔍 [1/10] Inspecting Model: "iPhone 7"
+   [Hierarchy] ⏭️ Skipping: No product lines exist for brand "Apple".
 
-[Hierarchy] 🔍 [2/5] Inspecting Model: "Leap V2"
-   [Hierarchy] ⏭️ Skipping: No product lines exist for brand "Steelcase".
+[Hierarchy] 🔍 [2/10] Inspecting Model: "222"
+   [Hierarchy] ⏭️ Skipping: No product lines exist for brand "Case".
 
-[Hierarchy] 🔍 [3/5] Inspecting Model: "Classic Black Belt"
+[Hierarchy] 🔍 [3/10] Inspecting Model: "iPhone 6s"
+   [Hierarchy] ⏭️ Skipping: No product lines exist for brand "Apple".
 
-[Hierarchy] 🔍 [4/5] Inspecting Model: "4880"
-   [Hierarchy] ⏭️ Skipping: No product lines exist for brand "Massey Ferguson".
+[Hierarchy] 🔍 [4/10] Inspecting Model: "646B"
+   [Hierarchy] ⏭️ Skipping: No product lines exist for brand "Case".
 
-[Hierarchy] 🔍 [5/5] Inspecting Model: "STX425"
-   [Hierarchy] ⏭️ Skipping: No product lines exist for brand "Case STX425".
-   [Hierarchy] 🔗 LINKED: "Classic Black Belt"  ➡️  [Belt]
+[Hierarchy] 🔍 [5/10] Inspecting Model: "446"
+   [Hierarchy] ⏭️ Skipping: No product lines exist for brand "Case".
 
-[Hierarchy] ✅ Hierarchy sweep complete! Linked 1/5 exact models to a parent line.
+[Hierarchy] 🔍 [6/10] Inspecting Model: "Lido 2"
+
+[Hierarchy] 🔍 [7/10] Inspecting Model: "224"
+   [Hierarchy] ⏭️ Skipping: No product lines exist for brand "Case".
+
+[Hierarchy] 🔍 [8/10] Inspecting Model: "646 Loader"
+   [Hierarchy] ⏭️ Skipping: No product lines exist for brand "Case".
+
+[Hierarchy] 🔍 [9/10] Inspecting Model: "448"
+   [Hierarchy] ⏭️ Skipping: No product lines exist for brand "Case".
+
+[Hierarchy] 🔍 [10/10] Inspecting Model: "Compact Kettle"
+   [Hierarchy] ⏭️ Skipping: No product lines exist for brand "Hamilton Beach".
+   [Hierarchy] 🔗 LINKED: "Lido 2"  ➡️  [Lido]
+
+[Hierarchy] ✅ Hierarchy sweep complete! Linked 1/10 exact models to a parent line.
 
 🟢 TAXONOMY PHASE: Generating Organic Categories and Routing Matrix
 
@@ -1134,224 +1034,146 @@ This sweeps the database for mentions without vectors and embeds them.
 
 ◇ injected env (0) from ../../.env // tip: ⌘ suppress logs { quiet: true }
 [Discovery] 🔎 Sweeping for uncategorized Gold Product Lines...
-[Discovery] 📦 Processing 28 lines for category idea generation...
+[Discovery] 📦 Processing 18 lines for category idea generation...
 
-[Discovery] 🧠 [1/28] Brainstorming: Grip6 -> Belt
-   [Discovery] ✨ Generated 3 SEO categories! (e.g. Mens Belts)
+[Discovery] 🧠 [1/18] Brainstorming: Nintendo -> Game Boy
+   [Discovery] ✨ Generated 3 SEO categories! (e.g. Handheld gaming)
 
-[Discovery] 🧠 [2/28] Brainstorming: Nintendo -> amiibo cards
-   [Discovery] ✨ Generated 3 SEO categories! (e.g. video game unlocks)
+[Discovery] 🧠 [2/18] Brainstorming: Commercial -> Cake Pan
+   [Discovery] ✨ Generated 2 SEO categories! (e.g. Cake Pan)
 
-[Discovery] 🧠 [3/28] Brainstorming: Wesco -> Romeo
-   [Discovery] ✨ Generated 2 SEO categories! (e.g. Work Boots)
+[Discovery] 🧠 [3/18] Brainstorming: Bialetti -> Moka Pot
+   [Discovery] ✨ Generated 3 SEO categories! (e.g. Stovetop Coffee Maker)
 
-[Discovery] 🧠 [4/28] Brainstorming: Rancourt -> Loafers
-   [Discovery] ✨ Generated 3 SEO categories! (e.g. Mens Loafers)
+[Discovery] 🧠 [4/18] Brainstorming: Le Creuset -> Dutch Oven
+   [Discovery] ✨ Generated 3 SEO categories! (e.g. Dutch oven)
 
-[Discovery] 🧠 [5/28] Brainstorming: Darn Tough -> Micro-Crew Lightweight Hikers
-   [Discovery] ✨ Generated 3 SEO categories! (e.g. Hiking Socks)
+[Discovery] 🧠 [5/18] Brainstorming: Emile Henry -> Bakeware
+   [Discovery] ✨ Generated 3 SEO categories! (e.g. Bakeware)
 
-[Discovery] 🧠 [6/28] Brainstorming: Galco -> Gun Belt
-   [Discovery] ✨ Generated 2 SEO categories! (e.g. Gun Belts)
+[Discovery] 🧠 [6/18] Brainstorming: Kinu -> Pharos
+   [Discovery] ✨ Generated 2 SEO categories! (e.g. Espresso Grinder)
 
-[Discovery] 🧠 [7/28] Brainstorming: Duluth Trading -> Lifetime Belts
-   [Discovery] ✨ Generated 2 SEO categories! (e.g. Work Belts)
+[Discovery] 🧠 [7/18] Brainstorming: 1Zpresso -> Lido
+   [Discovery] ✨ Generated 2 SEO categories! (e.g. Coffee Grinder)
 
-[Discovery] 🧠 [8/28] Brainstorming: Icebreaker -> Merino Tees
-   [Discovery] ✨ Generated 2 SEO categories! (e.g. Merino T-shirts)
+[Discovery] 🧠 [8/18] Brainstorming: American Optical -> Aviators
+   [Discovery] ✨ Generated 2 SEO categories! (e.g. Aviator Sunglasses)
 
-[Discovery] 🧠 [9/28] Brainstorming: Charles Tyrwhitt -> Jersey Lounge Trousers
-   [Discovery] ✨ Generated 2 SEO categories! (e.g. Lounge Pants)
+[Discovery] 🧠 [9/18] Brainstorming: Fat Daddio -> ProSeries
+   [Discovery] ✨ Generated 3 SEO categories! (e.g. Cake Pan)
 
-[Discovery] 🧠 [10/28] Brainstorming: Subaru -> Forester
-   [Discovery] ✨ Generated 3 SEO categories! (e.g. Compact SUV)
+[Discovery] 🧠 [10/18] Brainstorming: OXO -> Borosilicate Bakeware
+   [Discovery] ✨ Generated 2 SEO categories! (e.g. Baking Dishes)
 
-[Discovery] 🧠 [11/28] Brainstorming: Orion -> Thirteen50
-   [Discovery] ✨ Generated 2 SEO categories! (e.g. Leather Belts)
+[Discovery] 🧠 [11/18] Brainstorming: Le Creuset -> Ceramic Cookware
+   [Discovery] ✨ Generated 2 SEO categories! (e.g. Ceramic Cookware)
 
-[Discovery] 🧠 [12/28] Brainstorming: John Deere -> X000 Ten series
-   [Discovery] ✨ Generated 2 SEO categories! (e.g. Compact Tractors)
+[Discovery] 🧠 [12/18] Brainstorming: OXO -> Good Grips
+   [Discovery] ✨ Generated 3 SEO categories! (e.g. Glass Baking Dish)
 
-[Discovery] 🧠 [13/28] Brainstorming: Duluth -> Belt
-   [Discovery] ✨ Generated 2 SEO categories! (e.g. Work Belts)
+[Discovery] 🧠 [13/18] Brainstorming: Le Creuset -> Bakeware
+   [Discovery] ✨ Generated 3 SEO categories! (e.g. Stoneware Bakeware)
 
-[Discovery] 🧠 [14/28] Brainstorming: Subaru -> Outback
-   [Discovery] ✨ Generated 3 SEO categories! (e.g. Crossover SUVs)
+[Discovery] 🧠 [14/18] Brainstorming: Le Creuset -> Enameled Cast Iron
+   [Discovery] ✨ Generated 3 SEO categories! (e.g. Cast Iron Cookware)
 
-[Discovery] 🧠 [15/28] Brainstorming: Adidas -> Stan Smith
-   [Discovery] ✨ Generated 2 SEO categories! (e.g. Leather Sneakers)
+[Discovery] 🧠 [15/18] Brainstorming: Devium USA -> Toiler Chino
+   [Discovery] ✨ Generated 3 SEO categories! (e.g. Chino Pants)
 
-[Discovery] 🧠 [16/28] Brainstorming: Salvatore Ferragamo -> Penny Loafers & Driving Moccasins
-   [Discovery] ✨ Generated 3 SEO categories! (e.g. Penny Loafers)
+[Discovery] 🧠 [16/18] Brainstorming: Emile Henry -> Pie Dish
+   [Discovery] ✨ Generated 2 SEO categories! (e.g. Pie Plates)
 
-[Discovery] 🧠 [17/28] Brainstorming: Narragansett Leathers -> Leather Belt
-   [Discovery] ✨ Generated 2 SEO categories! (e.g. Leather Belts)
+[Discovery] 🧠 [17/18] Brainstorming: M&S -> Flex Stretch Jeans
+   [Discovery] ✨ Generated 3 SEO categories! (e.g. Stretch Jeans)
 
-[Discovery] 🧠 [18/28] Brainstorming: Thirteen50 -> Orion Belt
-   [Discovery] ✨ Generated 2 SEO categories! (e.g. Leather Belts)
-
-[Discovery] 🧠 [19/28] Brainstorming: Duluth -> Pants
-   [Discovery] ✨ Generated 3 SEO categories! (e.g. Work Pants)
-
-[Discovery] 🧠 [20/28] Brainstorming: Kore Essentials -> Reinforced Gun Belt
-   [Discovery] ✨ Generated 2 SEO categories! (e.g. Gun Belts)
-
-[Discovery] 🧠 [21/28] Brainstorming: 3M -> Trizact Hook & Loop Disc
-   [Discovery] ✨ Generated 3 SEO categories! (e.g. Polishing Discs)
-
-[Discovery] 🧠 [22/28] Brainstorming: The Wilderness -> Tactical Belt
-   [Discovery] ✨ Generated 2 SEO categories! (e.g. Tactical Belt)
-
-[Discovery] 🧠 [23/28] Brainstorming: Mingda -> Magician X2
-   [Discovery] ✨ Generated 2 SEO categories! (e.g. 3D Printers)
-
-[Discovery] 🧠 [24/28] Brainstorming: Henrysshoerepair.com -> Moose Hide Belt
-   [Discovery] ✨ Generated 3 SEO categories! (e.g. Leather Belts)
-
-[Discovery] 🧠 [25/28] Brainstorming: Fruit Loom -> Original T-Shirt
-   [Discovery] ✨ Generated 2 SEO categories! (e.g. T-shirts)
-
-[Discovery] 🧠 [26/28] Brainstorming: G.H. Bass -> Weejuns
-   [Discovery] ✨ Generated 2 SEO categories! (e.g. Penny Loafers)
-
-[Discovery] 🧠 [27/28] Brainstorming: Toyota -> Pickup
-   [Discovery] ✨ Generated 3 SEO categories! (e.g. Compact Trucks)
-
-[Discovery] 🧠 [28/28] Brainstorming: Henry's -> Moose Hide Mittens
-   [Discovery] ✨ Generated 3 SEO categories! (e.g. Winter Mittens)
+[Discovery] 🧠 [18/18] Brainstorming: Tatung -> Steam Rice Cooker
+   [Discovery] ✨ Generated 2 SEO categories! (e.g. Rice Cookers)
 
 > @mono/admin@0.1.0 taxonomy:consolidate
 > dotenv -e ../../.env -- tsx scripts/consolidate-categories.ts
 
-◇ injected env (0) from ../../.env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+◇ injected env (0) from ../../.env // tip: ◈ secrets for agents [www.dotenvx.com]
 [Consolidation] 🧹 Sweeping for unprocessed Silver Category Ideas...
-[Consolidation] 📦 Consolidating a batch of 57 raw ideas...
+[Consolidation] 📦 Consolidating a batch of 39 raw ideas...
 [ONNX] Booting local embedding engine: mixedbread-ai/mxbai-embed-large-v1...
 [ONNX] Engine online and loaded into memory!
-   [Consolidation] ✨ Grouped [Mens Belts] -> Men's Belts
-   [Consolidation] ✨ Grouped [Tactical Belts, Tactical Belt] -> Tactical Belts
-   [Consolidation] ✨ Grouped [Ratchet Belts] -> Ratchet Belts
-   [Consolidation] ✨ Grouped [video game unlocks] -> Video Game Unlocks
-   [Consolidation] ✨ Grouped [gaming cards, game content cards] -> Gaming Cards
-   [Consolidation] ✨ Grouped [Work Boots] -> Work Boots
-   [Consolidation] ✨ Grouped [Custom Boots] -> Custom Boots
-   [Consolidation] ✨ Grouped [Mens Loafers, Men's Loafers, Classic Loafers, Penny Loafers, Driving Moccasins] -> Men's Loafers
-   [Consolidation] ✨ Grouped [Leather Loafers, Dress Loafers] -> Leather Loafers
-   [Consolidation] ✨ Grouped [Hiking Socks] -> Hiking Socks
-   [Consolidation] ✨ Grouped [Lightweight Socks] -> Lightweight Socks
-   [Consolidation] ✨ Grouped [Performance Socks] -> Performance Socks
-   [Consolidation] ✨ Grouped [Gun Belts, Concealed Carry Belts] -> Concealed Carry Belts
-   [Consolidation] ✨ Grouped [Work Belts, Utility Belt] -> Work Belts
-   [Consolidation] ✨ Grouped [Performance T-shirts, T-shirts, Basic T-shirts, Merino T-shirts] -> Performance T-Shirts
-   [Consolidation] ✨ Grouped [Lounge Pants, Comfortable Trousers, Work Pants, Outdoor Pants, Men's Pants] -> Comfortable Pants
-   [Consolidation] ✨ Grouped [Compact SUV, Crossover SUV, Crossover SUVs] -> Compact SUV
-   [Consolidation] ✨ Grouped [Family Car] -> Family Car
-   [Consolidation] ✨ Grouped [Leather Belts] -> Leather Belts
-   [Consolidation] ✨ Grouped [Casual Belts, Jean Belts, Men's Casual Belts] -> Casual Belts
-   [Consolidation] ✨ Grouped [Compact Tractors] -> Compact Tractors
-   [Consolidation] ✨ Grouped [Utility Tractors] -> Utility Tractors
-   [Consolidation] ✨ Grouped [All Wheel Drive] -> All Wheel Drive Vehicles
-   [Consolidation] ✨ Grouped [Station Wagons] -> Station Wagons
-   [Consolidation] ✨ Grouped [Leather Sneakers] -> Leather Sneakers
-   [Consolidation] ✨ Grouped [Classic Sneakers] -> Classic Sneakers
-   [Consolidation] ✨ Grouped [Polishing Discs, Abrasive Discs] -> Polishing Discs
-   [Consolidation] ✨ Grouped [Detail Finishing] -> Detail Finishing
-   [Consolidation] ✨ Grouped [Compact Trucks] -> Compact Trucks
-   [Consolidation] ✨ Grouped [Work Trucks] -> Work Trucks
-   [Consolidation] ✨ Grouped [Classic Trucks] -> Classic Trucks
-   [Consolidation] ✨ Grouped [Winter Mittens, Cold Weather Mittens, Outdoor Mittens] -> Winter Mittens
-   [Consolidation] ✨ Grouped [3D Printers, Desktop 3D Printers] -> 3D Printers
+   [Consolidation] ✨ Grouped [Handheld gaming, Retro video games, Portable games console] -> Portable Games Console
+   [Consolidation] ✨ Grouped [Cake Pan, Commercial Cake Pan, Rectangular Cake Pan, Straight Sided Pan] -> Cake Pan
+   [Consolidation] ✨ Grouped [Stovetop Coffee Maker, Moka Coffee Pot] -> Stovetop Coffee Maker
+   [Consolidation] ✨ Grouped [Espresso Maker] -> Espresso Maker
+   [Consolidation] ✨ Grouped [Dutch oven, Dutch Ovens] -> Dutch Oven
+   [Consolidation] ✨ Grouped [Cast iron pot, Cast Iron Cookware] -> Cast Iron Cookware
+   [Consolidation] ✨ Grouped [Enameled pot, Enameled Cookware] -> Enameled Cookware
+   [Consolidation] ✨ Grouped [Bakeware, Ceramic Bakeware, Glass Bakeware, Baking Dishes, Glass Baking Dish, Casserole Dish, Stoneware Bakeware, Pie Plates] -> Bakeware
+   [Consolidation] ✨ Grouped [Ceramic Cookware] -> Ceramic Cookware
+   [Consolidation] ✨ Grouped [Espresso Grinder, Burr Grinder, Coffee Grinder, Manual Coffee Grinder] -> Coffee Grinder
+   [Consolidation] ✨ Grouped [Aviator Sunglasses, Classic Sunglasses] -> Fashion Sunglasses
+   [Consolidation] ✨ Grouped [Chino Pants, Casual Pants, Everyday Trousers] -> Casual Pants
+   [Consolidation] ✨ Grouped [Stretch Jeans, Skinny Jeans, Denim Pants] -> Denim Jeans
+   [Consolidation] ✨ Grouped [Rice Cookers] -> Rice Cooker
+   [Consolidation] ✨ Grouped [Steam Cookers] -> Steam Cooker
 
 > @mono/admin@0.1.0 taxonomy:route
 > dotenv -e ../../.env -- tsx scripts/route-taxonomy.ts
 
-◇ injected env (0) from ../../.env // tip: ◈ encrypted .env [www.dotenvx.com]
+◇ injected env (0) from ../../.env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
 [Routing] 🔀 Sweeping for unrouted Gold Product Lines...
-[Routing] 📦 Matrix routing 28 lines...
+[Routing] 📦 Matrix routing 18 lines...
 
-[Routing] 🚦 [1/28] Routing: Grip6 Belt
-   [Routing] 🎯 Routed to Department: 'Apparel & Accessories' and 3 Categories.
-
-[Routing] 🚦 [2/28] Routing: Mingda Magician X2
+[Routing] 🚦 [1/18] Routing: Nintendo Game Boy
    [Routing] 🎯 Routed to Department: 'Electronics & Computers' and 1 Categories.
 
-[Routing] 🚦 [3/28] Routing: Nintendo amiibo cards
-   [Routing] 🎯 Routed to Department: 'Electronics & Computers' and 2 Categories.
+[Routing] 🚦 [2/18] Routing: Bialetti Moka Pot
+   [Routing] 🎯 Routed to Department: 'Kitchen & Dining' and 2 Categories.
 
-[Routing] 🚦 [4/28] Routing: Duluth Pants
+[Routing] 🚦 [3/18] Routing: Kinu Pharos
+   [Routing] 🎯 Routed to Department: 'Kitchen & Dining' and 2 Categories.
+
+[Routing] 🚦 [4/18] Routing: 1Zpresso Lido
+   [Routing] 🎯 Routed to Department: 'Kitchen & Dining' and 1 Categories.
+
+[Routing] 🚦 [5/18] Routing: American Optical Aviators
    [Routing] 🎯 Routed to Department: 'Apparel & Accessories' and 1 Categories.
 
-[Routing] 🚦 [5/28] Routing: Narragansett Leathers Leather Belt
-   [Routing] 🎯 Routed to Department: 'Apparel & Accessories' and 3 Categories.
+[Routing] 🚦 [6/18] Routing: Le Creuset Dutch Oven
+   [Routing] 🎯 Routed to Department: 'Kitchen & Dining' and 4 Categories.
 
-[Routing] 🚦 [6/28] Routing: Icebreaker Merino Tees
-   [Routing] 🎯 Routed to Department: 'Apparel & Accessories' and 1 Categories.
+[Routing] 🚦 [7/18] Routing: Emile Henry Bakeware
+   [Routing] 🎯 Routed to Department: 'Kitchen & Dining' and 2 Categories.
 
-[Routing] 🚦 [7/28] Routing: Fruit Loom Original T-Shirt
-   [Routing] 🎯 Routed to Department: 'Apparel & Accessories' and 1 Categories.
+[Routing] 🚦 [8/18] Routing: Le Creuset Bakeware
+   [Routing] 🎯 Routed to Department: 'Kitchen & Dining' and 2 Categories.
 
-[Routing] 🚦 [8/28] Routing: Wesco Romeo
-   [Routing] 🎯 Routed to Department: 'Footwear' and 2 Categories.
+[Routing] 🚦 [9/18] Routing: Commercial Cake Pan
+   [Routing] 🎯 Routed to Department: 'Kitchen & Dining' and 2 Categories.
 
-[Routing] 🚦 [9/28] Routing: G.H. Bass Weejuns
-   [Routing] 🎯 Routed to Department: 'Footwear' and 2 Categories.
+[Routing] 🚦 [10/18] Routing: Fat Daddio ProSeries
+   [Routing] 🎯 Routed to Department: 'Kitchen & Dining' and 2 Categories.
 
-[Routing] 🚦 [10/28] Routing: Rancourt Loafers
-   [Routing] 🎯 Routed to Department: 'Footwear' and 2 Categories.
+[Routing] 🚦 [11/18] Routing: OXO Good Grips
+   [Routing] 🎯 Routed to Department: 'Kitchen & Dining' and 1 Categories.
 
-[Routing] 🚦 [11/28] Routing: Darn Tough Micro-Crew Lightweight Hikers
-   [Routing] 🎯 Routed to Department: 'Apparel & Accessories' and 3 Categories.
+[Routing] 🚦 [12/18] Routing: OXO Borosilicate Bakeware
+   [Routing] 🎯 Routed to Department: 'Kitchen & Dining' and 1 Categories.
 
-[Routing] 🚦 [12/28] Routing: John Deere X000 Ten series
-   [Routing] 🎯 Routed to Department: 'Lawn & Garden' and 2 Categories.
+[Routing] 🚦 [13/18] Routing: Le Creuset Ceramic Cookware
+   [Routing] 🎯 Routed to Department: 'Kitchen & Dining' and 2 Categories.
 
-[Routing] 🚦 [13/28] Routing: Salvatore Ferragamo Penny Loafers & Driving Moccasins
-   [Routing] 🎯 Routed to Department: 'Footwear' and 2 Categories.
+[Routing] 🚦 [14/18] Routing: Le Creuset Enameled Cast Iron
+   [Routing] 🎯 Routed to Department: 'Kitchen & Dining' and 3 Categories.
 
-[Routing] 🚦 [14/28] Routing: Toyota Pickup
-   [Routing] 🎯 Routed to Department: 'Automotive & Garage' and 3 Categories.
+[Routing] 🚦 [15/18] Routing: Emile Henry Pie Dish
+   [Routing] 🎯 Routed to Department: 'Kitchen & Dining' and 3 Categories.
 
-[Routing] 🚦 [15/28] Routing: Subaru Forester
-   [Routing] 🎯 Routed to Department: 'Automotive & Garage' and 3 Categories.
-
-[Routing] 🚦 [16/28] Routing: Henry's Moose Hide Mittens
-   [Routing] 🎯 Routed to Department: 'Apparel & Accessories' and 1 Categories.
-
-[Routing] 🚦 [17/28] Routing: The Wilderness Tactical Belt
-   [Routing] 🎯 Routed to Department: 'Apparel & Accessories' and 4 Categories.
-
-[Routing] 🚦 [18/28] Routing: Duluth Trading Lifetime Belts
-   [Routing] 🎯 Routed to Department: 'Apparel & Accessories' and 3 Categories.
-
-[Routing] 🚦 [19/28] Routing: Galco Gun Belt
+[Routing] 🚦 [16/18] Routing: Devium USA Toiler Chino
    [Routing] 🎯 Routed to Department: 'Apparel & Accessories' and 2 Categories.
 
-[Routing] 🚦 [20/28] Routing: Henrysshoerepair.com Moose Hide Belt
+[Routing] 🚦 [17/18] Routing: Tatung Steam Rice Cooker
+   [Routing] 🎯 Routed to Department: 'Appliances' and 2 Categories.
+
+[Routing] 🚦 [18/18] Routing: M&S Flex Stretch Jeans
    [Routing] 🎯 Routed to Department: 'Apparel & Accessories' and 3 Categories.
-
-[Routing] 🚦 [21/28] Routing: Orion Thirteen50
-   [Routing] 🎯 Routed to Department: 'Apparel & Accessories' and 3 Categories.
-
-[Routing] 🚦 [22/28] Routing: Thirteen50 Orion Belt
-   [Routing] 🎯 Routed to Department: 'Apparel & Accessories' and 3 Categories.
-
-[Routing] 🚦 [23/28] Routing: Duluth Belt
-   [Routing] 🎯 Routed to Department: 'Apparel & Accessories' and 3 Categories.
-
-[Routing] 🚦 [24/28] Routing: 3M Trizact Hook & Loop Disc
-   [Routing] 🎯 Routed to Department: 'Automotive & Garage' and 2 Categories.
-
-[Routing] 🚦 [25/28] Routing: Charles Tyrwhitt Jersey Lounge Trousers
-   [Routing] 🎯 Routed to Department: 'Apparel & Accessories' and 1 Categories.
-
-[Routing] 🚦 [26/28] Routing: Subaru Outback
-   [Routing] 🎯 Routed to Department: 'Automotive & Garage' and 4 Categories.
-
-[Routing] 🚦 [27/28] Routing: Kore Essentials Reinforced Gun Belt
-   [Routing] 🎯 Routed to Department: 'Apparel & Accessories' and 4 Categories.
-
-[Routing] 🚦 [28/28] Routing: Adidas Stan Smith
-   [Routing] 🎯 Routed to Department: 'Footwear' and 2 Categories.
 
 ✅ End-to-End Pipeline Complete!
 Check out your shiny new taxonomy by exporting it via the dashboard.

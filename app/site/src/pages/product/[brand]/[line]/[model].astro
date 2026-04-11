@@ -2,6 +2,8 @@
 import { prisma as db } from "@mono/db";
 import { slugify } from "../../../../utils/slugify";
 
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+
 export async function getStaticPaths() {
   const models = await db.goldProduct.findMany({
     include: {
@@ -52,70 +54,79 @@ export async function getStaticPaths() {
 const { model, siblingModels, avgPrice, avgDuration, caveats, quotes, lineDisplay, lineSlug } = Astro.props;
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>{model.goldBrand.canonicalName} {model.canonicalName} Review - BIFL</title>
-  </head>
-  <body>
-    <nav>
-      <a href="/">Home</a> &gt; 
-      <a href={`/brands/${slugify(model.goldBrand.canonicalName)}`}>{model.goldBrand.canonicalName}</a> &gt; 
-      {model.goldProductLine ? (
-         <a href={`/product/${slugify(model.goldBrand.canonicalName)}/${lineSlug}`}>{lineDisplay}</a>
-      ) : (
-         lineDisplay
-      )} &gt; 
-      {model.canonicalName}
-    </nav>
-    
-    <header>
-      <h1>{model.goldBrand.canonicalName} {model.canonicalName}</h1>
-      <p><strong>BIFL Score:</strong> {model.avgSentiment > 0 ? "Positive" : "Pending"} ({model.mentionCount} Mentions)</p>
-      <!-- Tier 1 Affiliate Placeholder -->
-      <a href={`https://amazon.com/s?k=${encodeURIComponent(model.goldBrand.canonicalName + ' ' + model.canonicalName)}&tag=biflscore-20`} target="_blank" rel="nofollow noopener">Check Price on Amazon</a>
-    </header>
+<BaseLayout title={`${model.goldBrand.canonicalName} ${model.canonicalName} Review`}>
+  <nav class="breadcrumbs">
+    <a href="/">Home</a> &gt; 
+    <a href={`/brands/${slugify(model.goldBrand.canonicalName)}`}>{model.goldBrand.canonicalName}</a> &gt; 
+    {model.goldProductLine ? (
+       <a href={`/product/${slugify(model.goldBrand.canonicalName)}/${lineSlug}`}>{lineDisplay}</a>
+    ) : (
+       lineDisplay
+    )} &gt; 
+    {model.canonicalName}
+  </nav>
+  
+  <header style="margin-bottom: 2rem;">
+    <h1>{model.goldBrand.canonicalName} {model.canonicalName}</h1>
+    <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem;">
+      <span class="score-badge">BIFL Score: {model.avgSentiment > 0 ? "Positive" : "Pending"}</span>
+      <span style="color: var(--bifl-body-text);">{model.mentionCount} Verified Mentions</span>
+    </div>
+    <!-- Tier 1 Affiliate Placeholder -->
+    <a href={`https://amazon.com/s?k=${encodeURIComponent(model.goldBrand.canonicalName + ' ' + model.canonicalName)}&tag=biflscore-20`} class="cta-button" target="_blank" rel="nofollow noopener">Check Price on Amazon</a>
+  </header>
 
-    <section>
-      <h2>Verified Community Experience</h2>
-      <ul>
-        <li><strong>Average Price Paid:</strong> {avgPrice ? `$${avgPrice}` : 'Unknown'}</li>
-        <li><strong>Average Ownership:</strong> {avgDuration ? `${avgDuration} Years` : 'Unknown'}</li>
-      </ul>
+  <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+    <section style="flex: 2; min-width: 300px;">
+      <h2>Community Extraction</h2>
+      
+      <div class="data-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 1rem;">
+        <div class="bifl-card">
+          <h4 style="margin-top: 0; margin-bottom: 0.5rem; color: #888; font-size: 0.875rem;">Average Price Paid</h4>
+          <span style="font-size: 2rem; font-weight: 700; color: var(--bifl-charcoal);">{avgPrice ? `$${avgPrice}` : 'Unknown'}</span>
+        </div>
+        <div class="bifl-card">
+          <h4 style="margin-top: 0; margin-bottom: 0.5rem; color: #888; font-size: 0.875rem;">Average Ownership</h4>
+          <span style="font-size: 2rem; font-weight: 700; color: var(--bifl-charcoal);">{avgDuration ? `${avgDuration} Years` : 'Unknown'}</span>
+        </div>
+      </div>
       
       {quotes.length > 0 && (
         <article>
           <h3>What Users Say</h3>
-          <ul>
-            {quotes.map((q: string) => <li>"{q}"</li>)}
-          </ul>
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            {quotes.map((q: string) => <div class="bifl-card" style="font-style: italic;">"{q}"</div>)}
+          </div>
         </article>
       )}
 
       {caveats.length > 0 && (
-        <article>
-          <h3>Common Flaws &amp; Caveats</h3>
-          <ul>
-            {caveats.map((c: string) => <li>{c}</li>)}
-          </ul>
+        <article style="margin-top: 2rem;">
+          <h3 style="color: var(--bifl-accent-rust);">Common Flaws &amp; Caveats</h3>
+          <div class="bifl-card" style="border-left: 4px solid var(--bifl-accent-rust);">
+            <ul style="margin: 0; padding-left: 1rem;">
+              {caveats.map((c: string) => <li>{c}</li>)}
+            </ul>
+          </div>
         </article>
       )}
     </section>
     
     {siblingModels.length > 0 && (
-      <section>
-        <hr/>
-        <h2>Other Models in the {model.goldProductLine!.canonicalName} Line</h2>
-        <ul>
-          {siblingModels.map((sibling: any) => (
-             <li>
-               <a href={`/product/${slugify(model.goldBrand.canonicalName)}/${slugify(model.goldProductLine!.canonicalName)}/${slugify(sibling.canonicalName)}`}>
-                 {sibling.canonicalName}
-               </a>
-             </li>
-          ))}
-        </ul>
-      </section>
+      <aside style="flex: 1; min-width: 250px;">
+        <div class="bifl-card">
+          <h3 style="margin-top: 0;">Other Models in this Line</h3>
+          <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.75rem;">
+            {siblingModels.map((sibling: any) => (
+               <li style="border-bottom: 1px solid var(--bifl-border-color); padding-bottom: 0.75rem;">
+                 <a href={`/product/${slugify(model.goldBrand.canonicalName)}/${slugify(model.goldProductLine!.canonicalName)}/${slugify(sibling.canonicalName)}`}>
+                   {sibling.canonicalName}
+                 </a>
+               </li>
+            ))}
+          </ul>
+        </div>
+      </aside>
     )}
-  </body>
-</html>
+  </div>
+</BaseLayout>

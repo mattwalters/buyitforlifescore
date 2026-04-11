@@ -2,6 +2,8 @@
 import { prisma as db } from "@mono/db";
 import { slugify } from "../../../utils/slugify";
 
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
 export async function getStaticPaths() {
   const productLines = await db.goldProductLine.findMany({
     include: {
@@ -43,43 +45,44 @@ export async function getStaticPaths() {
 const { line, avgPrice, avgDuration, caveats, quotes } = Astro.props;
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>{line.goldBrand.canonicalName} {line.canonicalName} Reviews & Versions - BIFL</title>
-  </head>
-  <body>
-    <nav>
-      <a href="/">Home</a> &gt; 
-      <a href={`/brands/${slugify(line.goldBrand.canonicalName)}`}>{line.goldBrand.canonicalName}</a> &gt; 
-      {line.canonicalName}
-    </nav>
-    
-    <header>
-      <h1>{line.goldBrand.canonicalName} {line.canonicalName}</h1>
-      <p><strong>Generic Series BIFL Score:</strong> {line.avgSentiment > 0 ? "Positive" : "Pending"} ({line.mentionCount} Mentions)</p>
-    </header>
+<BaseLayout title={`${line.goldBrand.canonicalName} ${line.canonicalName} Reviews & Versions`}>
+  <nav class="breadcrumbs">
+    <a href="/">Home</a> &gt; 
+    <a href={`/brands/${slugify(line.goldBrand.canonicalName)}`}>{line.goldBrand.canonicalName}</a> &gt; 
+    {line.canonicalName}
+  </nav>
+  
+  <header>
+    <h1>{line.goldBrand.canonicalName} {line.canonicalName}</h1>
+    <p>
+      <span class="score-badge">Generic Series BIFL Score: {line.avgSentiment > 0 ? "Positive" : "Pending"}</span> 
+      <span style="margin-left: 1rem; color: var(--bifl-body-text);">{line.mentionCount} Total Mentions</span>
+    </p>
+  </header>
 
-    <section>
-      <h2>Verified Community Experience (Generic)</h2>
-      <ul>
-        <li><strong>Average Price Paid:</strong> {avgPrice ? `$${avgPrice}` : 'Unknown'}</li>
-        <li><strong>Average Ownership:</strong> {avgDuration ? `${avgDuration} Years` : 'Unknown'}</li>
-      </ul>
+  <div style="display: flex; gap: 2rem; flex-wrap: wrap; margin-top: 2rem;">
+    <section style="flex: 1; min-width: 300px;">
+      <h2>Verified Community Experience</h2>
+      <div class="bifl-card">
+        <ul style="list-style: none; padding: 0; margin: 0;">
+          <li style="margin-bottom: 0.5rem;"><strong>Average Price Paid:</strong> {avgPrice ? `$${avgPrice}` : 'Unknown'}</li>
+          <li><strong>Average Ownership:</strong> {avgDuration ? `${avgDuration} Years` : 'Unknown'}</li>
+        </ul>
+      </div>
       
       {quotes.length > 0 && (
-        <article>
+        <article style="margin-top: 2rem;">
           <h3>What Users Say</h3>
-          <ul>
-            {quotes.map((q: string) => <li>"{q}"</li>)}
-          </ul>
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            {quotes.map((q: string) => <div class="bifl-card" style="font-style: italic;">"{q}"</div>)}
+          </div>
         </article>
       )}
 
       {caveats.length > 0 && (
-        <article>
-          <h3>Common Flaws &amp; Caveats</h3>
-          <ul>
+        <article style="margin-top: 2rem;">
+          <h3 style="color: var(--bifl-accent-rust);">Common Flaws &amp; Caveats</h3>
+          <ul style="list-style: square;">
             {caveats.map((c: string) => <li>{c}</li>)}
           </ul>
         </article>
@@ -87,26 +90,25 @@ const { line, avgPrice, avgDuration, caveats, quotes } = Astro.props;
     </section>
 
     {line.products.length > 0 && (
-      <section>
-        <hr/>
+      <section style="flex: 2; min-width: 300px;">
         <h2>Specific Model Directory</h2>
-        <table border="1" cellpadding="8">
+        <table>
           <thead>
             <tr>
               <th>Model</th>
-              <th>BIFL Mentions</th>
-              <th>Durability Sentiment</th>
+              <th>Mentions</th>
+              <th>Durability Score</th>
               <th>Action</th>
             </tr>
           </thead>
           <tbody>
             {line.products.map((product: any) => (
               <tr>
-                <td>{product.canonicalName}</td>
+                <td style="font-weight: 500;">{product.canonicalName}</td>
                 <td>{product.mentionCount}</td>
                 <td>{product.avgSentiment > 0 ? "High" : "Average"}</td>
                 <td>
-                  <a href={`/product/${slugify(line.goldBrand.canonicalName)}/${slugify(line.canonicalName)}/${slugify(product.canonicalName)}`}>
+                  <a href={`/product/${slugify(line.goldBrand.canonicalName)}/${slugify(line.canonicalName)}/${slugify(product.canonicalName)}`} class="button" style="padding: 0.4rem 0.8rem; font-size: 0.875rem;">
                     Read Reviews
                   </a>
                 </td>
@@ -116,5 +118,5 @@ const { line, avgPrice, avgDuration, caveats, quotes } = Astro.props;
         </table>
       </section>
     )}
-  </body>
-</html>
+  </div>
+</BaseLayout>

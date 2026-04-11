@@ -2,6 +2,8 @@
 import { prisma as db } from "@mono/db";
 import { slugify } from "../../utils/slugify";
 
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
 export async function getStaticPaths() {
   const departments = await db.goldDepartment.findMany({
     include: { 
@@ -23,24 +25,25 @@ export async function getStaticPaths() {
 const { department } = Astro.props;
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>{department.canonicalName} - BIFL</title>
-  </head>
-  <body>
-    <nav><a href="/">Home</a> &gt; {department.canonicalName}</nav>
+<BaseLayout title={`${department.canonicalName}`}>
+  <nav class="breadcrumbs">
+    <a href="/">Home</a> &gt; {department.canonicalName}
+  </nav>
+
+  <header>
     <h1>Department: {department.canonicalName}</h1>
-    
+    <p>A master index of BIFL product lines managed within this department.</p>
+  </header>
+  
+  <section>
     <h2>Top Associated Product Lines</h2>
-    <ul>
+    <div class="data-grid">
       {department.productLines.map((line: any) => (
-        <li>
-          <a href={`/product/${slugify(line.goldBrand.canonicalName)}/${slugify(line.canonicalName)}`}>
-            {line.goldBrand.canonicalName} {line.canonicalName} ({line.mentionCount} Mentions)
-          </a>
-        </li>
+        <a href={`/product/${slugify(line.goldBrand.canonicalName)}/${slugify(line.canonicalName)}`} class="bifl-card" style="text-decoration: none;">
+          <h3 style="margin-top: 0; color: var(--bifl-charcoal);">{line.goldBrand.canonicalName} {line.canonicalName}</h3>
+          <span class="score-badge">{line.mentionCount} Mentions</span>
+        </a>
       ))}
-    </ul>
-  </body>
-</html>
+    </div>
+  </section>
+</BaseLayout>

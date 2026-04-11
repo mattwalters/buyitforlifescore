@@ -2,6 +2,8 @@
 import { prisma as db } from "@mono/db";
 import { slugify } from "../../utils/slugify";
 
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
 export async function getStaticPaths() {
   const categories = await db.goldCategory.findMany({
     include: {
@@ -28,32 +30,36 @@ export async function getStaticPaths() {
 const { category, relatedCategories } = Astro.props;
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>{category.canonicalName} - BIFL</title>
-  </head>
-  <body>
-    <nav><a href="/">Home</a> &gt; Category &gt; {category.canonicalName}</nav>
-    <h1>Category: {category.canonicalName}</h1>
-    
-    <h2>Top Ranked Product Lines</h2>
-    <ul>
-      {category.productLines.map((line: any) => (
-        <li>
-          <a href={`/product/${slugify(line.goldBrand.canonicalName)}/${slugify(line.canonicalName)}`}>
-            {line.goldBrand.canonicalName} {line.canonicalName} ({line.mentionCount} Mentions)
-          </a>
-        </li>
-      ))}
-    </ul>
+<BaseLayout title={`Best ${category.canonicalName}`}>
+  <nav class="breadcrumbs">
+    <a href="/">Home</a> &gt; Category &gt; {category.canonicalName}
+  </nav>
 
-    <hr/>
-    <h2>Related Categories</h2>
-    <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
-      {relatedCategories.map((rc: any) => (
-        <a href={`/category/${slugify(rc.canonicalName)}`}>{rc.canonicalName}</a>
+  <header>
+    <h1>The Best {category.canonicalName}</h1>
+    <p>Ranked models engineered for extreme durability and lifespan.</p>
+  </header>
+  
+  <section>
+    <h2>Top Ranked Ecosystems</h2>
+    <div class="data-grid">
+      {category.productLines.map((line: any) => (
+        <a href={`/product/${slugify(line.goldBrand.canonicalName)}/${slugify(line.canonicalName)}`} class="bifl-card" style="text-decoration: none;">
+          <h3 style="margin-top: 0; color: var(--bifl-charcoal);">{line.goldBrand.canonicalName} {line.canonicalName}</h3>
+          <span class="score-badge">{line.mentionCount} Mentions</span>
+        </a>
       ))}
     </div>
-  </body>
-</html>
+  </section>
+
+  {relatedCategories.length > 0 && (
+    <aside style="margin-top: 4rem;">
+      <h3>Related Categories</h3>
+      <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        {relatedCategories.map((rc: any) => (
+          <a href={`/category/${slugify(rc.canonicalName)}`} class="button" style="background-color: var(--bifl-charcoal);">{rc.canonicalName}</a>
+        ))}
+      </div>
+    </aside>
+  )}
+</BaseLayout>

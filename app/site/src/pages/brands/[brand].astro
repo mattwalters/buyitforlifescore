@@ -2,6 +2,8 @@
 import { prisma as db } from "@mono/db";
 import { slugify } from "../../utils/slugify";
 
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
 export async function getStaticPaths() {
   const brands = await db.goldBrand.findMany({
     include: {
@@ -24,43 +26,42 @@ export async function getStaticPaths() {
 const { brand } = Astro.props;
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>{brand.canonicalName} Gear - BIFL</title>
-  </head>
-  <body>
-    <nav><a href="/">Home</a> &gt; <a href="/brands">Brands</a> &gt; {brand.canonicalName}</nav>
-    <h1>{brand.canonicalName}</h1>
-    
-    {brand.productLines.length > 0 && (
-      <section>
-        <h2>Product Lines</h2>
-        <ul>
-          {brand.productLines.map((line: any) => (
-            <li>
-              <a href={`/product/${slugify(brand.canonicalName)}/${slugify(line.canonicalName)}`}>
-                {brand.canonicalName} {line.canonicalName}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </section>
-    )}
+<BaseLayout title={`${brand.canonicalName} BIFL Gear`}>
+  <nav class="breadcrumbs">
+    <a href="/">Home</a> &gt; <a href="/brands">Brands</a> &gt; {brand.canonicalName}
+  </nav>
 
-    {brand.products.length > 0 && (
-      <section>
-        <h2>Standalone Products</h2>
-        <ul>
-          {brand.products.map((product: any) => (
-            <li>
-              <a href={`/product/${slugify(brand.canonicalName)}/standalone/${slugify(product.canonicalName)}`}>
-                {brand.canonicalName} {product.canonicalName} ({product.mentionCount} Mentions)
-              </a>
-            </li>
-          ))}
-        </ul>
-      </section>
-    )}
-  </body>
-</html>
+  <header>
+    <h1>{brand.canonicalName}</h1>
+    <p>Comprehensive durability analysis for {brand.canonicalName} products based on real community longevity data.</p>
+  </header>
+  
+  {brand.productLines.length > 0 && (
+    <section>
+      <h2>Product Lines</h2>
+      <div class="data-grid">
+        {brand.productLines.map((line: any) => (
+          <a href={`/product/${slugify(brand.canonicalName)}/${slugify(line.canonicalName)}`} class="bifl-card" style="text-decoration: none;">
+            <h3 style="margin-top: 0; color: var(--bifl-charcoal);">{line.canonicalName}</h3>
+            <span style="color: var(--bifl-body-text);">{line.mentionCount} Mentions</span>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+
+  {brand.products.length > 0 && (
+    <section>
+      <h2>Standalone Products</h2>
+      <ul style="list-style: square;">
+        {brand.products.map((product: any) => (
+          <li>
+            <a href={`/product/${slugify(brand.canonicalName)}/standalone/${slugify(product.canonicalName)}`}>
+              {brand.canonicalName} {product.canonicalName} ({product.mentionCount} Mentions)
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+</BaseLayout>
