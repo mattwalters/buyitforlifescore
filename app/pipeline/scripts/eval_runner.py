@@ -156,8 +156,18 @@ async def run_evaluation(model_name: str, thinking_budget: str | None, csv_out: 
         with open(out_path, 'a', newline='') as csvfile:
             writer = csv.writer(csvfile)
             if not file_exists:
-                writer.writerow(["Model", "ThinkingBudget", "F1Score", "Precision", "Recall", "CostUSD", "LatencySeconds"])
-            writer.writerow([model_name, thinking_budget or 0, round(f1, 4), round(precision, 4), round(recall, 4), round(total_cost, 6), round(latency, 2)])
+                writer.writerow(["Model", "Thinking", "F1Score", "Precision", "Recall", "CostUSD", "LatencySeconds"])
+                
+            # Log the truthful default
+            if not thinking_budget:
+                if "gemini-3" in model_name:
+                    display_thinking = "high (api default)"
+                else:
+                    display_thinking = "0 (api default)"
+            else:
+                display_thinking = thinking_budget
+                
+            writer.writerow([model_name, display_thinking, round(f1, 4), round(precision, 4), round(recall, 4), round(total_cost, 6), round(latency, 2)])
         print(f"\nSaved eval metrics to {out_path}")
 
 if __name__ == "__main__":
