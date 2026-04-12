@@ -57,7 +57,7 @@ const lineGenerator = d3.line<{period: string, score: number}>()
       {/* Grid lines (Y-axis) */}
       {yTicks.map(tick => (
         <g class="tick" transform={`translate(0,${y(tick)})`}>
-          <line x2={innerWidth} stroke="#f1f5f9" stroke-dasharray="4" stroke-width="1" />
+          <line x2={innerWidth} stroke="#cbd5e1" stroke-dasharray="4 4" stroke-width="1" />
           <text 
             x="-10" 
             dy="0.32em" 
@@ -68,6 +68,19 @@ const lineGenerator = d3.line<{period: string, score: number}>()
             {tick}%
           </text>
         </g>
+      ))}
+
+      {/* Grid lines (X-axis vertical) */}
+      {periods.map(period => (
+        <line
+           x1={xBand(period)!}
+           y1={0}
+           x2={xBand(period)!}
+           y2={innerHeight}
+           stroke="#cbd5e1"
+           stroke-dasharray="4 4"
+           stroke-width="1"
+        />
       ))}
 
       {/* X-axis labels */}

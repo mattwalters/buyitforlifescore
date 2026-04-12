@@ -22,8 +22,6 @@ const category = await db.goldCategory.findUnique({
   where: { id: categoryId },
   include: {
     productLines: {
-      orderBy: { mentionCount: 'desc' },
-      take: 5, // Strict Top 5
       include: {
         goldBrand: true,
         mentions: {
@@ -37,7 +35,69 @@ const category = await db.goldCategory.findUnique({
   }
 });
 
-const topLines = category?.productLines || [];
+const allLines = category?.productLines || [];
+
+const calculateBiflScore = (line: any) => {
+  const mentions = line.mentions || [];
+  const total = mentions.length;
+  if (total < 3) return 0; // Statistical confidence gate
+
+  // 1. Base Sentiment Volume (60% Weight)
+  let pos = 0; let neg = 0;
+  mentions.forEach((m: any) => {
+     if (m.sentiment === 'POSITIVE') pos++;
+     if (m.sentiment === 'NEGATIVE') neg++;
+  });
+  const rawSentiment = Math.max(0, (pos - neg) / total);
+  const sentimentPoints = rawSentiment * 60; // Max 60 points
+
+  // 2. Core 5 Metrics Overlap (40% Weight)
+  let c5 = { durability: 0, repairability: 0, warranty: 0 };
+  let c5c = { durability: 0, repairability: 0, warranty: 0 };
+  const scoreMap: any = { "POSITIVE": 100, "NEUTRAL": 50, "NEGATIVE": 0 };
+  
+  mentions.forEach((m: any) => {
+     if (m.durability) { c5c.durability++; c5.durability += scoreMap[m.durability] ?? 50; }
+     if (m.repairability) { c5c.repairability++; c5.repairability += scoreMap[m.repairability] ?? 50; }
+     if (m.warranty) { c5c.warranty++; c5.warranty += scoreMap[m.warranty] ?? 50; }
+  });
+
+  const dScore = c5c.durability > 0 ? c5.durability / c5c.durability : 50;
+  const rScore = c5c.repairability > 0 ? c5.repairability / c5c.repairability : 50;
+  const wScore = c5c.warranty > 0 ? c5.warranty / c5c.warranty : 50;
+  
+  // Weights: Durability 20%, Repairability 10%, Warranty 10%
+  const core5Points = (dScore * 0.20) + (rScore * 0.10) + (wScore * 0.10);
+
+  // 3. The Consistency Multiplier (Time Bonus)
+  const years = new Set(mentions.map((m: any) => {
+    const d = m.submission?.postedAt || m.comment?.postedAt;
+    return d ? new Date(d).getFullYear() : null;
+  }).filter(Boolean));
+  
+  const yearsActive = years.size;
+  let consistencyBonus = 0.80; // Penalty
+  if (yearsActive >= 10) consistencyBonus = 1.15; // Legacy Bonus
+  else if (yearsActive >= 5) consistencyBonus = 1.00; // Baseline
+  else if (yearsActive >= 3) consistencyBonus = 0.95;
+  else if (yearsActive >= 2) consistencyBonus = 0.90;
+
+  return Math.min(99, Math.round((sentimentPoints + core5Points) * consistencyBonus));
+};
+
+const scoredLines = allLines.map((line: any) => ({
+  ...line,
+  biflScore: calculateBiflScore(line)
+}));
+
+// Strictly rank the entire category by the mathematical core, returning only the proven top 5
+const topLines = scoredLines
+  .sort((a, b) => {
+    if (b.biflScore === a.biflScore) return (b.mentionCount || 0) - (a.mentionCount || 0);
+    return b.biflScore - a.biflScore;
+  })
+  .slice(0, 5);
+
 const champion = topLines[0];
 const contenders = topLines.slice(1);
 
@@ -142,7 +202,7 @@ const comparativeLifecycleSeries = topLines.slice(0, 3).map((line, i) => {
   });
 
   const data = Object.entries(yearBuckets)
-    .filter(([_, stats]) => stats.count >= 2) // Prevents statistical noise
+    .filter(([_, stats]) => stats.count >= 1) // Allow 1 mention to plot in dev/sparse data environments
     .map(([year, stats]) => ({
        period: year.toString(), // Map calendar year to "period" axis point
        score: Math.round((stats.pos / stats.count) * 100)
@@ -243,11 +303,19 @@ const totalCategoryMentions = topLines.reduce((acc, line) => acc + line.mentionC
         <!-- Native grid split for content vs radar -->
         <div class="champion-inner-grid" style="display: grid; grid-template-columns: 1fr 300px; gap: 2rem; align-items: start;">
           <div>
-            <h2 style="font-size: 2rem; margin: 0; color: var(--bifl-charcoal);">
-              <a href={`/product/${slugify(champion.goldBrand.canonicalName)}/${slugify(champion.canonicalName)}`} style="text-decoration: none; color: inherit;">
-                {champion.goldBrand.canonicalName} {champion.canonicalName}
+            <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem;">
+              <h2 style="font-size: 2.2rem; margin: 0; color: var(--bifl-charcoal); line-height: 1.1;">
+                <a href={`/product/${slugify(champion.goldBrand.canonicalName)}/${slugify(champion.canonicalName)}`} style="text-decoration: none; color: inherit;">
+                  {champion.goldBrand.canonicalName} {champion.canonicalName}
+                </a>
+              </h2>
+              
+              <!-- Scientific BIFL Score Authority Badge -->
+              <a href="/methodology" title="View our data-science methodology" style="flex-shrink: 0; text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #fff; border: 3px solid #eab308; border-radius: 16px; width: 80px; height: 80px; box-shadow: 0 10px 15px -3px rgb(234 179 8 / 0.15), 0 4px 6px -4px rgb(234 179 8 / 0.1);">
+                <span style="font-size: 2rem; font-weight: 900; color: #ca8a04; line-height: 1; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;">{champion.biflScore}</span>
+                <span style="font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #a16207; opacity: 0.9; margin-top: 2px;">BIFL Score</span>
               </a>
-            </h2>
+            </div>
             
             <div style="margin-top: 0.5rem; display: flex; gap: 1rem; align-items: center;">
               <span class="score-badge" style="background: rgba(234, 179, 8, 0.1); color: #ca8a04; border-color: rgba(234, 179, 8, 0.2);">

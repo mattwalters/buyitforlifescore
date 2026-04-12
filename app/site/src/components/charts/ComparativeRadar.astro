@@ -59,7 +59,7 @@ const lineGen = d3.lineRadial()
         <polygon 
           points={points.map(p => p.join(",")).join(" ")} 
           fill="none" 
-          stroke="#f1f5f9" 
+          stroke="#cbd5e1" 
           stroke-width="1"
         />
       ))}
@@ -70,7 +70,7 @@ const lineGen = d3.lineRadial()
         const x2 = centerX + radius * Math.cos(angle);
         const y2 = centerY + radius * Math.sin(angle);
         return (
-          <line x1={centerX} y1={centerY} x2={x2} y2={y2} stroke="#f1f5f9" stroke-width="1" />
+          <line x1={centerX} y1={centerY} x2={x2} y2={y2} stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4 4" />
         )
       })}
     </g>

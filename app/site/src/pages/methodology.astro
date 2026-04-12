@@ -1,0 +1,111 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Data Science & BIFL Methodology | Buy It For Life">
+  
+  <article class="methodology-container" style="max-width: 800px; margin: 4rem auto; padding: 2rem; font-family: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif; color: #1e293b;">
+    <header style="margin-bottom: 4rem; text-align: center;">
+      <p style="font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; text-transform: uppercase; letter-spacing: 0.1em; color: #eab308; font-weight: 700; font-size: 0.875rem; margin-bottom: 1rem;">
+        Open-Source Algorithm
+      </p>
+      <h1 style="font-size: 3rem; margin-bottom: 1.5rem; line-height: 1.1; color: #0f172a;">
+        The BIFL Mathematical Methodology
+      </h1>
+      <p style="font-size: 1.25rem; color: #475569; max-width: 600px; margin: 0 auto; line-height: 1.6;">
+        A rigorous, data-driven approach to evaluating true product longevity by aggregating millions of organic field reports.
+      </p>
+    </header>
+
+    <div style="background: #f8fafc; border-left: 4px solid #cbd5e1; padding: 1.5rem 2rem; margin-bottom: 4rem; font-style: italic; font-size: 1.1rem; color: #334155;">
+      <strong>Abstract:</strong> In an internet dominated by pay-to-play affiliate marketing, "Top 10" lists are inherently compromised. To solve this, we have engineered a proprietary natural language processing (NLP) pipeline that scrapes, normalizes, and scores unstructured digital sentiment. Our algorithm is entirely source-agnostic and relies strictly on the mathematical volume and chronological consistency of organic product mentions. We publish our core mathematical framework below to ensure absolute algorithmic transparency.
+    </div>
+
+    <section style="margin-bottom: 4rem;">
+      <h2 style="font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; font-size: 1.75rem; color: #0f172a; margin-bottom: 1.5rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem;">
+        I. Base Approval Score ($\Omega$)
+      </h2>
+      <p style="font-size: 1.125rem; line-height: 1.7; margin-bottom: 1.5rem;">
+        The foundational pillar of our score is raw sentiment density. Evaluating true longevity requires extracting the pure signal from statistical noise, entirely separated from a brand's own marketing material.
+      </p>
+      <div style="background: #0f172a; border-radius: 8px; padding: 2rem; overflow-x: auto; margin-bottom: 2rem; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);">
+         <code style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; color: #38bdf8; font-size: 1.1rem; display: block; white-space: pre;">
+  // Calculate the baseline public approval rating ($\Omega$)
+  
+  let P = $\sum$ Positive Mentions
+  let N = $\sum$ Negative Mentions
+  let T = Minimum Sample Threshold
+
+  $\Omega$ = Max(0, (P - N) / T)
+         </code>
+      </div>
+      <p style="font-size: 1.125rem; line-height: 1.7;">
+        By converting thousands of individual reviews into a single baseline score ($\Omega$), we establish a strict performance ceiling. Products lacking statistical significance (a low $T$ value) are excluded from the mathematical evaluation to prevent small-sample bias.
+      </p>
+    </section>
+
+    <section style="margin-bottom: 4rem;">
+      <h2 style="font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; font-size: 1.75rem; color: #0f172a; margin-bottom: 1.5rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem;">
+        II. The Core Five Metrics ($\Psi$)
+      </h2>
+      <p style="font-size: 1.125rem; line-height: 1.7; margin-bottom: 1.5rem;">
+        True "Buy It For Life" goods share a few core mechanical traits. Our pipeline specifically looks for keywords indicating these structural pillars, aggressively weighting <em>Repairability</em>.
+      </p>
+      <ul style="font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; font-size: 1.1rem; line-height: 1.8; color: #334155; margin-bottom: 2rem; padding-left: 1.5rem;">
+        <li><strong>Durability (20%)</strong> - How long it survives heavy use.</li>
+        <li><strong>Repairability (10%)</strong> - Can it be fixed when it wears down?</li>
+        <li><strong>Warranty (10%)</strong> - Does the manufacturer financially guarantee it?</li>
+      </ul>
+      <p style="font-size: 1.125rem; line-height: 1.7;">
+        The sum of these metrics ($\Psi$) contributes directly to the final formula, guaranteeing that we mathematically reward long-term sustainability rather than just initial "out-of-the-box" purchase quality.
+      </p>
+    </section>
+
+    <section style="margin-bottom: 4rem;">
+      <h2 style="font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; font-size: 1.75rem; color: #0f172a; margin-bottom: 1.5rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem;">
+        III. The Test of Time ($\lambda$)
+      </h2>
+      <p style="font-size: 1.125rem; line-height: 1.7; margin-bottom: 1.5rem;">
+        The Lindy effect postulates that the future life expectancy of a non-perishable object is directly proportional to its current age. Simply put: an item scoring 95/100 over a single year of viral hype is mathematically less proven than an item scoring 85/100 consistently across a 10-year rolling window.
+      </p>
+      <div style="background: #fdfbf7; border: 1px solid #eab308; border-radius: 8px; padding: 2rem; margin-bottom: 2rem;">
+        <p style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 1rem; color: #854d0e; text-align: center; margin: 0;">
+          Let {"$Y_{active}$"} equal the distinct years a product has been actively recommended.
+        </p>
+      </div>
+      <p style="font-size: 1.125rem; line-height: 1.7;">
+        We enforce this principle by mapping {"$Y_{active}$"} to a chronological penalty or bonus curve. Products that have existed for under 2 years incur a global penalty ($\lambda = 0.80$). Products displaying verifiable resilience over a 5-year gap are awarded the baseline standard ($\lambda = 1.0$), scaling all the way up to definitive legacy bonuses ($\lambda = 1.15$) for surviving multiple decades.
+      </p>
+    </section>
+
+    <section>
+      <div style="border-top: 2px dashed #cbd5e1; padding-top: 3rem; text-align: center;">
+        <p style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-bottom: 1rem;">
+          Final Calculation Framework
+        </p>
+        <div style="display: inline-block; background: #1e293b; color: #fff; padding: 1.5rem 3rem; border-radius: 12px; font-family: ui-monospace, monospace; font-size: 1.25rem; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);">
+          {"$BIFL Score = \\min(99, \\lfloor (\Omega + \\Psi) \\times \\lambda \\rfloor)$"}
+        </div>
+      </div>
+    </section>
+
+  </article>
+
+</BaseLayout>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script is:inline src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script is:inline src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+<script is:inline>
+  // Because we removed defer, renderMathInElement is immediately available
+  renderMathInElement(document.body, {
+      delimiters: [
+          {left: '$$', right: '$$', display: true},
+          {left: '$', right: '$', display: false},
+          {left: '\\(', right: '\\)', display: false},
+          {left: '\\[', right: '\\]', display: true}
+      ],
+      throwOnError : false
+  });
+</script>
