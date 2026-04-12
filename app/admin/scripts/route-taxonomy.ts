@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
  
  
  
@@ -36,7 +37,7 @@ async function withRetry<T>(fn: () => Promise<T>, maxRetries = 3, delayMs = 2000
     } catch (err: unknown) {
       attempt++;
       if (attempt >= maxRetries) throw err;
-      console.warn(`   [Retry] API Error: ${err?.message}. Retrying in ${delayMs}ms (Attempt ${attempt}/${maxRetries})...`);
+      console.warn(`   [Retry] API Error: ${(err as any)?.message}. Retrying in ${delayMs}ms (Attempt ${attempt}/${maxRetries})...`);
       await new Promise(r => setTimeout(r, delayMs));
       delayMs *= 2; // exponential backoff
     }
@@ -82,7 +83,13 @@ async function main() {
   console.log(`[Routing] 📦 Matrix routing ${lines.length} lines...`);
   const total = lines.length;
 
-  for (const [i, line] of lines.entries()) {
+  const args = process.argv.slice(2);
+  const concurrencyIndex = args.indexOf("--concurrency");
+  const CONCURRENCY = concurrencyIndex !== -1 ? parseInt(args[concurrencyIndex + 1], 10) || 10 : 10;
+  
+  console.log(`[Routing] 🚀 Using concurrency: ${CONCURRENCY}`);
+
+  const processLine = async (line: typeof lines[0], i: number) => {
     console.log(`\n[Routing] 🚦 [${i + 1}/${total}] Routing: ${line.brand} ${line.canonicalName}`);
 
     // Extract Context
@@ -143,7 +150,7 @@ async function main() {
 
     if (topCategories.length === 0) {
        console.log(`   [Routing] ⚠️ No GoldCategories exist at all. Skip.`);
-       continue;
+       return;
     }
 
     const catContext = topCategories.map((c, idx) => `${idx + 1}. ${c.canonicalName}`).join("\n");
@@ -174,13 +181,13 @@ ${catContext}
 3. Select an array of index numbers from the Candidate Categories list that this product acts as a member of.`;
 
     try {
-      const response = await withRetry(() => ai.models.generateContent({
+      const response = await withRetry(() => ai!.models.generateContent({
         model: ACTIVE_MODEL,
         contents: prompt,
         config: {
           responseMimeType: "application/json",
           responseSchema: llmResponseSchema,
-          thinkingConfig: getThinkingConfig(ACTIVE_MODEL, ACTIVE_THINKING_LEVEL)
+          thinkingConfig: getThinkingConfig(ACTIVE_MODEL, ACTIVE_THINKING_LEVEL) as any
         }
       }));
 
@@ -223,7 +230,7 @@ ${catContext}
               model: ACTIVE_MODEL,
               promptTokens: usage.promptTokenCount,
               responseTokens: usage.candidatesTokenCount || 0,
-              thinkingTokens: usage.thoughtsTokenCount || usage.thoughts_token_count || 0,
+              thinkingTokens: usage.thoughtsTokenCount || (usage as any).thoughts_token_count || 0,
               totalTokens: usage.totalTokenCount,
               costInUsd: cost
             }
@@ -231,8 +238,14 @@ ${catContext}
         }
       }
     } catch (err: unknown) {
-      console.error(`   [Routing] ❌ Error:`, err?.message);
+      console.error(`   [Routing] ❌ Error:`, (err as Error)?.message);
     }
+  };
+
+  // Process in chunks
+  for (let i = 0; i < lines.length; i += CONCURRENCY) {
+    const chunk = lines.slice(i, i + CONCURRENCY);
+    await Promise.all(chunk.map((line, idx) => processLine(line, i + idx)));
   }
 }
 

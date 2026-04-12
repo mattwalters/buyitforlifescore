@@ -40,7 +40,7 @@ async function runResolution() {
   for (const mention of unmapped) {
     try {
       // 2. Construct canonical identity string
-      const identityString = `Brand: ${mention.rawBrand}. Product: ${mention.rawProductName}. Category: ${mention.seedCategory}.`;
+      const identityString = `Brand: ${mention.brand}. Product: ${mention.productName}.`;
       
       console.log(`\nProcessing [${mention.id}]: ${identityString}`);
       
@@ -120,14 +120,19 @@ async function runResolution() {
         console.log(`  🌟 NEW CANONICAL ENTRY: Creating GoldProduct...`);
         
         // Ensure canonical names are clean
-        const newCanonicalName = `${mention.rawBrand} ${mention.rawProductName}`;
+        const newCanonicalName = `${mention.brand} ${mention.productName}`;
         
         // Insert GoldProduct with embedding via Raw SQL to support pgvector typing properly if Prisma doesn't map it.
         const pgId = (await prisma.goldProduct.create({
           data: {
             canonicalName: newCanonicalName,
-            brand: mention.rawBrand,
-            category: mention.seedCategory,
+            brand: mention.brand,
+            goldBrand: {
+              connectOrCreate: {
+                where: { canonicalName: mention.brand },
+                create: { canonicalName: mention.brand }
+              }
+            },
             mentionCount: 1,
             avgSentiment: mention.sentiment === 'POSITIVE' ? 1 : mention.sentiment === 'NEGATIVE' ? -1 : 0
           }

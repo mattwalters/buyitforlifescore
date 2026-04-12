@@ -1,8 +1,11 @@
 ---
 import { prisma as db } from "@mono/db";
 import { slugify } from "../../utils/slugify";
-
 import BaseLayout from '../../layouts/BaseLayout.astro';
+
+import RadarStatBlock from '../../components/charts/RadarStatBlock.astro';
+import HoneymoonTracker from '../../components/charts/HoneymoonTracker.astro';
+import LifeCycleChart from '../../components/charts/LifeCycleChart.astro';
 
 export async function getStaticPaths() {
   const brands = await db.goldBrand.findMany({
@@ -24,6 +27,82 @@ export async function getStaticPaths() {
 }
 
 const { brand } = Astro.props;
+
+const mentions = await db.silverProductMention.findMany({
+  where: { goldBrandId: brand.id }
+});
+
+// Calculate Radar Stats
+let radarCounts = { durability: 0, repairability: 0, maintenance: 0, value: 0, warranty: 0 };
+let radarSums = { durability: 0, repairability: 0, maintenance: 0, value: 0, warranty: 0 };
+const scoreMap: Record<string, number> = { "POSITIVE": 10, "NEUTRAL": 5, "NEGATIVE": 0 };
+
+mentions.forEach((m: any) => {
+   if (m.durability) { radarCounts.durability++; radarSums.durability += scoreMap[m.durability] ?? 5; }
+   if (m.repairability) { radarCounts.repairability++; radarSums.repairability += scoreMap[m.repairability] ?? 5; }
+   if (m.maintenance) { radarCounts.maintenance++; radarSums.maintenance += scoreMap[m.maintenance] ?? 5; }
+   if (m.value) { radarCounts.value++; radarSums.value += scoreMap[m.value] ?? 5; }
+   if (m.warranty) { radarCounts.warranty++; radarSums.warranty += scoreMap[m.warranty] ?? 5; }
+});
+
+const radarData = {
+  durability: radarCounts.durability > 0 ? radarSums.durability / radarCounts.durability : (brand.avgSentiment || 5),
+  repairability: radarCounts.repairability > 0 ? radarSums.repairability / radarCounts.repairability : (brand.avgSentiment || 5),
+  maintenance: radarCounts.maintenance > 0 ? radarSums.maintenance / radarCounts.maintenance : (brand.avgSentiment || 5),
+  value: radarCounts.value > 0 ? radarSums.value / radarCounts.value : (brand.avgSentiment || 5),
+  warranty: radarCounts.warranty > 0 ? radarSums.warranty / radarCounts.warranty : (brand.avgSentiment || 5),
+};
+
+// Calculate Lifecycle & Honeymoon
+type Bucket = { period: string; min: number; max: number };
+const buckets: Bucket[] = [
+  { period: "0-1Y", min: 0, max: 12 },
+  { period: "1-3Y", min: 13, max: 36 },
+  { period: "3-5Y", min: 37, max: 60 },
+  { period: "5-10Y", min: 61, max: 120 },
+  { period: "10Y+", min: 121, max: 9999 },
+];
+
+const lifecycleData = buckets.map(b => ({
+  period: b.period, durability: 0, value: 0, maintenance: 0, warranty: 0, repairability: 0, _counts: {d:0, v:0, m:0, w:0, r:0}
+}));
+
+const honeymoonData = buckets.map(b => ({
+  period: b.period, positive: 0, neutral: 0, negative: 0
+}));
+
+let unbucketedMentions = 0;
+
+mentions.forEach((m: any) => {
+   if (m.ownershipDurationMonths !== null) {
+      const bIdx = buckets.findIndex(b => m.ownershipDurationMonths >= b.min && m.ownershipDurationMonths <= b.max);
+      if (bIdx !== -1) {
+         if (m.sentiment === "POSITIVE") honeymoonData[bIdx].positive++;
+         else if (m.sentiment === "NEGATIVE") honeymoonData[bIdx].negative++;
+         else honeymoonData[bIdx].neutral++;
+         
+         const lf = lifecycleData[bIdx];
+         if (m.durability) { lf._counts.d++; lf.durability += scoreMap[m.durability] ?? 5; }
+         if (m.value) { lf._counts.v++; lf.value += scoreMap[m.value] ?? 5; }
+         if (m.maintenance) { lf._counts.m++; lf.maintenance += scoreMap[m.maintenance] ?? 5; }
+         if (m.warranty) { lf._counts.w++; lf.warranty += scoreMap[m.warranty] ?? 5; }
+         if (m.repairability) { lf._counts.r++; lf.repairability += scoreMap[m.repairability] ?? 5; }
+      }
+   } else {
+     unbucketedMentions++;
+   }
+});
+
+// Averages for Lifecycle
+lifecycleData.forEach(lf => {
+   lf.durability = lf._counts.d > 0 ? lf.durability / lf._counts.d : 5;
+   lf.value = lf._counts.v > 0 ? lf.value / lf._counts.v : 5;
+   lf.maintenance = lf._counts.m > 0 ? lf.maintenance / lf._counts.m : 5;
+   lf.warranty = lf._counts.w > 0 ? lf.warranty / lf._counts.w : 5;
+   lf.repairability = lf._counts.r > 0 ? lf.repairability / lf._counts.r : 5;
+});
+
+const totalMentions = mentions.length;
 ---
 
 <BaseLayout title={`${brand.canonicalName} BIFL Gear`}>
@@ -35,6 +114,39 @@ const { brand } = Astro.props;
     <h1>{brand.canonicalName}</h1>
     <p>Comprehensive durability analysis for {brand.canonicalName} products based on real community longevity data.</p>
   </header>
+  
+  {totalMentions > 0 && (
+    <section class="max-w-4xl mx-auto py-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-16">
+        <div>
+          <h2 class="text-2xl font-bold mb-4">The "Buy It For Life" Scorecard</h2>
+          <p class="text-gray-600 mb-4">
+            Aggregated from {totalMentions.toLocaleString()} organic Reddit discussions. 
+            Scores represent the community consensus out of 10.
+          </p>
+          <RadarStatBlock {...radarData} size={350} />
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold mb-4">Survivorship & Honeymoon Curve</h2>
+          <p class="text-gray-600 mb-6">
+            Does the sentiment hold up over time? 
+            Tracking Positive (Green) vs Negative (Red) mentions based on user-reported ownership durations.
+          </p>
+          <HoneymoonTracker data={honeymoonData} width={400} height={250} />
+        </div>
+      </div>
+
+      <div class="mb-16">
+        <h2 class="text-2xl font-bold mb-2">Metric Evolution Lifecycle</h2>
+        <p class="text-gray-600 mb-6">
+          Tracking the 5 Core Metrics over decades of use. Watch how product "Value" evolves chronologically.
+        </p>
+        <div class="bg-slate-50 p-6 rounded-xl border border-slate-200">
+           <LifeCycleChart data={lifecycleData} width={800} height={400} />
+        </div>
+      </div>
+    </section>
+  )}
   
   {brand.productLines.length > 0 && (
     <section>

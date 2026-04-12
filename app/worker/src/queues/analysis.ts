@@ -149,7 +149,8 @@ ${threadText}`;
             };
           });
 
-          const preparedItems = [];
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const preparedItems: any[] = [];
           for (const item of dataToInsert) {
             const embedText = `${item.brand.trim()} ${item.productName.trim()}`.toLowerCase();
             const vectorValue = await embedWithRetry(embedText);

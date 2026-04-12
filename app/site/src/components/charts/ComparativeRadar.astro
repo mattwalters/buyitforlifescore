@@ -1,0 +1,169 @@
+---
+import * as d3 from 'd3';
+
+export interface RadarSeries {
+  label: string;
+  color: string;
+  durability: number;
+  repairability: number;
+  maintenance: number;
+  value: number;
+  warranty: number;
+}
+
+interface Props {
+  series: RadarSeries[];
+  size?: number;
+  hideLegend?: boolean;
+}
+
+const { series, size = 350, hideLegend = false } = Astro.props;
+
+// Hard cap visual chaos to 3 overlays
+const boundedSeries = series.slice(0, 3);
+
+const margin = 40; // Tighter margin since tilted text hugs the chart
+const radius = (size / 2) - margin;
+const centerX = size / 2;
+const centerY = size / 2;
+
+const dimensions = ["Durability", "Repairability", "Maintenance", "Value", "Warranty"];
+
+// Scales
+const angleScale = d3.scaleBand().range([0, 2 * Math.PI]).domain(dimensions);
+const radiusScale = d3.scaleLinear().range([0, radius]).domain([0, 10]);
+
+// Background web calculation
+const ticks = [2, 4, 6, 8, 10];
+const webPoints = ticks.map(t => {
+  return dimensions.map(dim => {
+    const angle = angleScale(dim)! - Math.PI / 2;
+    const r = radiusScale(t);
+    return [centerX + r * Math.cos(angle), centerY + r * Math.sin(angle)];
+  });
+});
+
+// Data polygon generator
+const lineGen = d3.lineRadial()
+  .angle(d => angleScale(d[0])!)
+  .radius(d => radiusScale(d[1] as number))
+  .curve(d3.curveLinearClosed);
+
+---
+
+<div class="comparative-radar relative flex flex-col items-center justify-center font-sans">
+  <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} class="overflow-visible">
+    {/* Background webs */}
+    <g class="web">
+      {webPoints.map(points => (
+        <polygon 
+          points={points.map(p => p.join(",")).join(" ")} 
+          fill="none" 
+          stroke="#f1f5f9" 
+          stroke-width="1"
+        />
+      ))}
+      
+      {/* Grid crosshairs */}
+      {dimensions.map(dim => {
+        const angle = angleScale(dim)! - Math.PI / 2;
+        const x2 = centerX + radius * Math.cos(angle);
+        const y2 = centerY + radius * Math.sin(angle);
+        return (
+          <line x1={centerX} y1={centerY} x2={x2} y2={y2} stroke="#f1f5f9" stroke-width="1" />
+        )
+      })}
+    </g>
+
+    {/* The SVG Overlays for each top competitor */}
+    {boundedSeries.map((s, idx) => {
+      const dataMapping = [
+        ["Durability", s.durability],
+        ["Repairability", s.repairability],
+        ["Maintenance", s.maintenance],
+        ["Value", s.value],
+        ["Warranty", s.warranty]
+      ];
+      
+      const pathData = lineGen(dataMapping as [string, number][])!;
+      
+      // Rank 1 gets slightly higher opacity
+      const fillOpacity = idx === 0 ? "0.3" : "0.15";
+      const strokeWidth = idx === 0 ? "3" : "2";
+
+      return (
+        <g class={`series-${idx}`}>
+          <path 
+            d={pathData} 
+            transform={`translate(${centerX}, ${centerY})`} 
+            fill={s.color}
+            fill-opacity={fillOpacity}
+            stroke={s.color} 
+            stroke-width={strokeWidth} 
+          />
+          
+          {/* Explicit data points on the plot */}
+          {dataMapping.map(d => {
+            const angle = angleScale(d[0] as string)! - Math.PI / 2;
+            const cx = centerX + radiusScale(d[1] as number) * Math.cos(angle);
+            const cy = centerY + radiusScale(d[1] as number) * Math.sin(angle);
+            return (
+              <circle cx={cx} cy={cy} r="4" fill={s.color} />
+            )
+          })}
+        </g>
+      );
+    })}
+
+    {/* Text Labels */}
+    <g class="axes-labels">
+      {dimensions.map(dim => {
+        const angle = angleScale(dim)! - Math.PI / 2;
+        const textOffset = 18;
+        const x = centerX + (radius + textOffset) * Math.cos(angle);
+        const y = centerY + (radius + textOffset) * Math.sin(angle);
+        
+        let rotateDeg = (angle * 180) / Math.PI + 90;
+        if (rotateDeg > 90 && rotateDeg < 270) {
+          rotateDeg -= 180;
+        }
+
+        return (
+          <text 
+            x={x} 
+            y={y} 
+            dominant-baseline="middle"
+            text-anchor="middle"
+            transform={`rotate(${rotateDeg}, ${x}, ${y})`}
+            class="text-[11px] font-bold fill-slate-500 uppercase tracking-widest"
+          >
+            {dim}
+          </text>
+        )
+      })}
+    </g>
+  </svg>
+  
+  {/* Legend overlay generated statically */}
+  {!hideLegend && (
+    <div class="legend flex flex-wrap justify-center gap-4 mt-2">
+      {boundedSeries.map((s, i) => {
+        const getRankIcon = (rank?: number) => {
+          if (rank === 1) return "🥇";
+          if (rank === 2) return "🥈";
+          if (rank === 3) return "🥉";
+          if (rank === 4) return "4️⃣";
+          if (rank === 5) return "5️⃣";
+          return "";
+        };
+        
+        return (
+          <div class="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+            <span style={`display: inline-block; width: 16px; height: 3px; border-radius: 2px; background-color: ${s.color}; opacity: ${i===0?'1':'0.7'}; transform: translateY(-4px);`}></span>
+            <span>{getRankIcon(s.rank)} {s.label}</span>
+          </div>
+        );
+      })}
+    </div>
+  )}
+</div>

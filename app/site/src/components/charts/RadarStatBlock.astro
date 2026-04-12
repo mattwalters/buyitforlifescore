@@ -1,0 +1,122 @@
+---
+import * as d3 from 'd3';
+
+interface Props {
+  durability: number;
+  repairability: number;
+  maintenance: number;
+  value: number;
+  warranty: number;
+  size?: number;
+}
+
+const { durability = 5, repairability = 5, maintenance = 5, value = 5, warranty = 5, size = 300 } = Astro.props;
+
+const data = [
+  { axis: "Durability", value: durability },
+  { axis: "Repairability", value: repairability },
+  { axis: "Maintenance", value: maintenance },
+  { axis: "Value", value: value },
+  { axis: "Warranty", value: warranty }
+];
+
+const margin = 40; // Tighter margin since tilted text hugs the chart
+const radius = (size / 2) - margin;
+const centerX = size / 2;
+const centerY = size / 2;
+
+// Scales
+const angleScale = d3.scaleBand().range([0, 2 * Math.PI]).domain(data.map(d => d.axis));
+const radiusScale = d3.scaleLinear().range([0, radius]).domain([0, 10]);
+
+// Background web calculation
+const ticks = [2, 4, 6, 8, 10];
+const webPoints = ticks.map(t => {
+  return data.map(d => {
+    const angle = angleScale(d.axis)! - Math.PI / 2;
+    const r = radiusScale(t);
+    return [centerX + r * Math.cos(angle), centerY + r * Math.sin(angle)];
+  });
+});
+
+// Data polygon calculation
+const line = d3.lineRadial()
+  .angle(d => angleScale(d[0])!)
+  .radius(d => radiusScale(d[1] as number))
+  .curve(d3.curveLinearClosed);
+
+const pathData = line(data.map(d => [d.axis, d.value] as [string, number]))!;
+---
+
+<div class="radar-chart-container relative flex items-center justify-center font-sans">
+  <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} class="overflow-visible">
+    {/* Grid webs */}
+    <g class="web">
+      {webPoints.map(points => (
+        <polygon 
+          points={points.map(p => p.join(",")).join(" ")} 
+          fill="none" 
+          stroke="#e2e8f0" 
+          stroke-width="1"
+        />
+      ))}
+      
+      {/* Grid crosshairs */}
+      {data.map(d => {
+        const angle = angleScale(d.axis)! - Math.PI / 2;
+        const x2 = centerX + radius * Math.cos(angle);
+        const y2 = centerY + radius * Math.sin(angle);
+        return (
+          <line x1={centerX} y1={centerY} x2={x2} y2={y2} stroke="#e2e8f0" stroke-width="1" />
+        )
+      })}
+    </g>
+
+    {/* The main green radar blob */}
+    <path 
+        d={pathData} 
+        transform={`translate(${centerX}, ${centerY})`} 
+        fill="rgba(16, 185, 129, 0.2)" 
+        stroke="#10b981" 
+        stroke-width="2" 
+    />
+    
+    {/* Explicit data points on the plot */}
+    {data.map(d => {
+       const angle = angleScale(d.axis)! - Math.PI / 2;
+       const cx = centerX + radiusScale(d.value) * Math.cos(angle);
+       const cy = centerY + radiusScale(d.value) * Math.sin(angle);
+       return (
+         <circle cx={cx} cy={cy} r="4" fill="#10b981" />
+       )
+    })}
+
+    {/* Text Labels */}
+    <g class="axes-labels">
+      {data.map(d => {
+        const angle = angleScale(d.axis)! - Math.PI / 2;
+        const textOffset = 18;
+        const x = centerX + (radius + textOffset) * Math.cos(angle);
+        const y = centerY + (radius + textOffset) * Math.sin(angle);
+        
+        let rotateDeg = (angle * 180) / Math.PI + 90;
+        if (rotateDeg > 90 && rotateDeg < 270) {
+          rotateDeg -= 180;
+        }
+
+        return (
+          <text 
+            x={x} 
+            y={y} 
+            dominant-baseline="middle"
+            text-anchor="middle"
+            transform={`rotate(${rotateDeg}, ${x}, ${y})`}
+            class="text-[11px] font-bold fill-slate-500 uppercase tracking-widest"
+          >
+            {d.axis}
+          </text>
+        )
+      })}
+    </g>
+  </svg>
+</div>

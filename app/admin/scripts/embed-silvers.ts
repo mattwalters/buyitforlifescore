@@ -1,4 +1,5 @@
  
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
  
 import { prisma } from "@mono/db";
@@ -79,7 +80,7 @@ async function main() {
          console.warn(`   [Embedding] ⚠️ Batch output length mismatch or failure. Expected ${chunk.length}, got ${vectorValues?.length}.`);
       }
     } catch (err: unknown) {
-      console.error(`   [Embedding] ❌ Failed to generate or save batch. Aborting the chunk so it can retry later.`, err?.message || err);
+      console.error(`   [Embedding] ❌ Failed to generate or save batch. Aborting the chunk so it can retry later.`, (err as any)?.message || err);
     }
   }
 

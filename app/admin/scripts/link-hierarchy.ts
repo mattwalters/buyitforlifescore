@@ -39,12 +39,12 @@ const generateWithRetry = async (prompt: string, retries = 3) => {
         config: {
           responseMimeType: "application/json",
           responseSchema: llmResponseSchema,
-          thinkingConfig: getThinkingConfig(ACTIVE_MODEL, ACTIVE_THINKING_LEVEL)
+          thinkingConfig: getThinkingConfig(ACTIVE_MODEL, ACTIVE_THINKING_LEVEL) as any
         }
       });
       return response;
     } catch (e: unknown) {
-      console.warn(`   ⚠️ LLM failed (attempt ${i + 1}/${retries}):`, e.message || e);
+      console.warn(`   ⚠️ LLM failed (attempt ${i + 1}/${retries}):`, (e as any).message || e);
       if (i === retries - 1) return null;
       await new Promise(r => setTimeout(r, 2000));
     }
@@ -165,7 +165,7 @@ Return a JSON object indicating if the Exact Model is a member of any of the can
                   model: ACTIVE_MODEL,
                   promptTokens: usage.promptTokenCount,
                   responseTokens: usage.candidatesTokenCount || 0,
-                  thinkingTokens: usage.thoughtsTokenCount || usage.thoughts_token_count || 0,
+                  thinkingTokens: usage.thoughtsTokenCount || (usage as any).thoughts_token_count || 0,
                   totalTokens: usage.totalTokenCount,
                   costInUsd: cost
                 }

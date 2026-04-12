@@ -84,7 +84,7 @@ export function SpendChart({ data, keys }: SpendChartProps) {
             axisLine={false}
           />
           <Tooltip 
-            formatter={(value: number) => [formatters.dollar(value), ""]}
+            formatter={(value: any) => [formatters.dollar(value as number), ""]}
             contentStyle={{ 
               backgroundColor: "hsl(var(--card))", 
               borderColor: "hsl(var(--border))",

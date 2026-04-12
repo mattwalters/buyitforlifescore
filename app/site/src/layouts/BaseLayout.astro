@@ -4,9 +4,10 @@ import '../styles/global.css';
 interface Props {
   title: string;
   description?: string;
+  schemaData?: Record<string, any>;
 }
 
-const { title, description = "Discover the most durable products backed by raw data and real community experience." } = Astro.props;
+const { title, description = "Discover the most durable products backed by raw data and real community experience.", schemaData } = Astro.props;
 ---
 
 <html lang="en">
@@ -16,6 +17,9 @@ const { title, description = "Discover the most durable products backed by raw d
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="description" content={description} />
     <title>{title} | BuyItForLifeScore</title>
+    {schemaData && (
+      <script type="application/ld+json" set:html={JSON.stringify(schemaData)} />
+    )}
   </head>
   <body>
     <header>

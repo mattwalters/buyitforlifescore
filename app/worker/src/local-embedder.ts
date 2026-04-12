@@ -20,9 +20,11 @@ class EmbedderPipeline {
 
 export const embedWithRetry = async (text: string, _dim: number = 1024): Promise<number[]> => {
   try {
-    const extractor = await EmbedderPipeline.getInstance();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const extractor: any = await EmbedderPipeline.getInstance();
     // Use format specific to Mxbai: pooling="cls", normalize=true
-    const output = await extractor(text, { pooling: "cls", normalize: true });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const output: any = await extractor(text, { pooling: "cls", normalize: true });
     return Array.from(output.data);
   } catch (err: unknown) {
     console.error(`[ONNX] Embedding failed:`, (err as Error).message);

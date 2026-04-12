@@ -1,8 +1,10 @@
 ---
 import { prisma as db } from "@mono/db";
 import { slugify } from "../../../utils/slugify";
-
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+import RadarStatBlock from '../../../components/charts/RadarStatBlock.astro';
+import HoneymoonTracker from '../../../components/charts/HoneymoonTracker.astro';
+import LifeCycleChart from '../../../components/charts/LifeCycleChart.astro';
 
 export async function getStaticPaths() {
   const productLines = await db.goldProductLine.findMany({
@@ -10,42 +12,105 @@ export async function getStaticPaths() {
       goldBrand: true,
       products: {
         orderBy: { mentionCount: 'desc' }
-      },
-      mentions: true
+      }
     }
   });
 
-  return productLines.map(line => {
-    // Aggregations for generic mentions tied directly to the Product Line
-    const validPrices = line.mentions.map(m => m.acquiredPrice).filter(p => p !== null) as number[];
-    const avgPrice = validPrices.length ? (validPrices.reduce((a,b) => a+b, 0) / validPrices.length).toFixed(2) : null;
-    
-    const validDurations = line.mentions.map(m => m.ownershipDurationMonths).filter(p => p !== null) as number[];
-    const avgDuration = validDurations.length ? (validDurations.reduce((a,b) => a+b, 0) / validDurations.length / 12).toFixed(1) : null;
-
-    const caveats = line.mentions.map(m => m.flawOrCaveat).filter(f => f && f.length > 5).slice(0, 3);
-    const quotes = line.mentions.map(m => m.quote).filter(q => q && q.length > 5).slice(0, 3);
-
-    return {
-      params: { 
-        brand: slugify(line.goldBrand.canonicalName),
-        line: slugify(line.canonicalName) 
-      },
-      props: { 
-        line,
-        avgPrice,
-        avgDuration,
-        caveats,
-        quotes
-      },
-    };
-  });
+  return productLines.map(line => ({
+    params: { 
+      brand: slugify(line.goldBrand.canonicalName),
+      line: slugify(line.canonicalName) 
+    },
+    props: { line },
+  }));
 }
 
-const { line, avgPrice, avgDuration, caveats, quotes } = Astro.props;
+const { line } = Astro.props;
+
+// Fetch Mentions for this specific Product Line
+const mentions = await db.silverProductMention.findMany({
+  where: { goldProductLineId: line.id }
+});
+
+const totalMentions = mentions.length;
+
+// Raw metric aggregations
+const validPrices = mentions.map(m => m.acquiredPrice).filter(p => p !== null) as number[];
+const avgPrice = validPrices.length ? (validPrices.reduce((a,b) => a+b, 0) / validPrices.length).toFixed(2) : null;
+
+const validDurations = mentions.map(m => m.ownershipDurationMonths).filter(p => p !== null) as number[];
+const avgDuration = validDurations.length ? (validDurations.reduce((a,b) => a+b, 0) / validDurations.length / 12).toFixed(1) : null;
+
+const caveats = mentions.map(m => m.flawOrCaveat).filter(f => f && f.length > 5).slice(0, 5);
+const quotes = mentions.map(m => m.quote).filter(q => q && q.length > 5).slice(0, 5);
+
+// Radar Data
+let radarCounts = { durability: 0, repairability: 0, maintenance: 0, value: 0, warranty: 0 };
+let radarSums = { durability: 0, repairability: 0, maintenance: 0, value: 0, warranty: 0 };
+const scoreMap: Record<string, number> = { "POSITIVE": 10, "NEUTRAL": 5, "NEGATIVE": 0 };
+
+mentions.forEach((m: any) => {
+   if (m.durability) { radarCounts.durability++; radarSums.durability += scoreMap[m.durability] ?? 5; }
+   if (m.repairability) { radarCounts.repairability++; radarSums.repairability += scoreMap[m.repairability] ?? 5; }
+   if (m.maintenance) { radarCounts.maintenance++; radarSums.maintenance += scoreMap[m.maintenance] ?? 5; }
+   if (m.value) { radarCounts.value++; radarSums.value += scoreMap[m.value] ?? 5; }
+   if (m.warranty) { radarCounts.warranty++; radarSums.warranty += scoreMap[m.warranty] ?? 5; }
+});
+
+const radarData = {
+  durability: radarCounts.durability > 0 ? radarSums.durability / radarCounts.durability : (line.avgSentiment || 5),
+  repairability: radarCounts.repairability > 0 ? radarSums.repairability / radarCounts.repairability : (line.avgSentiment || 5),
+  maintenance: radarCounts.maintenance > 0 ? radarSums.maintenance / radarCounts.maintenance : (line.avgSentiment || 5),
+  value: radarCounts.value > 0 ? radarSums.value / radarCounts.value : (line.avgSentiment || 5),
+  warranty: radarCounts.warranty > 0 ? radarSums.warranty / radarCounts.warranty : (line.avgSentiment || 5),
+};
+
+// Lifecycle & Honeymoon Data
+type Bucket = { period: string; min: number; max: number };
+const buckets: Bucket[] = [
+  { period: "0-1Y", min: 0, max: 12 },
+  { period: "1-3Y", min: 13, max: 36 },
+  { period: "3-5Y", min: 37, max: 60 },
+  { period: "5-10Y", min: 61, max: 120 },
+  { period: "10Y+", min: 121, max: 9999 },
+];
+
+const lifecycleData = buckets.map(b => ({
+  period: b.period, durability: 0, value: 0, maintenance: 0, warranty: 0, repairability: 0, _counts: {d:0, v:0, m:0, w:0, r:0}
+}));
+
+const honeymoonData = buckets.map(b => ({
+  period: b.period, positive: 0, neutral: 0, negative: 0
+}));
+
+mentions.forEach((m: any) => {
+   if (m.ownershipDurationMonths !== null) {
+      const bIdx = buckets.findIndex(b => m.ownershipDurationMonths >= b.min && m.ownershipDurationMonths <= b.max);
+      if (bIdx !== -1) {
+         if (m.sentiment === "POSITIVE") honeymoonData[bIdx].positive++;
+         else if (m.sentiment === "NEGATIVE") honeymoonData[bIdx].negative++;
+         else honeymoonData[bIdx].neutral++;
+         
+         const lf = lifecycleData[bIdx];
+         if (m.durability) { lf._counts.d++; lf.durability += scoreMap[m.durability] ?? 5; }
+         if (m.value) { lf._counts.v++; lf.value += scoreMap[m.value] ?? 5; }
+         if (m.maintenance) { lf._counts.m++; lf.maintenance += scoreMap[m.maintenance] ?? 5; }
+         if (m.warranty) { lf._counts.w++; lf.warranty += scoreMap[m.warranty] ?? 5; }
+         if (m.repairability) { lf._counts.r++; lf.repairability += scoreMap[m.repairability] ?? 5; }
+      }
+   }
+});
+
+lifecycleData.forEach(lf => {
+   lf.durability = lf._counts.d > 0 ? lf.durability / lf._counts.d : 5;
+   lf.value = lf._counts.v > 0 ? lf.value / lf._counts.v : 5;
+   lf.maintenance = lf._counts.m > 0 ? lf.maintenance / lf._counts.m : 5;
+   lf.warranty = lf._counts.w > 0 ? lf.warranty / lf._counts.w : 5;
+   lf.repairability = lf._counts.r > 0 ? lf.repairability / lf._counts.r : 5;
+});
 ---
 
-<BaseLayout title={`${line.goldBrand.canonicalName} ${line.canonicalName} Reviews & Versions`}>
+<BaseLayout title={`${line.goldBrand.canonicalName} ${line.canonicalName} Details & Charts`}>
   <nav class="breadcrumbs">
     <a href="/">Home</a> &gt; 
     <a href={`/brands/${slugify(line.goldBrand.canonicalName)}`}>{line.goldBrand.canonicalName}</a> &gt; 
@@ -55,14 +120,46 @@ const { line, avgPrice, avgDuration, caveats, quotes } = Astro.props;
   <header>
     <h1>{line.goldBrand.canonicalName} {line.canonicalName}</h1>
     <p>
-      <span class="score-badge">Generic Series BIFL Score: {line.avgSentiment > 0 ? "Positive" : "Pending"}</span> 
-      <span style="margin-left: 1rem; color: var(--bifl-body-text);">{line.mentionCount} Total Mentions</span>
+      <span class="score-badge shrink-0">BIFL Score: {line.avgSentiment > 0 ? "Positive" : "Pending"}</span> 
+      <span style="margin-left: 1rem; color: var(--bifl-body-text);">{totalMentions} Organic Community Mentions</span>
     </p>
   </header>
 
+  {totalMentions > 0 && (
+    <section class="max-w-4xl mx-auto py-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-16">
+        <div>
+          <h2 class="text-2xl font-bold mb-4">Series Scorecard</h2>
+          <p class="text-gray-600 mb-4">
+            Analysis across {totalMentions} organic Reddit mentions scaling across durability, value, and repairability.
+          </p>
+          <RadarStatBlock {...radarData} size={350} />
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold mb-4">The Honeymoon Curve</h2>
+          <p class="text-gray-600 mb-6">
+            Visualizing the drop-off rate of positivity vs ownership duration. 
+            Green represents positive sentiment, Red represents negative sentiment.
+          </p>
+          <HoneymoonTracker data={honeymoonData} width={400} height={250} />
+        </div>
+      </div>
+
+      <div class="mb-16">
+        <h2 class="text-2xl font-bold mb-2">Metric Evolution Lifecycle</h2>
+        <p class="text-gray-600 mb-6">
+          Tracking the 5 Core Metrics over decades of use.
+        </p>
+        <div class="bg-slate-50 p-6 rounded-xl border border-slate-200">
+           <LifeCycleChart data={lifecycleData} width={800} height={400} />
+        </div>
+      </div>
+    </section>
+  )}
+
   <div style="display: flex; gap: 2rem; flex-wrap: wrap; margin-top: 2rem;">
     <section style="flex: 1; min-width: 300px;">
-      <h2>Verified Community Experience</h2>
+      <h2>Recorded Experiences</h2>
       <div class="bifl-card">
         <ul style="list-style: none; padding: 0; margin: 0;">
           <li style="margin-bottom: 0.5rem;"><strong>Average Price Paid:</strong> {avgPrice ? `$${avgPrice}` : 'Unknown'}</li>
@@ -81,7 +178,7 @@ const { line, avgPrice, avgDuration, caveats, quotes } = Astro.props;
 
       {caveats.length > 0 && (
         <article style="margin-top: 2rem;">
-          <h3 style="color: var(--bifl-accent-rust);">Common Flaws &amp; Caveats</h3>
+          <h3 style="color: var(--bifl-accent-rust);">Flaw Constellation</h3>
           <ul style="list-style: square;">
             {caveats.map((c: string) => <li>{c}</li>)}
           </ul>
@@ -97,7 +194,7 @@ const { line, avgPrice, avgDuration, caveats, quotes } = Astro.props;
             <tr>
               <th>Model</th>
               <th>Mentions</th>
-              <th>Durability Score</th>
+              <th>Avg Sentiment</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -109,7 +206,7 @@ const { line, avgPrice, avgDuration, caveats, quotes } = Astro.props;
                 <td>{product.avgSentiment > 0 ? "High" : "Average"}</td>
                 <td>
                   <a href={`/product/${slugify(line.goldBrand.canonicalName)}/${slugify(line.canonicalName)}/${slugify(product.canonicalName)}`} class="button" style="padding: 0.4rem 0.8rem; font-size: 0.875rem;">
-                    Read Reviews
+                    View Model
                   </a>
                 </td>
               </tr>

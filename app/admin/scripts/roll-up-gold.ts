@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
  
  
  
@@ -151,6 +152,12 @@ async function main() {
         const created = await prisma.goldProduct.create({
           data: {
             brand: m.brand,
+            goldBrand: {
+              connectOrCreate: {
+                where: { canonicalName: m.brand },
+                create: { canonicalName: m.brand }
+              }
+            },
             canonicalName: m.productName,
             mentionCount: 0,
             avgSentiment: 0,
@@ -203,7 +210,7 @@ async function main() {
       });
 
     } catch (err: unknown) {
-      console.error(`   ❌ Error processing mention ${m.id}:`, err?.message);
+      console.error(`   ❌ Error processing mention ${m.id}:`, (err as any)?.message);
     }
   }
 

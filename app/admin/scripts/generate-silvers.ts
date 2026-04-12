@@ -127,12 +127,12 @@ const generateWithRetry = async (prompt: string, retries = 4) => {
         config: {
           responseMimeType: "application/json",
           responseSchema: THREAD_EXTRACTION_SCHEMA,
-          thinkingConfig: getThinkingConfig(ACTIVE_MODEL, ACTIVE_THINKING_LEVEL)
+          thinkingConfig: getThinkingConfig(ACTIVE_MODEL, ACTIVE_THINKING_LEVEL) as any
         },
       });
       return response;
     } catch (e: unknown) {
-      console.warn(`   ⚠️ LLM Extraction failed (attempt ${i + 1}/${retries}):`, e.message || e);
+      console.error(`      ❌ Extraction failed (attempt ${i + 1}/${retries}):`, (e as any).message || e);
       if (i === retries - 1) return null;
       await new Promise((r) => setTimeout(r, 3000));
     }
@@ -225,7 +225,7 @@ async function main() {
         chunks.push(baseContext);
       } else {
         for (let i = 0; i < sub.comments.length; i += CHUNK_SIZE) {
-          const chunkComments = sub.comments.slice(i, i + CHUNK_SIZE).map((c, localIdx) => 
+          const chunkComments = sub.comments.slice(i, i + CHUNK_SIZE).map((c: any, localIdx: number) => 
             `[SOURCE INDEX: ${i + localIdx + 1}] Body: ${c.body}`
           );
           chunks.push([baseContext, ...chunkComments].join("\n\n"));
@@ -326,7 +326,7 @@ ${threadText}`;
                         promptTokens: usage.promptTokenCount,
                         cachedTokens: 0,
                         responseTokens: usage.candidatesTokenCount || 0,
-                        thinkingTokens: usage.thoughtsTokenCount || usage.thoughts_token_count || 0,
+                        thinkingTokens: usage.thoughtsTokenCount || (usage as any).thoughts_token_count || 0,
                         totalTokens: usage.totalTokenCount,
                       },
                     });

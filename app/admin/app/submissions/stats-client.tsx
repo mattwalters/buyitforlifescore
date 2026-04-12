@@ -275,7 +275,7 @@ export default function TokenStatsChart({
                   <Tooltip 
                     cursor={{ fill: "hsl(var(--muted)/0.5)" }}
                     contentStyle={{ backgroundColor: "hsl(var(--popover))", borderColor: "hsl(var(--border))", borderRadius: "8px" }}
-                    formatter={(value: number) => [value, "Threads"]}
+                    formatter={(value: any) => [value, "Threads"]}
                     labelStyle={{ color: "hsl(var(--foreground))", fontWeight: "bold", marginBottom: "8px" }}
                   />
                   <Bar 
@@ -323,7 +323,7 @@ export default function TokenStatsChart({
                   <Tooltip 
                     cursor={{ fill: "hsl(var(--muted)/0.5)" }}
                     contentStyle={{ backgroundColor: "hsl(var(--popover))", borderColor: "hsl(var(--border))", borderRadius: "8px" }}
-                    formatter={(value: number) => [value, "Threads"]}
+                    formatter={(value: any) => [value, "Threads"]}
                     labelStyle={{ color: "hsl(var(--foreground))", fontWeight: "bold", marginBottom: "8px" }}
                   />
                   <Bar 

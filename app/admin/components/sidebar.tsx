@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Activity, MessageSquare, Package, Trophy, Layers } from "lucide-react";
+import { LayoutDashboard, Activity, MessageSquare, Package, Trophy, Layers, FolderTree, Tags, Lightbulb } from "lucide-react";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -22,6 +22,21 @@ export function Sidebar() {
       title: "Silver (Mentions)",
       href: "/silver",
       icon: <Package className="h-5 w-5" />,
+    },
+    {
+      title: "Silver (Ideas)",
+      href: "/silver/category-ideas",
+      icon: <Lightbulb className="h-5 w-5" />,
+    },
+    {
+      title: "Gold (Depts)",
+      href: "/gold/departments",
+      icon: <FolderTree className="h-5 w-5" />,
+    },
+    {
+      title: "Gold (Categories)",
+      href: "/gold/categories",
+      icon: <Tags className="h-5 w-5" />,
     },
     {
       title: "Gold (Brands)",

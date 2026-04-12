@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
  
  
  
@@ -217,7 +218,7 @@ Return a JSON object. If one of the candidate options is unambiguously the exact
              config: {
                responseMimeType: "application/json",
                responseSchema: llmResponseSchema,
-               thinkingConfig: getThinkingConfig(ACTIVE_MODEL, ACTIVE_THINKING_LEVEL)
+               thinkingConfig: getThinkingConfig(ACTIVE_MODEL, ACTIVE_THINKING_LEVEL) as any
              }
            });
 
@@ -247,7 +248,7 @@ Return a JSON object. If one of the candidate options is unambiguously the exact
                    model: ACTIVE_MODEL,
                    promptTokens: usage.promptTokenCount,
                    responseTokens: usage.candidatesTokenCount || 0,
-                   thinkingTokens: usage.thoughtsTokenCount || usage.thoughts_token_count || 0,
+                   thinkingTokens: usage.thoughtsTokenCount || (usage as any).thoughts_token_count || 0,
                    totalTokens: usage.totalTokenCount,
                    costInUsd: cost
                  }
@@ -268,8 +269,8 @@ Return a JSON object. If one of the candidate options is unambiguously the exact
          let pureVec: number[] = [];
          try {
             pureVec = await embedWithRetry(canonicalStr);
-         } catch(e) {
-            console.error("   [Rollup] Failed to generate centroid vector:", e);
+         } catch(e: unknown) {
+            console.error(`   [Rollup] ❌ Error processing mention ${m.id}:`, (e as any)?.message);
          }
 
          const created = await prisma.goldProductLine.create({
@@ -320,7 +321,7 @@ Return a JSON object. If one of the candidate options is unambiguously the exact
       });
       
     } catch (err: unknown) {
-      console.error(`   [Rollup] ❌ Error processing mention ${m.id}:`, err?.message);
+      console.error(`   ❌ Error processing mention ${m.id}:`, (err as any)?.message || err);
     }
   }
 }

@@ -64,9 +64,9 @@ npm run gold:link -w @mono/admin -- --concurrency 10
 echo ""
 echo "🟢 TAXONOMY PHASE: Generating Organic Categories and Routing Matrix"
 npm run taxonomy:seed -w @mono/admin
-npm run taxonomy:discover -w @mono/admin
+npm run taxonomy:discover -w @mono/admin -- --concurrency 10
 npm run taxonomy:consolidate -w @mono/admin
-npm run taxonomy:route -w @mono/admin
+npm run taxonomy:route -w @mono/admin -- --concurrency 10
 
 echo ""
 echo "✅ End-to-End Pipeline Complete!"

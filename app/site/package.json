@@ -12,11 +12,13 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@mono/db": "*",
     "astro": "^6.1.5",
-    "@mono/db": "*"
+    "d3": "^7.9.0"
   },
   "devDependencies": {
     "@mono/eslint-config": "*",
+    "@types/d3": "^7.4.3",
     "prettier": "^3.8.1"
   }
 }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
  
  
  
@@ -31,7 +32,7 @@ async function withRetry<T>(fn: () => Promise<T>, maxRetries = 3, delayMs = 2000
     } catch (err: unknown) {
       attempt++;
       if (attempt >= maxRetries) throw err;
-      console.warn(`   [Retry] API Error: ${err?.message}. Retrying in ${delayMs}ms (Attempt ${attempt}/${maxRetries})...`);
+      console.warn(`   [Retry] API Error: ${(err as any)?.message}. Retrying in ${delayMs}ms (Attempt ${attempt}/${maxRetries})...`);
       await new Promise(r => setTimeout(r, delayMs));
       delayMs *= 2; // exponential backoff
     }
@@ -70,8 +71,14 @@ async function main() {
   console.log(`[Discovery] 📦 Processing ${lines.length} lines for category idea generation...`);
   const total = lines.length;
 
-  for (const [i, line] of lines.entries()) {
-    console.log(`\n[Discovery] 🧠 [${i + 1}/${total}] Brainstorming: ${line.brand} -> ${line.canonicalName}`);
+  const args = process.argv.slice(2);
+  const concurrencyIndex = args.indexOf("--concurrency");
+  const CONCURRENCY = concurrencyIndex !== -1 ? parseInt(args[concurrencyIndex + 1], 10) || 10 : 10;
+  
+  console.log(`[Discovery] 🚀 Using concurrency: ${CONCURRENCY}`);
+
+  const processLine = async (line: typeof lines[0], i: number) => {
+    console.log(`[Discovery] 🧠 [${i + 1}/${total}] Brainstorming: ${line.brand} -> ${line.canonicalName}`);
 
     try {
       let contextStr = "No additional context.";
@@ -99,13 +106,13 @@ ${contextStr}
 5. DO return focused Head-Term hubs like "Work Boots", "Cast Iron Skillets", "Gaming Keyboards".
 6. Return only the array of strings.`;
 
-      const response = await withRetry(() => ai.models.generateContent({
+      const response = await withRetry(() => ai!.models.generateContent({
         model: ACTIVE_MODEL,
         contents: prompt,
         config: {
           responseMimeType: "application/json",
           responseSchema: llmResponseSchema,
-          thinkingConfig: getThinkingConfig(ACTIVE_MODEL, ACTIVE_THINKING_LEVEL)
+          thinkingConfig: getThinkingConfig(ACTIVE_MODEL, ACTIVE_THINKING_LEVEL) as any
         }
       }));
 
@@ -142,7 +149,7 @@ ${contextStr}
               model: ACTIVE_MODEL,
               promptTokens: usage.promptTokenCount,
               responseTokens: usage.candidatesTokenCount || 0,
-              thinkingTokens: usage.thoughtsTokenCount || usage.thoughts_token_count || 0,
+              thinkingTokens: usage.thoughtsTokenCount || (usage as any).thoughts_token_count || 0,
               totalTokens: usage.totalTokenCount,
               costInUsd: cost
             }
@@ -150,14 +157,20 @@ ${contextStr}
         }
       }
     } catch (err: unknown) {
-      console.error(`   [Discovery] ❌ Error discovering ${line.id}:`, err?.message);
+      console.error(`   [Discovery] ❌ Error discovering ${line.id}:`, (err as Error)?.message);
     }
+  };
+
+  // Process in chunks
+  for (let i = 0; i < lines.length; i += CONCURRENCY) {
+    const chunk = lines.slice(i, i + CONCURRENCY);
+    await Promise.all(chunk.map((line, idx) => processLine(line, i + idx)));
   }
 }
 
 main()
-  .catch((e) => {
-    console.error("Fatal error:", e);
+  .catch((err) => {
+    console.error(`\n❌ Fatal Error:`, (err as any)?.message);
     process.exit(1);
   })
   .finally(async () => {

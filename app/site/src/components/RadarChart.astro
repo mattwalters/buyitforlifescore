@@ -1,0 +1,175 @@
+---
+export interface Props {
+  data: {
+    label: string;
+    value: number; // 0 to 100
+  }[];
+}
+
+const { data } = Astro.props;
+
+const size = 400;
+const center = size / 2;
+const radius = 130; // Leave room for labels
+const N = data.length;
+
+// Math helpers
+const getAngle = (i: number) => -Math.PI / 2 + (i * 2 * Math.PI) / N;
+const getPoint = (val: number, i: number) => {
+  const angle = getAngle(i);
+  const r = (val / 100) * radius;
+  return {
+    x: center + r * Math.cos(angle),
+    y: center + r * Math.sin(angle)
+  };
+};
+
+// SVG Polygon Points String
+const polygonPoints = data.map((d, i) => {
+  const p = getPoint(d.value, i);
+  return `${p.x},${p.y}`;
+}).join(' ');
+
+// Spider Web Background Rings
+const rings = [20, 40, 60, 80, 100];
+---
+
+<div class="radar-container">
+  <svg viewBox={`0 0 ${size} ${size}`} class="radar-chart">
+    {/* Inner spider web rings */}
+    {rings.map((ringValue) => (
+      <polygon 
+        points={data.map((_, i) => {
+          const p = getPoint(ringValue, i);
+          return `${p.x},${p.y}`;
+        }).join(' ')} 
+        class="radar-ring"
+      />
+    ))}
+    
+    {/* Spokes mapping center to outer ring */}
+    {data.map((_, i) => {
+      const p = getPoint(100, i);
+      return <line x1={center} y1={center} x2={p.x} y2={p.y} class="radar-spoke" />;
+    })}
+
+    {/* The Actual Data Polygon */}
+    <polygon points={polygonPoints} class="radar-data-fill" />
+    
+    {/* The Data Plot Points */}
+    {data.map((d, i) => {
+      const p = getPoint(d.value, i);
+      return <circle cx={p.x} cy={p.y} r="4" class="radar-point" />;
+    })}
+
+    {/* The Labels */}
+    {data.map((d, i) => {
+      // Push label out slightly further than the 100 radius
+      const labelAngle = getAngle(i);
+      const labelRadius = radius + 25;
+      const x = center + labelRadius * Math.cos(labelAngle);
+      const y = center + labelRadius * Math.sin(labelAngle);
+      
+      // Determine text anchor based on X position to prevent clipping
+      let anchor = "middle";
+      if (Math.cos(labelAngle) > 0.1) anchor = "start";
+      if (Math.cos(labelAngle) < -0.1) anchor = "end";
+
+      // Slight Y baseline shift
+      const dy = Math.sin(labelAngle) > 0.1 ? 12 : (Math.sin(labelAngle) < -0.1 ? -4 : 4);
+
+      return (
+        <text x={x} y={y} text-anchor={anchor} dy={dy} class="radar-label">
+          {d.label}
+        </text>
+      );
+    })}
+  </svg>
+
+  {/* AIO & Accessibility Feeder Table */}
+  <table class="sr-only" aria-label="Global Industry Durability Data">
+    <thead>
+      <tr>
+        <th scope="col">Industry / Department</th>
+        <th scope="col">Average BIFL Score (0-100)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {data.map(d => (
+        <tr>
+          <td>{d.label}</td>
+          <td>{d.value}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+<style>
+  .radar-container {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    background: var(--bifl-card-bg);
+    border: 1px solid var(--bifl-border-color);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  }
+
+  .radar-chart {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  .radar-ring {
+    fill: none;
+    stroke: var(--bifl-border-color);
+    stroke-width: 1px;
+    stroke-dasharray: 4 4;
+  }
+
+  .radar-spoke {
+    stroke: var(--bifl-border-color);
+    stroke-width: 1px;
+  }
+
+  .radar-data-fill {
+    fill: var(--bifl-brand-green);
+    fill-opacity: 0.15;
+    stroke: var(--bifl-brand-green);
+    stroke-width: 2.5px;
+    stroke-linejoin: round;
+    transition: fill-opacity 0.3s ease;
+  }
+  .radar-data-fill:hover {
+    fill-opacity: 0.25;
+  }
+
+  .radar-point {
+    fill: var(--bifl-canvas);
+    stroke: var(--bifl-brand-green);
+    stroke-width: 2px;
+  }
+
+  .radar-label {
+    fill: var(--bifl-charcoal);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  /* Accessibility & Bot Feeder Class */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+</style>

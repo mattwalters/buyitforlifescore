@@ -1,0 +1,194 @@
+---
+import * as d3 from 'd3';
+
+export interface Props {
+  series: {
+    id: string;
+    label: string;
+    color: string;
+    data: { year: number; score: number }[];
+  }[];
+}
+
+const { series } = Astro.props as Props;
+
+// Chart Dimensions
+const width = 800;
+const height = 300;
+const margin = { top: 30, right: 120, bottom: 40, left: 50 }; // Wide right margin for label
+
+const allDataPoints = series.flatMap(s => s.data);
+
+// Domains
+const currentYear = new Date().getFullYear();
+const xMin = d3.min(allDataPoints, d => d.year) ?? (currentYear - 10);
+const xMax = d3.max(allDataPoints, d => d.year) ?? currentYear;
+
+const xScale = d3.scaleLinear()
+  .domain([xMin, xMax])
+  .range([margin.left, width - margin.right]);
+
+const yScale = d3.scaleLinear()
+  .domain([0, 100])
+  .range([height - margin.bottom, margin.top]);
+
+const yTicks = [0, 25, 50, 75, 100];
+const maxAge = xMax - xMin;
+// Pick intelligent step size for X axis to avoid crunching text
+const stepSize = maxAge > 10 ? 2 : 1;
+const xTicks = d3.range(xMin, xMax + 1, stepSize);
+
+const lineGenerator = d3.line<{year: number, score: number}>()
+  .x(d => xScale(d.year))
+  .y(d => yScale(d.score))
+  .curve(d3.curveMonotoneX); // Smooth curves over discrete years
+
+// Calculate all SVG elements natively on the server
+---
+<div class="tufte-timeline">
+  
+  <svg 
+    viewBox={`0 0 ${width} ${height}`} 
+    width="100%" 
+    height="100%" 
+    aria-hidden="true" 
+    class="tufte-svg"
+  >
+    <!-- Background Grid -->
+    <g class="grid">
+      {yTicks.map(tick => (
+        <line 
+          x1={margin.left} 
+          x2={width - margin.right} 
+          y1={yScale(tick)} 
+          y2={yScale(tick)} 
+          stroke="var(--bifl-border)" 
+          stroke-width="1" 
+          stroke-dasharray="4 4" 
+        />
+      ))}
+      {yTicks.map(tick => (
+        <text 
+          x={margin.left - 10} 
+          y={yScale(tick) + 4} 
+          text-anchor="end" 
+          class="tufte-axis-label"
+        >
+          {tick}
+        </text>
+      ))}
+
+      {/* X Axis Base Line */}
+      <line x1={margin.left} x2={width - margin.right} y1={height - margin.bottom} y2={height - margin.bottom} stroke="var(--bifl-charcoal)" stroke-width="1" />
+
+      {xTicks.map(tick => (
+        <g transform={`translate(${xScale(tick)}, ${height - margin.bottom})`}>
+          <line x1="0" x2="0" y1="0" y2="5" stroke="var(--bifl-charcoal)" stroke-width="1" />
+          <text x="0" y="20" text-anchor="middle" class="tufte-axis-label">{tick}</text>
+        </g>
+      ))}
+    </g>
+
+    <!-- Data Series -->
+    {series.map((s, i) => {
+      // Sort data chronologically just in case
+      const sortedData = [...s.data].sort((a, b) => a.year - b.year);
+      const pathD = lineGenerator(sortedData);
+      if (!pathD) return null;
+
+      const lastPoint = sortedData[sortedData.length - 1];
+
+      return (
+        <g class="tufte-series group">
+          <!-- The Path -->
+          <path 
+            d={pathD} 
+            fill="none" 
+            stroke={s.color} 
+            stroke-width="3" 
+            stroke-linecap="round" 
+            stroke-linejoin="round"
+          />
+          
+          <!-- Scatter Dots for valid data points -->
+          {sortedData.map(d => (
+            <circle cx={xScale(d.year)} cy={yScale(d.score)} r="4" fill={s.color} stroke="#fff" stroke-width="1.5" />
+          ))}
+
+          <!-- Series Label (Pinning to the final data point) -->
+          {lastPoint && (
+             <text 
+               x={xScale(lastPoint.year) + 8} 
+               y={yScale(lastPoint.score) + 4} 
+               class="tufte-series-label" 
+               fill={s.color}
+             >
+               {s.label}
+             </text>
+          )}
+        </g>
+      );
+    })}
+  </svg>
+
+  <!-- AIO / LLM Feeder Table (.sr-only will hide it visually but keep it in DOM for scrapers) -->
+  <table class="sr-only">
+    <caption>Historical Quality Trajectory: Sentiment Score over Time</caption>
+    <thead>
+      <tr>
+        <th>Year</th>
+        {series.map(s => <th>{s.label} Ranking</th>)}
+      </tr>
+    </thead>
+    <tbody>
+      {d3.range(xMin, xMax + 1).map(year => (
+        <tr>
+          <td>{year}</td>
+          {series.map(s => {
+            const val = s.data.find(d => d.year === year)?.score;
+            return <td>{val !== undefined ? `${val.toFixed(1)}/100` : "Insufficient Data"}</td>
+          })}
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+<style>
+  .tufte-timeline {
+    width: 100%;
+    max-width: 900px;
+    margin: 2rem auto;
+    font-family: inherit;
+    position: relative;
+  }
+  .tufte-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+  .tufte-axis-label {
+    font-size: 12px;
+    fill: var(--bifl-text-muted, #64748b);
+    user-select: none;
+  }
+  .tufte-series-label {
+    font-size: 13px;
+    font-weight: 600;
+    user-select: none;
+  }
+  /* Pure CSS Interactivity without Javascript */
+  .tufte-series {
+    opacity: 0.8;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+  .tufte-series:hover {
+    opacity: 1;
+  }
+  /* Dim other series when one is hovered */
+  .tufte-svg:hover .tufte-series:not(:hover) {
+    opacity: 0.2;
+    filter: grayscale(100%);
+  }
+</style>

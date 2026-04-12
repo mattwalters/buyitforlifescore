@@ -1,4 +1,5 @@
  
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
  
 import { prisma } from "@mono/db";
@@ -40,7 +41,7 @@ async function withRetry<T>(fn: () => Promise<T>, maxRetries = 3, delayMs = 2000
     } catch (err: unknown) {
       attempt++;
       if (attempt >= maxRetries) throw err;
-      console.warn(`   [Retry] API Error: ${err?.message}. Retrying in ${delayMs}ms (Attempt ${attempt}/${maxRetries})...`);
+      console.warn(`   [Retry] API Error: ${(err as any)?.message}. Retrying in ${delayMs}ms (Attempt ${attempt}/${maxRetries})...`);
       await new Promise(r => setTimeout(r, delayMs));
       delayMs *= 2; // exponential backoff
     }
@@ -108,7 +109,7 @@ GOOD Output: "Kitchen Tongs" and "Spatulas" must remain separate specific tool h
       config: {
         responseMimeType: "application/json",
         responseSchema: llmResponseSchema,
-        thinkingConfig: getThinkingConfig(ACTIVE_MODEL, ACTIVE_THINKING_LEVEL)
+        thinkingConfig: getThinkingConfig(ACTIVE_MODEL, ACTIVE_THINKING_LEVEL) as any
       }
     }));
 
@@ -168,7 +169,7 @@ GOOD Output: "Kitchen Tongs" and "Spatulas" must remain separate specific tool h
             model: ACTIVE_MODEL,
             promptTokens: usage.promptTokenCount,
             responseTokens: usage.candidatesTokenCount || 0,
-            thinkingTokens: usage.thoughtsTokenCount || usage.thoughts_token_count || 0,
+            thinkingTokens: usage.thoughtsTokenCount || (usage as any).thoughts_token_count || 0,
             totalTokens: usage.totalTokenCount,
             costInUsd: cost
           }
@@ -176,7 +177,7 @@ GOOD Output: "Kitchen Tongs" and "Spatulas" must remain separate specific tool h
       }
     }
   } catch (err: unknown) {
-    console.error(`   [Consolidation] ❌ Error:`, err?.message);
+    console.error(`   [Consolidation] ❌ Error:`, (err as any)?.message);
   }
 }
 

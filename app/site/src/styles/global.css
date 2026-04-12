@@ -64,6 +64,12 @@ a:hover {
 }
 
 /* Structural Layout elements */
+.container {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
 body > header {
   background-color: var(--bifl-card-bg);
   border-bottom: 2px solid var(--bifl-brand-green);
@@ -86,9 +92,8 @@ body > header .container {
 .site-logo:hover { text-decoration: none; color: var(--bifl-brand-green); }
 
 main.container {
-  max-width: var(--container-max);
-  margin: 2rem auto;
-  padding: 0 1rem;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
   min-height: 80vh;
 }
 

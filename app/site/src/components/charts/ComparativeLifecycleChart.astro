@@ -1,0 +1,145 @@
+---
+import * as d3 from 'd3';
+
+export interface ComparativeLineSeries {
+  id: string;
+  label: string;
+  color: string;
+  data: {
+    period: string; // e.g. "2018", "2019"
+    score: number;  // 0-100 overall sentiment score
+  }[];
+}
+
+interface Props {
+  series: ComparativeLineSeries[];
+  width?: number;
+  height?: number;
+  hideLegend?: boolean;
+}
+
+const { series, width = 600, height = 350, hideLegend = false } = Astro.props;
+
+// Filter out series with no data
+const activeSeries = series.filter(s => s.data.length > 0);
+
+const margin = { top: 20, right: 30, bottom: 40, left: 40 }; 
+const innerWidth = width - margin.left - margin.right;
+const innerHeight = height - margin.top - margin.bottom;
+
+// Dynamically extract all unique periods used across all series and sort chronologically
+const allPeriodsSet = new Set<string>();
+activeSeries.forEach(s => s.data.forEach(d => allPeriodsSet.add(d.period)));
+const periods = Array.from(allPeriodsSet).sort();
+
+const xBand = d3.scalePoint()
+  .domain(periods)
+  .range([0, innerWidth])
+  .padding(0.1);
+
+const y = d3.scaleLinear()
+  .domain([0, 100])
+  .range([innerHeight, 0]);
+
+const yTicks = y.ticks(5);
+
+const lineGenerator = d3.line<{period: string, score: number}>()
+  .x(d => xBand(d.period)!)
+  .y(d => y(d.score))
+  .curve(d3.curveMonotoneX);
+
+---
+
+<div class="comparative-trajectory-chart w-full overflow-hidden flex flex-col items-center" style={`max-width: ${width}px;`}>
+  <svg width="100%" height="auto" viewBox={`0 0 ${width} ${height}`} class="font-sans shrink-0">
+    <g transform={`translate(${margin.left},${margin.top})`}>
+      
+      {/* Grid lines (Y-axis) */}
+      {yTicks.map(tick => (
+        <g class="tick" transform={`translate(0,${y(tick)})`}>
+          <line x2={innerWidth} stroke="#f1f5f9" stroke-dasharray="4" stroke-width="1" />
+          <text 
+            x="-10" 
+            dy="0.32em" 
+            fill="#64748b" 
+            text-anchor="end" 
+            font-size="12"
+          >
+            {tick}%
+          </text>
+        </g>
+      ))}
+
+      {/* X-axis labels */}
+      <g transform={`translate(0,${innerHeight})`}>
+        {periods.map(period => (
+          <text
+            x={xBand(period)!}
+            y="25"
+            text-anchor="middle"
+            fill="#475569"
+            font-size="12"
+            font-weight="600"
+          >
+            {period}
+          </text>
+        ))}
+      </g>
+
+      {/* Lines and Data Points */}
+      {activeSeries.map((s, idx) => {
+        const pathData = lineGenerator(s.data)!;
+        const strokeWidth = idx === 0 ? "4" : "2.5"; // Thicker line for the Champion
+        const opacity = idx === 0 ? "1" : "0.7";
+        
+        return (
+          <g class={`series-${s.id}`} style={`opacity: ${opacity};`}>
+            {/* The Line */}
+            <path 
+              d={pathData} 
+              fill="none" 
+              stroke={s.color} 
+              stroke-width={strokeWidth} 
+              stroke-linecap="round"
+            />
+
+            {/* The Dots */}
+            {s.data.map(d => (
+              <circle 
+                cx={xBand(d.period)!} 
+                cy={y(d.score)} 
+                r={idx === 0 ? "5" : "4"} 
+                fill="#fff" 
+                stroke={s.color} 
+                stroke-width="2" 
+              />
+            ))}
+          </g>
+        );
+      })}
+    </g>
+  </svg>
+
+  {/* Clean Legend Below Chart to prevent overlapping chaos */}
+  {!hideLegend && (
+    <div class="legend flex flex-wrap justify-center gap-6 mt-4 w-full px-8">
+      {activeSeries.map((s, idx) => {
+         const getRankIcon = (rank?: number) => {
+           if (rank === 1) return "🥇";
+           if (rank === 2) return "🥈";
+           if (rank === 3) return "🥉";
+           if (rank === 4) return "4️⃣";
+           if (rank === 5) return "5️⃣";
+           return "";
+         };
+
+         return (
+           <div class="flex items-center gap-2 text-sm text-slate-700 font-medium whitespace-nowrap">
+             <span style={`display: inline-block; width: 16px; height: 3px; border-radius: 2px; background-color: ${s.color}; transform: translateY(-4px);`}></span>
+             <span>{getRankIcon(s.rank)} {s.label}</span>
+           </div>
+         );
+      })}
+    </div>
+  )}
+</div>

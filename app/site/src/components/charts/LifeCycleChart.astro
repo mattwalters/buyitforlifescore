@@ -1,0 +1,142 @@
+---
+import * as d3 from 'd3';
+
+export interface LifeCycleDataPoint {
+  period: string; // "0-1Y", "1-3Y", "3-5Y", "5-10Y", "10Y+"
+  durability: number;
+  value: number;
+  maintenance: number;
+  warranty: number;
+  repairability: number;
+}
+
+interface Props {
+  data: LifeCycleDataPoint[];
+  width?: number;
+  height?: number;
+}
+
+const { data, width = 600, height = 300 } = Astro.props;
+
+const margin = { top: 20, right: 120, bottom: 40, left: 40 };
+const innerWidth = width - margin.left - margin.right;
+const innerHeight = height - margin.top - margin.bottom;
+
+// Scales
+const xDataMap = data.map(d => d.period);
+const xBand = d3.scalePoint()
+  .domain(xDataMap)
+  .range([0, innerWidth])
+  .padding(0.1);
+
+const y = d3.scaleLinear()
+  .domain([0, 10]) // Metrics are scaled 0-10
+  .range([innerHeight, 0]);
+
+const yTicks = y.ticks(5);
+
+const metrics = [
+  { key: "durability", color: "#10b981", label: "Durability" }, // emerald
+  { key: "value", color: "#3b82f6", label: "Value" }, // blue
+  { key: "maintenance", color: "#f59e0b", label: "Maintenance" }, // amber
+  { key: "warranty", color: "#8b5cf6", label: "Warranty" }, // violet
+  { key: "repairability", color: "#ec4899", label: "Repairability" } // pink
+] as const;
+
+// Generate path data for each metric
+const lineGenerator = (key: keyof LifeCycleDataPoint) => d3.line<LifeCycleDataPoint>()
+  .x(d => xBand(d.period)!)
+  .y(d => y(d[key] as number))
+  .curve(d3.curveMonotoneX);
+
+---
+
+<div class="lifecycle-chart w-full overflow-hidden" style={`max-width: ${width}px;`}>
+  <svg width="100%" height="auto" viewBox={`0 0 ${width} ${height}`} class="font-sans">
+    <g transform={`translate(${margin.left},${margin.top})`}>
+      
+      {/* Grid lines (Y-axis) */}
+      {yTicks.map(tick => (
+        <g class="tick" transform={`translate(0,${y(tick)})`}>
+          <line x2={innerWidth} stroke="#f1f5f9" stroke-width="1" />
+          <text 
+            x="-10" 
+            dy="0.32em" 
+            fill="#64748b" 
+            text-anchor="end" 
+            font-size="12"
+          >
+            {tick}
+          </text>
+        </g>
+      ))}
+
+      {/* Lines */}
+      {metrics.map(m => {
+        const pathData = lineGenerator(m.key)(data)!;
+        return (
+          <path 
+            d={pathData} 
+            fill="none" 
+            stroke={m.color} 
+            stroke-width="3" 
+            stroke-linecap="round"
+          />
+        );
+      })}
+
+      {/* Dots for each data point */}
+      {metrics.map(m => 
+        data.map(d => (
+          <circle 
+            cx={xBand(d.period)!} 
+            cy={y(d[m.key] as number)} 
+            r="4" 
+            fill="#fff" 
+            stroke={m.color} 
+            stroke-width="2" 
+          />
+        ))
+      )}
+
+      {/* X-axis labels */}
+      <g transform={`translate(0,${innerHeight})`}>
+        {data.map(d => (
+          <text
+            x={xBand(d.period)!}
+            y="20"
+            text-anchor="middle"
+            fill="#475569"
+            font-size="12"
+            font-weight="600"
+          >
+            {d.period}
+          </text>
+        ))}
+      </g>
+
+      {/* Direct Line Labels at the end of the chart */}
+      {metrics.map(m => {
+        // Grab the last data point's Y position to place the label
+        const lastPoint = data[data.length - 1];
+        if (!lastPoint) return null;
+        const lastY = y(lastPoint[m.key] as number);
+        const lastX = xBand(lastPoint.period)! + 10;
+        
+        return (
+          <text
+            x={lastX}
+            y={lastY}
+            dy="0.32em"
+            fill={m.color}
+            font-size="12"
+            font-weight="700"
+          >
+            {m.label}
+          </text>
+        );
+      })}
+
+    </g>
+  </svg>
+</div>

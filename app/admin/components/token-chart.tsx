@@ -79,7 +79,7 @@ export function TokenChart({ data }: TokenChartProps) {
             width={70}
           />
           <Tooltip 
-            formatter={(value: number, name: string) => [formatters.number(value), name]}
+            formatter={(value: any, name: any) => [formatters.number(value as number), name as string]}
             contentStyle={{ 
               backgroundColor: "hsl(var(--card))", 
               borderColor: "hsl(var(--border))",

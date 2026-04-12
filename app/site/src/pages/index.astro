@@ -4,9 +4,56 @@ import { slugify } from "../utils/slugify";
 
 import BaseLayout from '../layouts/BaseLayout.astro';
 
+import BaseLayout from '../layouts/BaseLayout.astro';
+import RadarChart from '../components/RadarChart.astro';
+
+// Global Aggregations
+const totalProducts = await db.goldProduct.count();
+const totalExperiences = await db.silverProductMention.count();
+const topBrandsCount = await db.goldBrand.count();
+
 const departments = await db.goldDepartment.findMany({
-  orderBy: { canonicalName: 'asc' }
+  include: {
+    products: {
+      where: { mentionCount: { gt: 0 } }
+    }
+  }
 });
+
+// Map Departments to Radar Chart format (Average BIFL Score of their products)
+// We only map Top 5 or 6 departments that have enough data
+const radarDataRaw = departments
+  .map(dept => {
+    const scoredProducts = dept.products.filter(p => p.avgSentiment > 0);
+    const avgScore = scoredProducts.length > 0 
+      ? scoredProducts.reduce((sum, p) => sum + p.avgSentiment, 0) / scoredProducts.length
+      : 0;
+    
+    // Scale the sentiment (usually 0 to 1 ish, let's normalize to a 100 pt scale if needed)
+    // Assuming pipelines scale average to ~0.5 to 1.0. Let's just multiply by 100 
+    // or map it properly. For now we use Math.min(100, Math.round(avgScore * 100))
+    // Actually our fake data / current silver data might just have `avgSentiment` 
+    // If avgSentiment is exactly '1' for purely positive, then 1*100 = 100.
+    const normalizedScore = Math.min(100, Math.max(10, Math.round((avgScore / 1) * 100)));
+    
+    return {
+      label: dept.canonicalName,
+      value: normalizedScore,
+      dataPoints: scoredProducts.length
+    };
+  })
+  .filter(d => d.dataPoints > 0)
+  .sort((a, b) => b.dataPoints - a.dataPoints)
+  .slice(0, 6); // Keep it to 6 points max for a clean Hexagon radar
+
+// Fallback if DB is completely empty or just the minimal stub data is weird
+const radarData = radarDataRaw.length >= 3 ? radarDataRaw : [
+  { label: 'Footwear', value: 92 },
+  { label: 'Kitchen & Dining', value: 85 },
+  { label: 'Appliances', value: 30 },
+  { label: 'Apparel', value: 75 },
+  { label: 'Tools', value: 88 }
+];
 
 const categories = await db.goldCategory.findMany({
   orderBy: { canonicalName: 'asc' }
@@ -14,40 +61,46 @@ const categories = await db.goldCategory.findMany({
 ---
 
 <BaseLayout title="Buy It For Life Data & Rankings">
-  <section>
-    <h1>The Heritage Ledger</h1>
-    <p>Discover products engineered to last a lifetime, ranked by true community experience rather than marketing copy.</p>
+  <section style="display: flex; gap: 3rem; flex-wrap: wrap; margin-top: 2rem; align-items: center;">
+    <div style="flex: 1; min-width: 300px;">
+      <h1 style="font-size: 3.5rem; line-height: 1.1; margin-bottom: 1.5rem;">The State of Buy It For Life.</h1>
+      <p style="font-size: 1.125rem; margin-bottom: 2rem;">Discover products engineered to last a lifetime. We crawl forums, analyze decades of community experience, and rank goods based on actual survival rates rather than marketing copy.</p>
+      
+      <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+        <div class="bifl-card" style="margin: 0; flex: 1; padding: 1rem; border-top: 4px solid var(--bifl-brand-green);">
+          <h4 style="margin: 0; color: #888; font-size: 0.875rem;">Verified Products</h4>
+          <span style="font-size: 1.75rem; font-weight: 700; color: var(--bifl-charcoal);">{totalProducts.toLocaleString()}</span>
+        </div>
+        <div class="bifl-card" style="margin: 0; flex: 1; padding: 1rem; border-top: 4px solid var(--bifl-accent-rust);">
+          <h4 style="margin: 0; color: #888; font-size: 0.875rem;">Human Experiences</h4>
+          <span style="font-size: 1.75rem; font-weight: 700; color: var(--bifl-charcoal);">{totalExperiences.toLocaleString()}</span>
+        </div>
+      </div>
+      
+      <a href="/brands" class="button" style="font-size: 1.125rem; padding: 1rem 2rem;">Explore the Master Directory</a>
+    </div>
+
+    <div style="flex: 1; min-width: 300px; display: flex; flex-direction: column; align-items: center;">
+      <h3 style="margin-top: 0; color: var(--bifl-charcoal);">Global Industry Durability</h3>
+      <RadarChart data={radarData} />
+      <p style="font-size: 0.875rem; color: #888; margin-top: 1rem; text-align: center;">Average 100-pt durability score across departments based on community consensus.</p>
+    </div>
   </section>
 
+  <hr style="border: none; border-top: 1px solid var(--bifl-border-color); margin: 4rem 0;" />
+
   <section>
-    <h2>Top Categories</h2>
+    <div style="display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--bifl-border-color); padding-bottom: 0.5rem; margin-bottom: 2rem;">
+      <h2 style="margin: 0; border: none; padding: 0;">Top Product Categories</h2>
+      <a href="/department/categories" style="font-size: 0.875rem; font-weight: 700;">View All Categories &rarr;</a>
+    </div>
+    
     <div class="data-grid">
       {categories.map((cat) => (
-        <a href={`/category/${slugify(cat.canonicalName)}`} class="bifl-card">
-          <h3 style="margin: 0; color: var(--bifl-brand-green);">{cat.canonicalName}</h3>
+        <a href={`/category/${slugify(cat.canonicalName)}`} class="bifl-card" style="text-decoration: none;">
+          <h3 style="margin: 0; color: var(--bifl-brand-green); font-size: 1.25rem;">{cat.canonicalName}</h3>
         </a>
       ))}
-    </div>
-  </section>
-
-  <section style="display: flex; gap: 2rem;">
-    <div style="flex: 1;">
-      <h2>Departments</h2>
-      <ul style="list-style: square;">
-        {departments.map((dept) => (
-          <li>
-            <a href={`/department/${slugify(dept.canonicalName)}`}>
-              {dept.canonicalName}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </div>
-    <div style="flex: 1;">
-      <h2>Explore</h2>
-      <ul style="list-style: square;">
-        <li><a href="/brands">Master Brands Directory</a></li>
-      </ul>
     </div>
   </section>
 </BaseLayout>

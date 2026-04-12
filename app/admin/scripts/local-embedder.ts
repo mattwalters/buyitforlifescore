@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
  
  
  
@@ -25,10 +26,10 @@ export const embedWithRetry = async (text: string, _dim: number = 1024): Promise
   try {
     const extractor = await EmbedderPipeline.getInstance();
     // Use format specific to Mxbai: pooling="cls", normalize=true
-    const output = await extractor(text, { pooling: "cls", normalize: true });
+    const output = await (extractor as any)(text, { pooling: "cls", normalize: true });
     return Array.from(output.data);
   } catch (err: unknown) {
-    console.error(`[ONNX] Embedding failed:`, err.message);
+    console.error(`[ONNX] Embedding failed:`, (err as any).message);
     return [];
   }
 };
@@ -37,12 +38,12 @@ export const embedBatchWithRetry = async (texts: string[], _dim: number = 1024):
   if (texts.length === 0) return [];
   try {
     const extractor = await EmbedderPipeline.getInstance();
-    const output = await extractor(texts, { pooling: "cls", normalize: true });
+    const output = await (extractor as any)(texts, { pooling: "cls", normalize: true });
     // Transformers.js tolist() returns the nested arrays directly derived from the tensor dimensions
     const lists = output.tolist();
     return lists;
   } catch (err: unknown) {
-    console.error(`[ONNX] Batch embedding failed:`, err.message);
+    console.error(`[ONNX] Batch embedding failed:`, (err as any).message);
     return [];
   }
 };

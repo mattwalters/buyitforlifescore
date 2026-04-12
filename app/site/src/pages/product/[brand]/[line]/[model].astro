@@ -31,6 +31,25 @@ export async function getStaticPaths() {
     // Only resolve siblings if it belongs to a line
     const siblingModels = model.goldProductLine ? model.goldProductLine.products.filter(p => p.id !== model.id) : [];
 
+    // Calculate normalized 100-pt rating for Schema.org
+    const schemaRating = Math.min(100, Math.max(10, Math.round((model.avgSentiment / 1) * 100)));
+
+    const schemaData = {
+      "@context": "https://schema.org/",
+      "@type": "Product",
+      "name": model.canonicalName,
+      "brand": {
+        "@type": "Brand",
+        "name": model.goldBrand.canonicalName
+      },
+      "aggregateRating": model.mentionCount > 0 ? {
+        "@type": "AggregateRating",
+        "ratingValue": schemaRating.toString(),
+        "bestRating": "100",
+        "ratingCount": model.mentionCount.toString()
+      } : undefined
+    };
+
     return {
       params: { 
         brand: slugify(model.goldBrand.canonicalName),
@@ -45,16 +64,17 @@ export async function getStaticPaths() {
         quotes,
         siblingModels,
         lineDisplay,
-        lineSlug
+        lineSlug,
+        schemaData
       },
     };
   });
 }
 
-const { model, siblingModels, avgPrice, avgDuration, caveats, quotes, lineDisplay, lineSlug } = Astro.props;
+const { model, siblingModels, avgPrice, avgDuration, caveats, quotes, lineDisplay, lineSlug, schemaData } = Astro.props;
 ---
 
-<BaseLayout title={`${model.goldBrand.canonicalName} ${model.canonicalName} Review`}>
+<BaseLayout title={`${model.goldBrand.canonicalName} ${model.canonicalName} Review`} schemaData={schemaData}>
   <nav class="breadcrumbs">
     <a href="/">Home</a> &gt; 
     <a href={`/brands/${slugify(model.goldBrand.canonicalName)}`}>{model.goldBrand.canonicalName}</a> &gt; 

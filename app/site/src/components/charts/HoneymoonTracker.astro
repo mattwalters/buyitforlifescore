@@ -1,0 +1,115 @@
+---
+import * as d3 from 'd3';
+
+interface Props {
+  data: {
+    period: string; // e.g., "0-1Y", "1-3Y", "3-5Y", "5-10Y", "10Y+"
+    positive: number;
+    neutral: number;
+    negative: number;
+  }[];
+  width?: number;
+  height?: number;
+}
+
+const { data, width = 600, height = 300 } = Astro.props;
+
+// Margins
+const margin = { top: 20, right: 30, bottom: 40, left: 40 };
+const innerWidth = width - margin.left - margin.right;
+const innerHeight = height - margin.top - margin.bottom;
+
+// Stacker
+const stack = d3.stack<any>()
+  .keys(["negative", "neutral", "positive"])
+  .order(d3.stackOrderNone)
+  .offset(d3.stackOffsetNone);
+
+const series = stack(data);
+
+// Scales
+const x = d3.scaleBand()
+  .domain(data.map(d => d.period))
+  .range([0, innerWidth])
+  .padding(0.2);
+
+const maxStackValue = d3.max(series, d => d3.max(d, d => d[1])) || 1;
+
+const y = d3.scaleLinear()
+  .domain([0, maxStackValue])
+  .nice()
+  .range([innerHeight, 0]);
+
+const colorMap: Record<string, string> = {
+  negative: "#ef4444", // red-500
+  neutral: "#94a3b8", // slate-400
+  positive: "#10b981", // emerald-500
+};
+
+// Generate Y-axis ticks
+const yTicks = y.ticks(5);
+---
+
+<div class="honeymoon-tracker w-full overflow-hidden" style={`max-width: ${width}px;`}>
+  <svg width="100%" height="auto" viewBox={`0 0 ${width} ${height}`} class="font-sans">
+    <g transform={`translate(${margin.left},${margin.top})`}>
+      
+      {/* Grid lines (Y-axis) */}
+      {yTicks.map(tick => (
+        <g class="tick" transform={`translate(0,${y(tick)})`}>
+          <line x2={innerWidth} stroke="#f1f5f9" stroke-width="1" />
+          <text 
+            x="-10" 
+            dy="0.32em" 
+            fill="#64748b" 
+            text-anchor="end" 
+            font-size="12"
+          >
+            {tick}
+          </text>
+        </g>
+      ))}
+
+      {/* Bars */}
+      {series.map(layer => (
+        <g fill={colorMap[layer.key]}>
+          {layer.map(d => {
+            const period = d.data.period;
+            const xPos = x(period)!;
+            const yPos = y(d[1]);
+            const barHeight = y(d[0]) - yPos;
+            
+            // Only render visual rects if height > 0
+            if (barHeight <= 0) return null;
+
+            return (
+              <rect
+                x={xPos}
+                y={yPos}
+                height={barHeight}
+                width={x.bandwidth()}
+                rx="2"
+              />
+            );
+          })}
+        </g>
+      ))}
+
+      {/* X-axis labels */}
+      <g transform={`translate(0,${innerHeight})`}>
+        {data.map(d => (
+          <text
+            x={x(d.period)! + x.bandwidth() / 2}
+            y="20"
+            text-anchor="middle"
+            fill="#475569"
+            font-size="12"
+            font-weight="600"
+          >
+            {d.period}
+          </text>
+        ))}
+      </g>
+    </g>
+  </svg>
+</div>
