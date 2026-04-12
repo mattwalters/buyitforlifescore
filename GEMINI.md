@@ -58,6 +58,11 @@ The AI Agent is explicitly authorized to run any `npm` command defined in `packa
 - The AI Agent must **NEVER** run `git add`, `git commit`, `git push` or attempt to manage version control state.
 - The AI Agent should only make code changes and leave the git management entirely up to the human developer.
 
+## Python Environment (uv)
+
+The monorepo contains Python workspaces (e.g., `app/pipeline`). We use **`uv`** as our Python package and project manager. 
+- You MUST use `uv run <script>` instead of `.venv/bin/python` to ensure the correct virtual environment and dependencies are automatically resolved.
+
 ## Code Formatting
 
 The project uses **Prettier** for code formatting.
