@@ -95,7 +95,7 @@ Thread to analyze:
         if thinking:
             if thinking.lstrip('-').isdigit():
                 gen_config.thinking_config = types.ThinkingConfig(
-                    thinking_budget_tokens=int(thinking)
+                    thinking_budget=int(thinking)
                 )
             else:
                 gen_config.thinking_config = types.ThinkingConfig(
