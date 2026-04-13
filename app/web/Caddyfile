@@ -10,6 +10,6 @@
     }
 
     # Proxy to the Dagster instance running on the private Railway network.
-    # We fallback to `http://pipeline.railway.internal:3000` assuming standard naming.
-    reverse_proxy /* {$UPSTREAM_URL:http://pipeline.railway.internal:3000}
+    # We fallback to `http://pipeline.railway.internal:8080` assuming standard naming.
+    reverse_proxy /* {$UPSTREAM_URL:http://pipeline.railway.internal:8080}
 }
