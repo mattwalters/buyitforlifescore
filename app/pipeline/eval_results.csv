@@ -1,4 +1,0 @@
-Model,Thinking,F1Score,Precision,Recall,CostUSD,LatencySeconds
-gemini-2.5-flash-lite,1024,0.8067,0.6761,1.0,0.009542,9.24
-gemini-2.5-flash-lite,1024,0.768,0.64,0.96,0.00973,13.95
-gemini-3-flash-preview,low,0.7931,0.6866,0.9388,0.02289,7.33
