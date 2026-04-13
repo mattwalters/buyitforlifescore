@@ -1,0 +1,9 @@
+.venv/
+.dg/
+.tmp_dagster_home*
+__pycache__/
+*.parquet
+*.duckdb
+uv.lock.bak
+eval_results.csv
+data/

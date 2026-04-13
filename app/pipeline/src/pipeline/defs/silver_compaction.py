@@ -1,0 +1,47 @@
+import duckdb
+import os
+from dagster import asset, MonthlyPartitionsDefinition, MaterializeResult
+
+bifl_monthly_partitions = MonthlyPartitionsDefinition(start_date="2012-01-01")
+
+@asset(
+    group_name="silver",
+    partitions_def=bifl_monthly_partitions,
+    deps=["silver_entity_discovery"],
+)
+def silver_entity_discovery_monthly(context) -> MaterializeResult:
+    """Compacts the small daily Parquet files into a large monthly partition."""
+    target_month_str = context.partition_key # e.g. "2012-01"
+    
+    from ..utils.paths import get_data_dir
+    data_dir = get_data_dir()
+    
+    source_glob = f"{data_dir}/silver/entity_discovery_{target_month_str}-*.parquet"
+    target_dir = f"{data_dir}/silver_monthly"
+    target_parquet = f"{target_dir}/entity_discovery_{target_month_str}.parquet"
+    
+    if not target_dir.startswith("s3://"):
+        os.makedirs(target_dir, exist_ok=True)
+    
+    with duckdb.connect(database=':memory:') as con:
+        if data_dir.startswith("s3://"):
+            con.execute("INSTALL httpfs; LOAD httpfs;")
+        try:
+            row_count = con.execute(f"SELECT count(*) FROM read_parquet('{source_glob}')").fetchone()[0]
+        except duckdb.IOException:
+            context.log.info(f"No daily files found for {target_month_str}. Skipping.")
+            return MaterializeResult()
+            
+        if row_count > 0:
+            con.execute(f"COPY (SELECT * FROM read_parquet('{source_glob}')) TO '{target_parquet}' (FORMAT PARQUET)")
+            context.log.info(f"Compacted {row_count} rows into {target_parquet}")
+            
+            return MaterializeResult(
+                metadata={
+                    "partition": target_month_str,
+                    "rows_compacted": row_count,
+                    "file_path": target_parquet
+                }
+            )
+            
+    return MaterializeResult()

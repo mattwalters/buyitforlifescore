@@ -13,6 +13,7 @@ import tqdm.asyncio
 # Allow import of the pipeline package
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 from pipeline.utils.pricing import AiModel, calculate_gemini_cost
+from pipeline.utils.judge import run_judge_alignment
 
 # --- Candidate Schema (Matches Canonical Model) ---
 class MentionItem(BaseModel):
@@ -20,14 +21,6 @@ class MentionItem(BaseModel):
     brand: str = Field(description="The stated brand name. Normalize to canonical proper spelling.")
     productName: str = Field(description="The specific marketed product line or model name. Leave as empty string if no specific model is mentioned.")
     source_block_ids: list[int] = Field(description="The list of block_ids where this author explicitly mentioned this product.")
-
-# --- Judge Pydantic Schemas ---
-class AlignmentMapping(BaseModel):
-    expected_index: int
-    extracted_index: int
-
-class AlignmentResult(BaseModel):
-    mappings: list[AlignmentMapping]
 
 async def _extract_candidate(doc_id: str, content_blocks: list[dict], model_name: str, thinking: str | None, semaphore: asyncio.Semaphore) -> tuple[list[dict], float]:
     """Runs Phase 1 LLM extraction on flat Canonical Data."""
@@ -93,57 +86,6 @@ Thread to analyze (JSON ContentBlocks):
     return results, cost
 
 
-async def run_judge_alignment(expected_mentions: list[dict], extracted_mentions: list[dict], semaphore: asyncio.Semaphore) -> tuple[list[AlignmentMapping], float]:
-    """Uses Gemini 3.1 Pro (High Thinking) as a Judge to semantically map Candidate -> Benchmark."""
-    if not expected_mentions and not extracted_mentions:
-        return [], 0.0
-
-    client = genai.Client()
-    
-    # Strip unnecessary noise
-    expected_for_judge = [{"index": i, "author_id": e.get("author_id"), "brand": e.get("brand"), "productName": e.get("productName")} for i, e in enumerate(expected_mentions)]
-    extracted_for_judge = [{"index": i, "author_id": e.get("author_id"), "brand": e.get("brand"), "productName": e.get("productName")} for i, e in enumerate(extracted_mentions)]
-
-    prompt = f"""You are an expert taxonomy aligner. Match extracted product mentions to the expected benchmark list. 
-The items might have spelling errors or differing specificity, but you must map them if they refer to the exact same product from the underlying text.
-CRITICAL RULE: The extracted item and the expected item MUST have the exact same 'author_id' to be considered a match. Do not map mismatched authors.
-
-Expected Benchmark:
-{json.dumps(expected_for_judge, indent=2)}
-
-Extracted Entities:
-{json.dumps(extracted_for_judge, indent=2)}
-
-Return a list of mappings bridging the matching indices."""
-
-    gen_config = types.GenerateContentConfig(
-        response_mime_type="application/json",
-        response_schema=AlignmentResult,
-        temperature=0.0,
-        thinking_config=types.ThinkingConfig(thinking_level="high")
-    )
-
-    try:
-        async with semaphore:
-            response = await client.aio.models.generate_content(
-                model=AiModel.GEMINI_3_FLASH.value,
-                contents=prompt,
-                config=gen_config,
-            )
-        
-        cost = 0.0
-        if response.usage_metadata:
-            cost = calculate_gemini_cost(AiModel.GEMINI_3_FLASH.value, response.usage_metadata)
-            
-        if response.text:
-            result_dict = json.loads(response.text)
-            return [AlignmentMapping(**m) for m in result_dict.get("mappings", [])], cost
-    except Exception as e:
-        print(f"Judge failed on mapping: {e}")
-        
-    return [], 0.0
-
-
 async def run_evaluation(model_name: str, thinking_budget: str | None, verbose: bool):
     print(f"--- Entity Discovery Phase 1 Eval: {model_name} (Thinking: {thinking_budget}) ---")
     
@@ -186,7 +128,13 @@ async def run_evaluation(model_name: str, thinking_budget: str | None, verbose: 
     
     async def _judge_wrapper(doc_id, expected_benchmark):
         doc_extractions = [e for e in all_extracted_items if e.get('document_id') == doc_id]
-        mappings, judge_cost = await run_judge_alignment(expected_benchmark, doc_extractions, judge_semaphore)
+        mappings, judge_cost = await run_judge_alignment(
+            expected_benchmark, 
+            doc_extractions, 
+            judge_semaphore,
+            judge_model_name=AiModel.GEMINI_3_FLASH.value,
+            judge_thinking_level="low"
+        )
         
         matched_expected_indices = set([m.expected_index for m in mappings])
         matched_extracted_indices = set([m.extracted_index for m in mappings])

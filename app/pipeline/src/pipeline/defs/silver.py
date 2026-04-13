@@ -12,6 +12,9 @@ from google.genai import types
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
 from ..utils.pricing import calculate_gemini_cost, AiModel
+from ..utils.paths import get_data_dir, get_ledger_path
+
+PROMPT_VERSION = "v1.0.0"
 
 # We define a Daily Partition from Jan 2012. 
 bifl_daily_partitions = DailyPartitionsDefinition(start_date="2012-01-01")
@@ -158,13 +161,15 @@ Thread to analyze (JSON ContentBlocks):
 def silver_entity_discovery(context: AssetExecutionContext, config: SilverExtractionConfig) -> MaterializeResult:
     partition_date_str = context.partition_key
     
-    monorepo_root = Path(__file__).resolve().parents[5]
-    bronze_comments_parquet = monorepo_root / "data" / "bronze" / "buyitforlife_comments.parquet"
-    bronze_submissions_parquet = monorepo_root / "data" / "bronze" / "buyitforlife_submissions.parquet"
+    data_dir = get_data_dir()
+    bronze_comments_parquet = f"{data_dir}/bronze/buyitforlife_comments.parquet"
+    bronze_submissions_parquet = f"{data_dir}/bronze/buyitforlife_submissions.parquet"
     
-    silver_dir = monorepo_root / "data" / "silver"
-    silver_dir.mkdir(parents=True, exist_ok=True)
-    target_parquet = silver_dir / f"entity_discovery_{partition_date_str}.parquet"
+    silver_dir_str = f"{data_dir}/silver"
+    if not silver_dir_str.startswith("s3://"):
+        Path(silver_dir_str).mkdir(parents=True, exist_ok=True)
+        
+    target_parquet = f"{silver_dir_str}/entity_discovery_{partition_date_str}.parquet"
     
     limit_clause = f"LIMIT {config.limit}" if config.limit else ""
     
@@ -184,6 +189,9 @@ def silver_entity_discovery(context: AssetExecutionContext, config: SilverExtrac
     """
     
     with duckdb.connect(database=':memory:') as con:
+        if data_dir.startswith("s3://"):
+            con.execute("INSTALL httpfs; LOAD httpfs;")
+            
         # returns [(id, title, body, created_utc, [c1, c2, c3]), ...]
         rows = con.execute(query).fetchall()
 
@@ -214,11 +222,36 @@ def silver_entity_discovery(context: AssetExecutionContext, config: SilverExtrac
     # 3. WRITE SILVER TO PARQUET
     if extracted_items:
         df = pd.DataFrame(extracted_items)
+        df['prompt_version'] = PROMPT_VERSION
+        
         # Using DuckDB to save DataFrame directly to partitioned Parquet!
         with duckdb.connect(database=':memory:') as con:
+            if data_dir.startswith("s3://"):
+                con.execute("INSTALL httpfs; LOAD httpfs;")
+                
             con.register('df_view', df)
             con.execute(f"COPY (SELECT * FROM df_view) TO '{str(target_parquet)}' (FORMAT PARQUET)")
     
+    # 3.5. COST LEDGER PERSISTENCE
+    ledger_path = get_ledger_path()
+    with duckdb.connect(database=ledger_path) as ledger_con:
+        ledger_con.execute("""
+            CREATE TABLE IF NOT EXISTS cost_ledger (
+                run_timestamp TIMESTAMP,
+                partition_key VARCHAR,
+                asset_name VARCHAR,
+                model_used VARCHAR,
+                input_tokens BIGINT,
+                output_tokens BIGINT,
+                cost_usd DOUBLE
+            )
+        """)
+        ledger_con.execute("""
+            INSERT INTO cost_ledger VALUES (
+                current_timestamp, ?, ?, ?, ?, ?, ?
+            )
+        """, [partition_date_str, 'silver_entity_discovery', model_name, total_in, total_out, float(total_cost)])
+        
     # 4. YIELD COST METADATA AND VIEWS!
     metadata = {
         "partition": partition_date_str,
