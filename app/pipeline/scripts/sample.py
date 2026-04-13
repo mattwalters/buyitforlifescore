@@ -83,18 +83,22 @@ def main():
         return
         
     target_selector = f"*{asset_name}" if upstream else asset_name
-    partition_string = ",".join(partitions_to_run)
-    
-    cmd = ["dagster", "asset", "materialize", "--select", target_selector, "--partition", partition_string]
-    
-    print(f"\n[EXEC] Executing: {' '.join(cmd)[:120]}...\n")
+    print(f"\n[EXEC] Dispatching {len(partitions_to_run)} targeted executions to Dagster...\n")
     try:
-        # Since this script runs under `uv run python`, `dagster` will inherently resolve from the active `.venv`
-        subprocess.run(cmd, check=True, env=os.environ.copy())
+        # Dagster CLI in 1.13.0 natively only parses continuous ranges or single partition targets
+        # so we elegantly traverse the array computationally to simulate an ad-hoc backfill!
+
+        for idx, part in enumerate(partitions_to_run):
+            cmd = ["dg", "launch", "--assets", target_selector, "--partition", part]
+            print(f"[{idx+1}/{len(partitions_to_run)}] Queueing DAG for: {part}")
+            
+            # Since this script is orchestrated via `npm run sample`, `dotenv` has already injected AWS creds
+            subprocess.run(cmd, check=True, env=os.environ.copy(), capture_output=True)
+            
     except subprocess.CalledProcessError as e:
         print(f"\n[ERROR] Dagster command failed with exit code: {e.returncode}")
-    except FileNotFoundError:
-        print(f"\n[ERROR] 'dagster' executable not found on path! Did you run this script using `uv run`?")
+        if e.stderr:
+            print(e.stderr.decode('utf-8'))
 
 if __name__ == "__main__":
     try:
