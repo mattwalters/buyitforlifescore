@@ -1,7 +1,11 @@
+{
+    debug
+}
+
 :{$PORT:8080} {
     # Specify the basicauth credentials dynamically.
     # Pass BASIC_AUTH_USER and BASIC_AUTH_HASH via Railway environment variables.
-    basic_auth / {
+    basic_auth /* {
         {$BASIC_AUTH_USER} {$BASIC_AUTH_HASH}
     }
 
