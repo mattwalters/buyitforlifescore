@@ -35,6 +35,7 @@
     "silver:generate": "npm run silver:generate -w @mono/admin --",
     "gold:generate": "npm run gold:generate -w @mono/admin --",
     "deploy:admin": "git push origin origin/main:deploy/admin --force",
+    "deploy:dagster": "git push origin origin/main:deploy/dagster --force",
     "deploy:worker": "git push origin origin/main:deploy/worker --force",
     "deploy": "npm run deploy:worker && npm run deploy:admin",
     "ssh": "railway ssh -s admin",
