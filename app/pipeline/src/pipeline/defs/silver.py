@@ -13,6 +13,7 @@ from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_excep
 
 from ..utils.pricing import calculate_gemini_cost, AiModel
 from ..utils.paths import get_data_dir, get_ledger_path
+from ..utils.db import get_duckdb_connection
 
 PROMPT_VERSION = "v1.0.0"
 
@@ -162,8 +163,8 @@ def silver_entity_discovery(context: AssetExecutionContext, config: SilverExtrac
     partition_date_str = context.partition_key
     
     data_dir = get_data_dir()
-    bronze_comments_parquet = f"{data_dir}/bronze/buyitforlife_comments.parquet"
-    bronze_submissions_parquet = f"{data_dir}/bronze/buyitforlife_submissions.parquet"
+    bronze_comments_parquet = f"{data_dir}/bronze/reddit_buyitforlife_comments.parquet"
+    bronze_submissions_parquet = f"{data_dir}/bronze/reddit_buyitforlife_submissions.parquet"
     
     silver_dir_str = f"{data_dir}/silver"
     if not silver_dir_str.startswith("s3://"):
@@ -188,9 +189,7 @@ def silver_entity_discovery(context: AssetExecutionContext, config: SilverExtrac
         {limit_clause}
     """
     
-    with duckdb.connect(database=':memory:') as con:
-        if data_dir.startswith("s3://"):
-            con.execute("INSTALL httpfs; LOAD httpfs;")
+    with get_duckdb_connection() as con:
             
         # returns [(id, title, body, created_utc, [c1, c2, c3]), ...]
         rows = con.execute(query).fetchall()
@@ -225,16 +224,14 @@ def silver_entity_discovery(context: AssetExecutionContext, config: SilverExtrac
         df['prompt_version'] = PROMPT_VERSION
         
         # Using DuckDB to save DataFrame directly to partitioned Parquet!
-        with duckdb.connect(database=':memory:') as con:
-            if data_dir.startswith("s3://"):
-                con.execute("INSTALL httpfs; LOAD httpfs;")
+        with get_duckdb_connection() as con:
                 
             con.register('df_view', df)
             con.execute(f"COPY (SELECT * FROM df_view) TO '{str(target_parquet)}' (FORMAT PARQUET)")
     
     # 3.5. COST LEDGER PERSISTENCE
     ledger_path = get_ledger_path()
-    with duckdb.connect(database=ledger_path) as ledger_con:
+    with get_duckdb_connection(database=ledger_path) as ledger_con:
         ledger_con.execute("""
             CREATE TABLE IF NOT EXISTS cost_ledger (
                 run_timestamp TIMESTAMP,

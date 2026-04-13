@@ -1,5 +1,5 @@
-import duckdb
 import os
+from ..utils.db import get_duckdb_connection
 from dagster import asset, MaterializeResult, MetadataValue
 
 @asset(group_name="observability")
@@ -15,7 +15,7 @@ def llm_cost_dashboard(context) -> MaterializeResult:
         context.log.warning("Cost ledger database does not exist yet. No data to report.")
         return MaterializeResult(metadata={"status": "No ledger found"})
         
-    with duckdb.connect(database=ledger_path, read_only=True) as con:
+    with get_duckdb_connection(database=ledger_path, read_only=True) as con:
         tables = con.execute("SHOW TABLES").fetchall()
         if not any(t[0] == 'cost_ledger' for t in tables):
             return MaterializeResult(metadata={"status": "Ledger table empty"})

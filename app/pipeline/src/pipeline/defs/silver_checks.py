@@ -4,6 +4,7 @@ from dagster import asset_check, AssetCheckResult, MetadataValue
 from .silver import silver_entity_discovery
 from ..utils.pricing import AiModel
 from ..utils.judge import run_blind_canary_evaluation
+from ..utils.db import get_duckdb_connection
 
 @asset_check(asset=silver_entity_discovery)
 def canary_validity_check(context) -> AssetCheckResult:
@@ -15,9 +16,7 @@ def canary_validity_check(context) -> AssetCheckResult:
     data_dir = get_data_dir()
     source_glob = f"{data_dir}/silver/entity_discovery_*.parquet"
     
-    with duckdb.connect(database=':memory:') as con:
-        if data_dir.startswith("s3://"):
-            con.execute("INSTALL httpfs; LOAD httpfs;")
+    with get_duckdb_connection() as con:
         try:
             # We use RESERVOIR sampling in DuckDB to pull an exact subset of the population longitudinally
             query = f"""

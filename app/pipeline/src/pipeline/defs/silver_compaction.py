@@ -1,5 +1,5 @@
-import duckdb
 import os
+from ..utils.db import get_duckdb_connection
 from dagster import asset, MonthlyPartitionsDefinition, MaterializeResult
 
 bifl_monthly_partitions = MonthlyPartitionsDefinition(start_date="2012-01-01")
@@ -23,9 +23,7 @@ def silver_entity_discovery_monthly(context) -> MaterializeResult:
     if not target_dir.startswith("s3://"):
         os.makedirs(target_dir, exist_ok=True)
     
-    with duckdb.connect(database=':memory:') as con:
-        if data_dir.startswith("s3://"):
-            con.execute("INSTALL httpfs; LOAD httpfs;")
+    with get_duckdb_connection() as con:
         try:
             row_count = con.execute(f"SELECT count(*) FROM read_parquet('{source_glob}')").fetchone()[0]
         except duckdb.IOException:
