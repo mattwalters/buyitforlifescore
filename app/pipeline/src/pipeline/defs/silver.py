@@ -9,6 +9,7 @@ from dagster import asset, MaterializeResult, AssetExecutionContext, DailyPartit
 
 from google import genai
 from google.genai import types
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
 from ..utils.pricing import calculate_gemini_cost, AiModel
 
@@ -23,20 +24,10 @@ class SilverExtractionConfig(Config):
 # --- PYDANTIC SCHEMA MAPPING --- 
 # This exactly matches your TypeScript THREAD_EXTRACTION_SCHEMA so Gemini returns identical JSON.
 class MentionItem(BaseModel):
-    sourceId: int = Field(description="The EXACT integer source index from the text block.")
+    author_id: str = Field(description="The unique author identifier from the ContentBlock.")
     brand: str = Field(description="The stated brand name. Normalize to canonical proper spelling.")
-    productName: str = Field(description="The specific marketed product line or model name. DO NOT extract generic categories. Empty string if BRAND_ONLY.")
-    specificityLevel: Literal["EXACT_MODEL", "PRODUCT_LINE", "BRAND_ONLY"]
-    acquiredPrice: Optional[float] = Field(None)
-    ownershipDurationMonths: Optional[int] = Field(None)
-    usageFrequency: Optional[Literal["DAILY", "WEEKLY", "MONTHLY", "SEASONAL", "RARELY"]] = Field(None)
-    durability: Optional[Literal["POSITIVE", "NEUTRAL", "NEGATIVE"]] = Field(None)
-    repairability: Optional[Literal["POSITIVE", "NEUTRAL", "NEGATIVE"]] = Field(None)
-    maintenance: Optional[Literal["POSITIVE", "NEUTRAL", "NEGATIVE"]] = Field(None)
-    warranty: Optional[Literal["POSITIVE", "NEUTRAL", "NEGATIVE"]] = Field(None)
-    value: Optional[Literal["POSITIVE", "NEUTRAL", "NEGATIVE"]] = Field(None)
-    sentiment: Literal["POSITIVE", "NEUTRAL", "NEGATIVE"]
-    flawOrCaveat: Optional[str] = Field(None)
+    productName: str = Field(description="The specific marketed product line or model name. Empty string if BRAND_ONLY.")
+    source_block_ids: list[int] = Field(description="The list of block_ids where this author explicitly mentioned this product.")
 
 async def _process_thread_batch(threads: list[tuple], model_name: str, semaphore: asyncio.Semaphore, thinking: Optional[str] = None) -> tuple[list[dict], float, int, int]:
     import datetime
@@ -47,43 +38,45 @@ async def _process_thread_batch(threads: list[tuple], model_name: str, semaphore
     total_output = 0
     
     async def _extract_chunk(submission_id: str, title: str, body: str, chunk: list, chunk_index: int, created_utc: Optional[str] = None):
-        # Build the exact TS string format based on chunk
+        import json
+        
+        # Build Canonical ContentBlocks array
+        content_blocks = []
         if chunk_index == 0:
-            thread_parts = [f"[SOURCE INDEX: 0] Title: {title} | Body: {body or ''}"]
-            instruction = ""
-        else:
-            thread_parts = [f"[PREVIOUSLY READ CONTEXT - DO NOT EXTRACT PRODUCTS FROM THIS HEADER. ONLY EXTRACT EXPLICIT NEW PRODUCT MENTIONS FROM THE COMMENTS LISTED BELOW.]:\nTitle: {title} | Body: {body or ''}"]
-            instruction = "- CRITICAL: You have already read the Title and Body in a previous chunk. Do NOT extract those products again. Only extract new durable products found in the COMMENTS below."
+            content_blocks.append({
+                "block_id": 0,
+                "author_id": "OP",
+                "text": f"Title: {title}\nBody: {body or ''}"
+            })
             
         if chunk:
             for idx, c_body in enumerate(chunk):
-                 if c_body:
-                     true_idx = (chunk_index * 10) + idx + 1
-                     thread_parts.append(f"[SOURCE INDEX: {true_idx}] Body: {c_body}")
-                     
-        thread_text = "\n\n".join(thread_parts)
+                if c_body:
+                    true_idx = (chunk_index * 10) + idx + 1
+                    content_blocks.append({
+                        "block_id": true_idx,
+                        "author_id": f"Commenter_{true_idx}",
+                        "text": c_body
+                    })
+                    
+        thread_text = json.dumps(content_blocks, indent=2)
 
-        temporal_anchor = ""
-        if created_utc:
-            try:
-                dt = datetime.datetime.fromtimestamp(float(created_utc))
-                temporal_anchor = f"\nTEMPORAL ANCHOR: This thread was published in {dt.strftime('%B %Y')}. Use this temporal anchor to do chronological math if users say things like 'I've owned this for 5 years' or 'Bought in 1999'."
-            except Exception:
-                pass
-
-        prompt = f"""You are a product analyst studying "Buy It For Life" patterns on Reddit.{temporal_anchor}
-Extract every notable durable product being discussed, recommended, or reviewed in the following Reddit thread.
-Include both products from the original submission and the comments.
+        prompt = f"""You are an Entity Discovery agent studying text blocks.
+Your task is to identify every durable product mentioned.
 
 CRITICAL INSTRUCTIONS:
-- For each extracted product, you MUST specify the exact integer 'sourceId' from the text block where it was mentioned. 
-- The sourceId will be the integer index from [SOURCE INDEX: X] (e.g. 0, 1, 2).
-- Only extract physical, durable products.
-- If the brand name of the product is unknown, completely unstated, or generic, DO NOT extract the product at all. Completely omit it. Do not use placeholders like "Unknown".
-- Do NOT extract generic product categories or nouns (e.g., "mixer", "backpack", "pan", "car", "boots", "sweater") as a productName. If the user only says "I love my KitchenAid mixer", the specificityLevel MUST be BRAND_ONLY and the productName MUST be an empty string "". You MUST ONLY classify something as PRODUCT_LINE or EXACT_MODEL if the user uses a Proper Noun, marketing name, or specific model identifier (e.g., "Artisan", "F-150", "Aeron", "D5").
-{instruction}
+- Aggregate your extractions by Author. Output exactly ONE extraction per unique 'author_id' and product combination. List all 'block_id's where they discussed it.
+- Your goal is to identify explicit OPINIONS or REVIEWS of brands and products. 
+- Do NOT extract a product if the user is simply stating that they bought it, are considering buying it, or are asking a question about it. There MUST be a qualitative opinion, endorsement, or explicit statement of experience attached.
+- You can extract general brand mentions (e.g., "Georgia has dropped in quality") if an opinion is attached. Do not limit yourself strictly to "physical" models if the brand quality itself is being reviewed.
+- If a commenter refers to a specific model name but omits the brand (e.g., "The SL-1200 is a tank"), you MUST use the preceding conversation blocks to infer the correct brand name ("Technics").
+- CRITICAL BOUNDARY: You MUST be able to tie an opinion to a specific BRAND. If a user states an experience about a generic component (e.g. "side zippers fail") or a generic product (e.g. "I love my boots") but the BRAND is unknown and cannot be inferred from context, you MUST NOT extract it.
+- DO NOT extract rhetorical metaphors or analogies (e.g., "You are asking for a Cadillac at a Chevy price"). You must only extract products that are explicitly part of the literal discussion.
+- DO NOT extract generic nouns, raw materials, or components as brands (e.g., "Teak", "memory foam", "Goretex", "leather", "wooden"). A brand MUST represent a specific named manufacturer/store.
+- DO NOT extract a comment if the brand is unknown. NEVER output literal string values like 'Unknown', 'N/A', or 'BRAND_ONLY'. If you cannot find or confidently infer a specific brand name, you must skip the extraction entirely.
+- Do NOT extract generic product nouns (e.g., "mixer", "backpack", "pan").
 
-Thread to analyze:
+Thread to analyze (JSON ContentBlocks):
 {thread_text}"""
         
         nonlocal total_cost, total_input, total_output
@@ -102,13 +95,22 @@ Thread to analyze:
                     thinking_level=thinking
                 )
             
+        @retry(
+            stop=stop_after_attempt(3),
+            wait=wait_exponential(multiplier=2, min=4, max=10),
+            retry=retry_if_exception_type(Exception),
+            reraise=True
+        )
+        async def call_api():
+            return await client.aio.models.generate_content(
+                model=model_name,
+                contents=prompt,
+                config=gen_config,
+            )
+
         async with semaphore:
             try:
-                response = await client.aio.models.generate_content(
-                    model=model_name,
-                    contents=prompt,
-                    config=gen_config,
-                )
+                response = await call_api()
                 
                 # Aggregate costs
                 if response.usage_metadata:
@@ -150,9 +152,9 @@ Thread to analyze:
     group_name="silver",
     partitions_def=bifl_daily_partitions,
     deps=["raw_reddit_buyitforlife_comments", "raw_reddit_buyitforlife_submissions"],
-    description="Runs LLM inferences (Gemini 2.5 Flash Lite) on a specific daily timeslice of Bronze data."
+    description="Phase 1: Runs LLM inferences to discover entities in Bronze data."
 )
-def extracted_sentiment_silver(context: AssetExecutionContext, config: SilverExtractionConfig) -> MaterializeResult:
+def silver_entity_discovery(context: AssetExecutionContext, config: SilverExtractionConfig) -> MaterializeResult:
     partition_date_str = context.partition_key
     
     monorepo_root = Path(__file__).resolve().parents[5]
@@ -161,7 +163,7 @@ def extracted_sentiment_silver(context: AssetExecutionContext, config: SilverExt
     
     silver_dir = monorepo_root / "data" / "silver"
     silver_dir.mkdir(parents=True, exist_ok=True)
-    target_parquet = silver_dir / f"sentiment_silver_{partition_date_str}.parquet"
+    target_parquet = silver_dir / f"entity_discovery_{partition_date_str}.parquet"
     
     limit_clause = f"LIMIT {config.limit}" if config.limit else ""
     
@@ -217,9 +219,6 @@ def extracted_sentiment_silver(context: AssetExecutionContext, config: SilverExt
             con.execute(f"COPY (SELECT * FROM df_view) TO '{str(target_parquet)}' (FORMAT PARQUET)")
     
     # 4. YIELD COST METADATA AND VIEWS!
-    import collections
-    sentiment_counts = collections.Counter([item.get('sentiment') for item in extracted_items]) if extracted_items else {}
-    
     metadata = {
         "partition": partition_date_str,
         "threads_processed": len(rows),
@@ -227,11 +226,20 @@ def extracted_sentiment_silver(context: AssetExecutionContext, config: SilverExt
         "model_used": model_name,
         "cost_usd": float(round(total_cost, 6)),
         "input_tokens": total_in,
-        "output_tokens": total_out,
-        "sentiment_distribution": dict(sentiment_counts)
+        "output_tokens": total_out
     }
     
     if extracted_items:
         metadata["data_preview"] = MetadataValue.md(df.head(10).to_markdown())
 
     return MaterializeResult(metadata=metadata)
+
+@asset(
+    group_name="silver",
+    partitions_def=bifl_daily_partitions,
+    deps=["silver_entity_discovery"],
+    description="Phase 2: Reads the mapped entities and uses Gemini 3.1 Pro to extract nuanced sentiment and durability metrics."
+)
+def silver_nuance_extraction(context: AssetExecutionContext) -> MaterializeResult:
+    context.log.info("Phase 2 Nuance Extraction is a stub. It will read entity_discovery parquet and fan out.")
+    return MaterializeResult(metadata={"status": "stub"})

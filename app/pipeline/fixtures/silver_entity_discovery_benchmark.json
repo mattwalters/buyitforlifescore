@@ -1,0 +1,2812 @@
+[
+  {
+    "document": {
+      "document_id": "synth_01",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "op_bifl",
+          "text": "Are Lodge cast iron skillets actually BIFL? Looking to get one for camping."
+        },
+        {
+          "block_id": 1,
+          "author_id": "iron_chef",
+          "text": "Yes, I have a Lodge I bough 30 years ago. It never scales or rusts if you take care of it."
+        },
+        {
+          "block_id": 2,
+          "author_id": "op_bifl",
+          "text": "That settles it, grabbing the skillet today."
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "iron_chef",
+        "brand": "Lodge",
+        "productName": ""
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "synth_02",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "hiker_dude",
+          "text": "Darn Tough socks just arrived. Time to hike!"
+        },
+        {
+          "block_id": 1,
+          "author_id": "hiker_dude",
+          "text": "Update: did 20 miles, not a single hole. These socks are insane."
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "hiker_dude",
+        "brand": "Darn Tough",
+        "productName": ""
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "synth_03",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "mechanic_joe",
+          "text": "Everyone talks about Snap-on wrenches, but have you tried Wera screwdrivers? Absolute quality."
+        },
+        {
+          "block_id": 1,
+          "author_id": "tool_guy",
+          "text": "Snap-on is just a name at this point. I switched my entire box to Wera last year."
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "mechanic_joe",
+        "brand": "Wera",
+        "productName": "screwdriver"
+      },
+      {
+        "author_id": "tool_guy",
+        "brand": "Snap-on",
+        "productName": ""
+      },
+      {
+        "author_id": "tool_guy",
+        "brand": "Wera",
+        "productName": ""
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "synth_04",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "coffee_snob",
+          "text": "Moccamaster vs Breville Precision Brewer. Which one?"
+        },
+        {
+          "block_id": 1,
+          "author_id": "drip_master",
+          "text": "Technivorm Moccamaster hands down. Mine has been making pot after pot for 12 years."
+        },
+        {
+          "block_id": 2,
+          "author_id": "espresso_lover",
+          "text": "I had the Breville. It died right after the warranty expired from scale build up."
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "drip_master",
+        "brand": "Technivorm",
+        "productName": "Moccamaster"
+      },
+      {
+        "author_id": "espresso_lover",
+        "brand": "Breville",
+        "productName": ""
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "synth_05",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "tech_bro",
+          "text": "Got an Aeron chair for the home office, but honestly thinking about returning it."
+        },
+        {
+          "block_id": 1,
+          "author_id": "back_pain",
+          "text": "Try the Steelcase Leap v2 instead. Much better for taller folks."
+        },
+        {
+          "block_id": 2,
+          "author_id": "tech_bro",
+          "text": "Good call, the Aeron completely cuts off my circulation."
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "tech_bro",
+        "brand": "Herman Miller",
+        "productName": "Aeron"
+      },
+      {
+        "author_id": "back_pain",
+        "brand": "Steelcase",
+        "productName": "Leap V2"
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "synth_06",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "clean_freak",
+          "text": "Finally bought a Miele C3 complete canister vacuum. I'm embarrassed of what it pulled out of my carpet."
+        },
+        {
+          "block_id": 1,
+          "author_id": "dyson_hater",
+          "text": "I'll never go back to Dyson after seeing how a real bagged vacuum performs."
+        },
+        {
+          "block_id": 2,
+          "author_id": "clean_freak",
+          "text": "Exactly. The seal on the bags is incredible."
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "clean_freak",
+        "brand": "Miele",
+        "productName": "C3 Complete"
+      },
+      {
+        "author_id": "dyson_hater",
+        "brand": "Dyson",
+        "productName": ""
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "synth_07",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "music_fan",
+          "text": "My dad just handed down his old Technics SL-1200 turntable. Still works flawlessly after 30 years."
+        },
+        {
+          "block_id": 1,
+          "author_id": "dj_spinner",
+          "text": "The SL-1200 is legendary. Total tanks. Don't ever sell it."
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "music_fan",
+        "brand": "Technics",
+        "productName": "SL-1200"
+      },
+      {
+        "author_id": "dj_spinner",
+        "brand": "Technics",
+        "productName": "SL-1200"
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "synth_08",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "chef_boy",
+          "text": "Is Victorinox really the best starter knife?"
+        },
+        {
+          "block_id": 1,
+          "author_id": "prep_cook",
+          "text": "The Fibrox Chef's Knife is the ultimate workhorse. Holds an edge decently and you don't cry if you chip it."
+        },
+        {
+          "block_id": 2,
+          "author_id": "sushi_master",
+          "text": "I prefer Global knives, but Victorinox is solid for the price."
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "prep_cook",
+        "brand": "Victorinox",
+        "productName": "Fibrox Chef's Knife"
+      },
+      {
+        "author_id": "sushi_master",
+        "brand": "Global",
+        "productName": ""
+      },
+      {
+        "author_id": "sushi_master",
+        "brand": "Victorinox",
+        "productName": ""
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "synth_09",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "winter_guy",
+          "text": "LL Bean boot reviews. Are the Maine Hunting Shoes still made well?"
+        },
+        {
+          "block_id": 1,
+          "author_id": "maine_local",
+          "text": "They outsourced some stuff, but the core boots are still stitched here. I highly recommend them."
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "maine_local",
+        "brand": "L.L. Bean",
+        "productName": ""
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "synth_10",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "tea_time",
+          "text": "Zojirushi water boilers are incredibly over-engineered. Love it."
+        },
+        {
+          "block_id": 1,
+          "author_id": "tea_time",
+          "text": "Actually I meant completely totally reliable. Mine has been on 24/7 for 6 years."
+        },
+        {
+          "block_id": 2,
+          "author_id": "troll_1",
+          "text": "I bet a $10 kettle does the same thing."
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "tea_time",
+        "brand": "Zojirushi",
+        "productName": "water boiler"
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "1sw3j8",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "1sw3j8",
+          "text": "Plan on wearing long-johns underneath. Looking for something water and wind resistant that preferably doesnt make loud swooshing sounds when walking. edit Took the advice of wool pants. I was able to score a nice pair of wool cargo pants at Goodwill. Banana Republic band, hate to think what they cost new, but I paid .50 (Goodwill has sales apparently, they were half off)."
+        },
+        {
+          "block_id": 1,
+          "author_id": "BadDatingAdvice",
+          "text": "Water-resistant == swooshy. What exact climate are you looking for? Our idea of winter may not match yours. The right gear varies wildly depending on how cold it is and how damp it is. A specific location and temperature range would be helpful."
+        },
+        {
+          "block_id": 2,
+          "author_id": "g4r4e0g",
+          "text": "Northern Ohio *edit Not sure why this gets downvoted. I'm fairly sure I know where I live."
+        },
+        {
+          "block_id": 3,
+          "author_id": "mr_perry_walker",
+          "text": "Find a pair of Johnson's wool pants. They are heavy, warm and do not make silly noises."
+        },
+        {
+          "block_id": 4,
+          "author_id": "[deleted]",
+          "text": "[deleted]"
+        },
+        {
+          "block_id": 5,
+          "author_id": "g4r4e0g",
+          "text": "Those look very nice. Do you happen to know if that site has sales at all?"
+        },
+        {
+          "block_id": 6,
+          "author_id": "DriveTurkey",
+          "text": "the clymb has them."
+        },
+        {
+          "block_id": 7,
+          "author_id": "Raging_Asian_Man",
+          "text": "I'm guessing a few of them contracted STD's in Northern Ohio...."
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "1sw3j8",
+        "brand": "Banana Republic",
+        "productName": "wool cargo pants"
+      },
+      {
+        "author_id": "mr_perry_walker",
+        "brand": "Johnson's",
+        "productName": "wool pants"
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "2hgfi9",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "2hgfi9",
+          "text": "I recently moved to Germany and my host family hikes and hunts alot. Since my feet are enormous and kept growing I haven't had any boots for 2 years. But they finally stopped growing (I hope) and I really need some soon."
+        },
+        {
+          "block_id": 1,
+          "author_id": "seraph77",
+          "text": "Get into porn. With feet that big, I can only guess at the other parts of your anatomy. Get paid big money and buy a new pair every year."
+        },
+        {
+          "block_id": 2,
+          "author_id": "JacobButterStick",
+          "text": "Made to measure is probably your only option. You can get a great pair of boots made exactly to your feet, except they'll be fairly pricey."
+        },
+        {
+          "block_id": 3,
+          "author_id": "Perpherion",
+          "text": "Thanks. Ill look into it. Price shouldn't be a problem cuz only being able to find tennis shoes in this size has freed up my shoe budget considerably"
+        },
+        {
+          "block_id": 4,
+          "author_id": "Daring_frog_eater",
+          "text": "Since you're in germany, check out the Meindl brand. Their \"flagship\" model, the Borneo (\"Borneo 2 MFS\") is made in US size up to 17 (I just checked on their website). It's a very well know german brand, and very durable (If I recall correctly, the Borneo comes in two versions, one with gore-tex and one without). And the \"MFS\" stands for \"Memory foam system\" that is inside the shoe, which means that over time the shoe will adapt to your feet."
+        },
+        {
+          "block_id": 5,
+          "author_id": "Perpherion",
+          "text": "Thanks. Ill have to check it out."
+        },
+        {
+          "block_id": 6,
+          "author_id": "Coconut667",
+          "text": "How big are your feet??"
+        },
+        {
+          "block_id": 7,
+          "author_id": "Perpherion",
+          "text": "american size 17"
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "Daring_frog_eater",
+        "brand": "Meindl",
+        "productName": "Borneo"
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "2il51l",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "2il51l",
+          "text": "So i've been trying to find the right set of boots that meet the following parameters: *Side zipper *Gore Tex or other breathable material *6\" tall *Steel or composite toe *Brown if possible"
+        },
+        {
+          "block_id": 1,
+          "author_id": "cloaclacola",
+          "text": "I can't help you, but in my experience side zippers fail long before the rest of the boot."
+        },
+        {
+          "block_id": 2,
+          "author_id": "yellow_yellow",
+          "text": "Really? I kinda thought being able to get the boots off in just a couple seconds would be a nice feature :("
+        },
+        {
+          "block_id": 3,
+          "author_id": "cloaclacola",
+          "text": "It is, the zippers just don't last. You can Shoe Goo the zippers shut when they start to go. There are zipper inserts you lace in the front, but I can't comment on those."
+        },
+        {
+          "block_id": 4,
+          "author_id": "Jeremiah164",
+          "text": "If you ever work in mud, it messes them up right away. Laces aren't too horrible, especially if they have the hooks you loop around at the top."
+        },
+        {
+          "block_id": 5,
+          "author_id": "SpacemanSpiff23",
+          "text": "This might be an option. You could buy a nice pair of boots, and add in the zipper. If it fails you can replace it and the boots aren't compromised at all."
+        },
+        {
+          "block_id": 6,
+          "author_id": "Its_Probably_Me",
+          "text": "Zipper insert for where the laces are or fast lacing systems designed for the military."
+        },
+        {
+          "block_id": 7,
+          "author_id": "yellow_yellow",
+          "text": "Ah ok. I didn't know about those zipper inserts. Seem like a pretty great idea. Thanks!"
+        },
+        {
+          "block_id": 8,
+          "author_id": "Crulpeak",
+          "text": "I'm incredibly happy with my Bates. Not sure if they are available in brown/steel toe though. I've had incredibly poor experiences wide side zippers, but these are very sturdy, breathe well, and don't hurt to be in for hours on end"
+        },
+        {
+          "block_id": 9,
+          "author_id": "section0",
+          "text": "Not a zipper side but quick lace eyelets Brown steel toe and leather. Georgia boot. Very comfortable and reliable. I think I paid 140$ three years ago."
+        },
+        {
+          "block_id": 10,
+          "author_id": "Dire88",
+          "text": "Integral zippers always tend to go. If you are dead set on a zipper, a better option is to get the ones you lace into the boot. Another option that I always brushed off was pull on boots. I have a pair of Ariat Workhogs that I picked up because I was constantly in and out of the house and tired of lacing boots. I went with a half size smaller than my normal size. A week of wear without the insoles in them, and they stretch out perfect to throw the liners in and go."
+        },
+        {
+          "block_id": 11,
+          "author_id": "Bones_MD",
+          "text": "Georgia has dropped in quality recently."
+        },
+        {
+          "block_id": 12,
+          "author_id": "Bones_MD",
+          "text": "Aside from the side zip I'd recommend the Carolina CA7528 (Vietnamese made) or CA1815 (USA Made right down the way from me in Martinsburg, Pennsylvania). Can't go wrong with a Carolina boot. BUT BUY THEM SOON. Leather prices are expected to go up ~13% next year based on demand from the automotive industry. Boot manufacturers are going to have to move to a combination of real leather and synthetic leather in order to maintain prices. Source: Boot Salesman"
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "Crulpeak",
+        "brand": "Bates",
+        "productName": ""
+      },
+      {
+        "author_id": "section0",
+        "brand": "Georgia",
+        "productName": "boot"
+      },
+      {
+        "author_id": "Dire88",
+        "brand": "Ariat",
+        "productName": "Workhogs"
+      },
+      {
+        "author_id": "Bones_MD",
+        "brand": "Georgia",
+        "productName": ""
+      },
+      {
+        "author_id": "Bones_MD",
+        "brand": "Carolina",
+        "productName": "CA7528"
+      },
+      {
+        "author_id": "Bones_MD",
+        "brand": "Carolina",
+        "productName": "CA1815"
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "synth_coref_01",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "op",
+          "text": "Looking for a new laptop, thinking about a MacBook."
+        },
+        {
+          "block_id": 1,
+          "author_id": "dev_guy",
+          "text": "I highly recommend the M3 Max. The battery life is insane compared to my old Intel one."
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "dev_guy",
+        "brand": "Apple",
+        "productName": "M3 Max MacBook"
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "synth_coref_02",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "shoes",
+          "text": "My Red Wings finally died after 10 years."
+        },
+        {
+          "block_id": 1,
+          "author_id": "walker",
+          "text": "Get the Iron Rangers. They take a week to break in but they last forever."
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "walker",
+        "brand": "Red Wing",
+        "productName": "Iron Rangers"
+      },
+      {
+        "author_id": "shoes",
+        "brand": "Red Wing",
+        "productName": "boots"
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "synth_coref_03",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "op",
+          "text": "Is Toyota actually reliable?"
+        },
+        {
+          "block_id": 1,
+          "author_id": "car_nut",
+          "text": "The Tacoma is immortal. Mine has 300k miles."
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "car_nut",
+        "brand": "Toyota",
+        "productName": "Tacoma"
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "synth_intent_01",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "op",
+          "text": "Should I buy a Dyson?"
+        },
+        {
+          "block_id": 1,
+          "author_id": "cleaner",
+          "text": "I just bought the V15 today! Very excited to use it."
+        }
+      ]
+    },
+    "expected_benchmark": []
+  },
+  {
+    "document": {
+      "document_id": "synth_intent_02",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "op",
+          "text": "Does anyone have a Herman Miller?"
+        },
+        {
+          "block_id": 1,
+          "author_id": "sitter",
+          "text": "I just ordered an Aeron during their sale. Looking forward to it."
+        }
+      ]
+    },
+    "expected_benchmark": []
+  },
+  {
+    "document": {
+      "document_id": "synth_intent_03",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "op",
+          "text": "I just found a vintage Le Creuset dutch oven at the thrift store! The color is stunning."
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "op",
+        "brand": "Le Creuset",
+        "productName": "dutch oven"
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "synth_intent_04",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "user1",
+          "text": "I am buying a Sony TV."
+        }
+      ]
+    },
+    "expected_benchmark": []
+  },
+  {
+    "document": {
+      "document_id": "synth_neg_01",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "chef",
+          "text": "Do not buy HexClad. The non-stick coating started peeling after exactly a year of careful use."
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "chef",
+        "brand": "HexClad",
+        "productName": ""
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "synth_neg_02",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "hiker",
+          "text": "North Face quality has tanked so hard. Zippers break, seams rip."
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "hiker",
+        "brand": "North Face",
+        "productName": ""
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "synth_neg_03",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "commuter",
+          "text": "Stay away from the Honda CRV 2018 model. The infotainment system is completely broken."
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "commuter",
+        "brand": "Honda",
+        "productName": "CRV"
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "synth_gen_01",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "op",
+          "text": "Goretex jackets are so loud."
+        },
+        {
+          "block_id": 1,
+          "author_id": "hiker",
+          "text": "Usually true, but my Arc'teryx Beta jacket actually uses a softer face fabric over the membrane so it's not too bad."
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "hiker",
+        "brand": "Arc'teryx",
+        "productName": "Beta jacket"
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "synth_gen_02",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "op",
+          "text": "Does anyone like aluminum pans? They warp so fast."
+        }
+      ]
+    },
+    "expected_benchmark": []
+  },
+  {
+    "document": {
+      "document_id": "synth_gen_03",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "mr_fixit",
+          "text": "Leather shoelaces always snap on me. No matter what boot they are on."
+        }
+      ]
+    },
+    "expected_benchmark": []
+  },
+  {
+    "document": {
+      "document_id": "synth_multi_01",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "coffee_snob",
+          "text": "I used to swear by the Breville Barista Express, but the grinder kept jamming. The Rancilio Silvia is much harder to learn but the build quality is industrial."
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "coffee_snob",
+        "brand": "Breville",
+        "productName": "Barista Express"
+      },
+      {
+        "author_id": "coffee_snob",
+        "brand": "Rancilio",
+        "productName": "Silvia"
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "synth_multi_02",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "mechanic",
+          "text": "Snap-On makes the best ratchets, but frankly gearwrench makes the best wrenches for the money."
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "mechanic",
+        "brand": "Snap-On",
+        "productName": "ratchets"
+      },
+      {
+        "author_id": "mechanic",
+        "brand": "GearWrench",
+        "productName": "wrenches"
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "synth_multi_03",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "camper",
+          "text": "Hydroflask dents if you look at it wrong. Yeti is way heavier but actually survives drops."
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "camper",
+        "brand": "Hydro Flask",
+        "productName": ""
+      },
+      {
+        "author_id": "camper",
+        "brand": "Yeti",
+        "productName": ""
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "synth_multi_04",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "runner",
+          "text": "Hoka foams compress in 200 miles. Brooks foam lasts 400."
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "runner",
+        "brand": "Hoka",
+        "productName": ""
+      },
+      {
+        "author_id": "runner",
+        "brand": "Brooks",
+        "productName": ""
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "x4jc75",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "isanonymouss",
+          "text": "What\u2019s best belt to buy in canada? "
+        },
+        {
+          "block_id": 1,
+          "author_id": "AutoModerator",
+          "text": "Hello /u/isanonymouss! Thank you for your submission! The AutoMod thought that your post might be a request type post and has changed the flair accordingly, but if this was wrong feel free to change it back!  *I am a bot, and this action was performed automatically. Please [contact the moderators of this subreddit](/message/compose/?to=/r/BuyItForLife) if you have any questions or concerns.*"
+        },
+        {
+          "block_id": 2,
+          "author_id": "The-Wooden-Beard",
+          "text": "I love my Hide and Drink full grain belt. Got it off of Amazon.ca. I'm not 100% sure if they are Canadian, but the quality seems to be really good. 101 year warranty to boot."
+        },
+        {
+          "block_id": 3,
+          "author_id": "isanonymouss",
+          "text": "I will check it, thanks"
+        },
+        {
+          "block_id": 4,
+          "author_id": "kfromm65",
+          "text": "Hanks belts, 100 year warranty. US company"
+        },
+        {
+          "block_id": 5,
+          "author_id": "tedesco455",
+          "text": "Find a tack shop. This is a shop that makes leather pieces for people that ride horses. Have them make a belt you will have it for life."
+        },
+        {
+          "block_id": 6,
+          "author_id": "GordonBennett2000",
+          "text": "Any leather belt, surely?"
+        },
+        {
+          "block_id": 7,
+          "author_id": "nukevi",
+          "text": "Need to ensure it\u2019s a full grain leather and not bonded."
+        },
+        {
+          "block_id": 8,
+          "author_id": "nona_anon0",
+          "text": "i have a saddle back leather belt. it\u2019s thick, maybe a little too thick, but i don\u2019t see this breaking anytime soon!"
+        },
+        {
+          "block_id": 9,
+          "author_id": "joejohnshabadu",
+          "text": "Mitch Rosen Gunleather (they look like dress belts and you don\u2019t have to use as a gunbelt). They are functional, beautifully made, and very durable. Made in USA. The \u201cExpress\u201d line is more than suitable for everyday use and the \u201cBest Quality\u201d belts are extremely thick and heavy duty.   https://mitchrosen.com/products/belts/  You can even have them make one of shell cordovan (I believe you have to call them for price quote on those. They are very expensive but likely your grandkids will be able to wear the belt long after you\u2019re gone.)  https://www.gentlemansgazette.com/cordovan-leather-from-horween/"
+        },
+        {
+          "block_id": 10,
+          "author_id": "itsyen",
+          "text": "I have used my Dockers black leather belt since high school (~10 years) every single day. I tend to put the wear and tear on all of my possessions, but this belt is still going strong. I just looked up the current iteration of the belt and it seems different. My belt is unfinished full grain leather, I think what's on amazon right now is bonded unfortunately."
+        },
+        {
+          "block_id": 11,
+          "author_id": "krazykamen",
+          "text": "Sadly, Hanks won't ship to Canada (just found out)."
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "The-Wooden-Beard",
+        "brand": "Hide and Drink",
+        "productName": "belt"
+      },
+      {
+        "author_id": "nona_anon0",
+        "brand": "Saddleback Leather",
+        "productName": "belt"
+      },
+      {
+        "author_id": "joejohnshabadu",
+        "brand": "Mitch Rosen Gunleather",
+        "productName": "belt"
+      },
+      {
+        "author_id": "itsyen",
+        "brand": "Dockers",
+        "productName": "belt"
+      },
+      {
+        "author_id": "kfromm65",
+        "brand": "Hanks belts",
+        "productName": ""
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "rn89gt",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "gio10gic",
+          "text": "Crazy cookie contraptions I break a cookie press every 18 months.  Seriously.  Does someone make a serious cookie press that can handle my hulk grip?"
+        },
+        {
+          "block_id": 1,
+          "author_id": "javaavril",
+          "text": "Atlas Marcato makes a sturdy all metal one with a ten year warranty, so even if you hulk it to bits you'd get replacement instead of having to buy more.    Shouldn't break though, I've had mine for years without issue."
+        },
+        {
+          "block_id": 2,
+          "author_id": "KoiCyclist",
+          "text": "Sounds like maybe you need a new cookie dough recipe?"
+        },
+        {
+          "block_id": 3,
+          "author_id": "practical_junket",
+          "text": "Oxo? Their stuff is pretty durable."
+        },
+        {
+          "block_id": 4,
+          "author_id": "omw_to_valhalla",
+          "text": "Have you looked into a commercial/industrial one?  While I'm not sure what a cookie press is, most kitchen tools have equivalents made for commercial kitchens.  They're made for heavy use and almost always BIFL material.  I bought myself a commercial French fry cutter for Christmas. I have the same issue: I break everything.   For $120, I got a solid metal, 20 pound machine with a suite of razor sharp steel blades. It's a bit big, but it'll likely be a BIFL item."
+        },
+        {
+          "block_id": 5,
+          "author_id": "spitfire07",
+          "text": "Are you referring to making spritz cookies?"
+        },
+        {
+          "block_id": 6,
+          "author_id": "insertcleverthought",
+          "text": "My meat grinder has a cookie press attachment.  I always wondered why anyone would need that but maybe it's for people who are so hardcore about cookie making they repeatedly break their manual presses?"
+        },
+        {
+          "block_id": 7,
+          "author_id": "poodlenancy",
+          "text": "I bought my mom a used Sawa cookie press on eBay and it's lasted for years!"
+        },
+        {
+          "block_id": 8,
+          "author_id": "IvanGirderboot",
+          "text": "This 1000x.  It's built of solid metal and the results are great.  The only downside is it's from Europe so disks from most American machines won't fit it it without modification."
+        },
+        {
+          "block_id": 9,
+          "author_id": "stiina22",
+          "text": "Use a silicone gun and a PVC pipe with a test cap. You could cut a hole in the test cap, then set your extruder dies inside. I use this setup for making long coils of clay (to make handles for pottery mugs) instead of buying a wall mounted extruder."
+        },
+        {
+          "block_id": 10,
+          "author_id": "gordianii",
+          "text": "I use a vintage one (was definitely my mother\u2019s and probably my grandmother\u2019s); it\u2019s the kind where you twist the knob at the top, not squeeze a trigger. I imagine that would hold up pretty well? Mine\u2019s all copper and aluminum, no plastic at all, and there\u2019s nothing you\u2019d need to grip terribly tightly. I\u2019m seeing several on etsy or ebay for not terribly much money (Mirro is the brand of mine and most of the ones I\u2019ve seen)"
+        },
+        {
+          "block_id": 11,
+          "author_id": "MagicCookie234669",
+          "text": "What brand was the French fry cutter?"
+        },
+        {
+          "block_id": 12,
+          "author_id": "omw_to_valhalla",
+          "text": "Garde  I bought this one: https://www.webstaurantstore.com/garde-fc38sc-3-8-heavy-duty-french-fry-cutter-with-suction-cup-feet/181FC38SC.html?utm_source=webstaurant&utm_medium=email&utm_campaign=auto-shipping-confirmation"
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "javaavril",
+        "brand": "Atlas Marcato",
+        "productName": "cookie press"
+      },
+      {
+        "author_id": "omw_to_valhalla",
+        "brand": "Garde",
+        "productName": "french fry cutter"
+      },
+      {
+        "author_id": "poodlenancy",
+        "brand": "Sawa",
+        "productName": "cookie press"
+      },
+      {
+        "author_id": "gordianii",
+        "brand": "Mirro",
+        "productName": "cookie press"
+      },
+      {
+        "author_id": "practical_junket",
+        "brand": "Oxo",
+        "productName": ""
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "1bq1qzs",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "rusrslolwth",
+          "text": "Printer/scanner recommendations for schoolwork? Looking for recommendations on a printer/scanner combination. It will be used on a weekly basis to print and scan multiple school assignments. Our current printer is a Canon that does not scan documents very well and the printer is out of ink/toner far too often. Looking for something that can scan documents and print in black and white only, as well as does not need a subscription or specific brand of ink/toner to be used. Thanks in advance."
+        },
+        {
+          "block_id": 1,
+          "author_id": "alicanrowe",
+          "text": "gl mate, hit me up if you find one, this is why a printer with the specs you want is hard to find btw: [Do Household Printers Leave an Invisible Tracking Code on All Your Printed Documents? | Snopes.com](https://www.snopes.com/fact-check/household-printers-tracking-code/)"
+        },
+        {
+          "block_id": 2,
+          "author_id": "Laescha",
+          "text": "Get a Brother or a Lexmark. No crappy cloud features, just reliable printers that work. Brother has better driver support for Linux."
+        },
+        {
+          "block_id": 3,
+          "author_id": "Starman68",
+          "text": "Brother all the way."
+        },
+        {
+          "block_id": 4,
+          "author_id": "typicalreddit_user",
+          "text": "Artist here! I also have a Canon printer with no built-in scanner.   **Buying Printer/scanner:**  When it comes to printers, unless you are printing photos for sale or need high-quality photos, don't buy a new printer. My recommendation is to ***buy a good scanner separately:***  * not only is this option often more portable, but you will be able to afford a better scanner that will be more long-lasting and durable. keeping scanner and printer apart is also good for if you want to upgrade only one of the two. printers without scanners also tend to be cheaper.  * As an artist I use printers almost every day. ***Home printers likely not will have a scanner that could even be called \"acceptable\".*** The scanner you have is most likely what you'll get with a new printer   [https://www.canon.co.uk/business/products/scanners/scanner-selector/](https://www.canon.co.uk/business/products/scanners/scanner-selector/)  [https://www.reddit.com/r/printers/comments/wbdges/purchase\\_an\\_allinone\\_or\\_just\\_a\\_dedicated\\_scanner/](https://www.reddit.com/r/printers/comments/wbdges/purchase_an_allinone_or_just_a_dedicated_scanner/)  If you do decide that no matter what you are getting a monochrome printer, I'll still say get a scanner separately or simply suffer the pain of a terrible scanner. Brother, Canon, Epson etc. All good brands to go for that do quality home and office printers. Consider what Ink type you think is best - I talk more about this later.  **Getting the most out of your current printer:**  You should absolutely already be able to print only using black and white:  * [https://canoncanada.custhelp.com/app/answers/answer\\_view/a\\_id/1041862/\\~/how-do-i-print-with-only-the-black-or-color-inks%3F-pixma](https://canoncanada.custhelp.com/app/answers/answer_view/a_id/1041862/~/how-do-i-print-with-only-the-black-or-color-inks%3F-pixma) * Some Canon printers will still allow you to print in black and white without any colour ink in it, you should check your model.  * If your printer requires colour ink, buy the cheapest off-brand you can find then never use it - it'll most likely be good enough for your printer.  Subscriptions: Canon Printers already don't require a subscription for ink and services. HP printers have been reported to require subscriptions for printing - I'm pretty sure this is specific to HP printers and haven't seen others that require a subscription but it's best to double check.  **Ink/toner:**  Generally you can find the page yield of ink when you buy it - you can get specific High Yield ink, or XXL cartridges depending on your paper. You can calculate the cost per page of the ink you're buying using the number of pages it will yield.   Buying a new printer, Ink considerations:  * Ink vs Laser:    * [https://www.currys.co.uk/techtalk/computing/printers/laser-printer-or-inkjet-printer-which-is-right-for-you.html](https://www.cdw.com/content/cdw/en/articles/hardware/types-of-ink-for-printers.html)    * The cheaper the printer, the more expensive the ink generally.    * if you can make a larger initial investment, Laser may be right for you - Brother has some good ones. * InkTank vs InkJet:    * [https://www.inkstation.com.au/blog/ink-tank-vs-ink-cartridge/](https://www.inkstation.com.au/blog/ink-tank-vs-ink-cartridge/)    * [https://www.epson.co.uk/en\\_GB/ecotank-mono-printers](https://www.epson.co.uk/en_GB/ecotank-mono-printers)  You can already get away with off-brand ink. However, it has some downsides that are true for ALL printers:  * Off-brand inks have a lower page yield compared to branded ink, you'll have to buy cartridges more frequently. They also often lie about their page yield. * Off-brand ink will often cause problems in the printer, clogging up the nozzles, causing the need for repairs and shortening the lifespan of the printer.   Buying only black ink for your printer is already much cheaper, so in my eyes may as well by the single cartridges of black ink from canon.  # TLDR: Try to avoid buying a new printer, but if you do - buy inktank or laser. Buy scanner separately, otherwise quality will be ASS."
+        },
+        {
+          "block_id": 5,
+          "author_id": "China_Hawk",
+          "text": "I have a Brother MFC-J4535DW Printer. It has worked great. :https://www.brother-usa.com/products/mfcj4535dw"
+        },
+        {
+          "block_id": 6,
+          "author_id": "rusrslolwth",
+          "text": "Wow! Thank you so much for this incredibly detailed and helpful information! My biggest qualm with my current Canon is that the scanner isn't that great. I use it primarily for scanning my kid's homework and their teachers have complained about the quality. I've tried to mess with the settings to no avail! I may look into getting a separate document scanner!"
+        },
+        {
+          "block_id": 7,
+          "author_id": "SoupremeEmporer",
+          "text": "ink wise get a printer with refillable ink tanks. it\u2019s so much cheaper than ink catriges.   my family has had an epson eco tank modal since 2018, it\u2019s been going strong."
+        },
+        {
+          "block_id": 8,
+          "author_id": "Pale_Historian_2443",
+          "text": "What cheap scanner do you recommend? I have drawings and letters and photos that I want to digitize. There are alot, so at least with the documents I want to be able to load multiple pages....  PC"
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "Laescha",
+        "brand": "Brother",
+        "productName": "printer"
+      },
+      {
+        "author_id": "Laescha",
+        "brand": "Lexmark",
+        "productName": "printer"
+      },
+      {
+        "author_id": "Starman68",
+        "brand": "Brother",
+        "productName": "printer"
+      },
+      {
+        "author_id": "China_Hawk",
+        "brand": "Brother",
+        "productName": "MFC-J4535DW"
+      },
+      {
+        "author_id": "SoupremeEmporer",
+        "brand": "Epson",
+        "productName": "eco tank"
+      },
+      {
+        "author_id": "rusrslolwth",
+        "brand": "Canon",
+        "productName": "printer"
+      },
+      {
+        "author_id": "typicalreddit_user",
+        "brand": "Brother",
+        "productName": ""
+      },
+      {
+        "author_id": "typicalreddit_user",
+        "brand": "Canon",
+        "productName": ""
+      },
+      {
+        "author_id": "typicalreddit_user",
+        "brand": "Epson",
+        "productName": ""
+      },
+      {
+        "author_id": "typicalreddit_user",
+        "brand": "HP",
+        "productName": ""
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "h0es05",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "[deleted]",
+          "text": "[request] long lasting &lt;$200 queen mattress [deleted]"
+        },
+        {
+          "block_id": 1,
+          "author_id": "dima054",
+          "text": "Ikea Matrand, perhaps?"
+        },
+        {
+          "block_id": 2,
+          "author_id": "benllew41",
+          "text": "Investing in a bed is similar to investing in a car. You will get exactly what you pay for. It will be worth your time to squirrel away some more money before you purchase. It is a big financial commitment for an extremely important necessity. I hope your search is fruitful."
+        },
+        {
+          "block_id": 3,
+          "author_id": "camellini",
+          "text": "I bought my Ikea mattress 3 years ago and it's been great! $200. I need a firmer bed and went with the Hasvag."
+        },
+        {
+          "block_id": 4,
+          "author_id": "Unabomber007",
+          "text": "You are coming to the internet and asking for a 2020 Toyota for $5000.  Seriously.....don't be a choosy beggar as there are zero BIFL choices at that price point unless your area's thrift stores are allowed to sell beds."
+        },
+        {
+          "block_id": 5,
+          "author_id": "CatMasterSquee",
+          "text": "I'm glad you like it but I was a quality inspector for Ikea and hasvag is one of the lowest quality mattresses. Metal spring core covered in felt, one foam pad on top and a zip cover. Only one worse was the jomna. People made jokes that they were for fema camps."
+        },
+        {
+          "block_id": 6,
+          "author_id": "camellini",
+          "text": "Yikes, good to know haha. I wanted to avoid a spring, but it was the only one that fit comfort/firmness. It's worked well for my partner and I, who is tall and over 200lbs. I did weeks of research and other than visiting a mattress store or getting an online one, this was a great bang for your buck."
+        },
+        {
+          "block_id": 7,
+          "author_id": "CatMasterSquee",
+          "text": "Depending on preference it may not be so bad. The one step up would be the Haugesund. It has the same spring core encased in fabric to avoid spring tangling. Then drop that into a thick foam box, and then put into a cover with sewn in padding on the top."
+        },
+        {
+          "block_id": 8,
+          "author_id": "camellini",
+          "text": "Thanks so much! I'll remember this for my next purchase... hopefully not for a couple years though"
+        },
+        {
+          "block_id": 9,
+          "author_id": "CatMasterSquee",
+          "text": "It's no problem. I have more inside Ikea info if needed about anything mattresses or sofas. One step up from the Haugesund is the Haugsvar."
+        },
+        {
+          "block_id": 10,
+          "author_id": "liamgosss",
+          "text": "i asked for a mattress that would last many years to come, dont think i\u2019m asking for the nicest bed on the market for $200. thanks for your advice though!"
+        },
+        {
+          "block_id": 11,
+          "author_id": "camellini",
+          "text": "You're a gem. Where were you when I bought one of their futons?? It would have been perfect except only giants could use it comfortably as a sofa (and I'm not short). Was able to resell it for close to what I bought it for."
+        },
+        {
+          "block_id": 12,
+          "author_id": "CatMasterSquee",
+          "text": "Heck if you can remember the name of the futon I might have assembled it. I would sign all my pieces with my staple gun as would a lot of the people on the line."
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "camellini",
+        "brand": "Ikea",
+        "productName": "Hasvag"
+      },
+      {
+        "author_id": "CatMasterSquee",
+        "brand": "Ikea",
+        "productName": "Hasvag"
+      },
+      {
+        "author_id": "camellini",
+        "brand": "Ikea",
+        "productName": "futon"
+      },
+      {
+        "author_id": "CatMasterSquee",
+        "brand": "Ikea",
+        "productName": "Haugesund"
+      },
+      {
+        "author_id": "CatMasterSquee",
+        "brand": "Ikea",
+        "productName": "Haugsvar"
+      },
+      {
+        "author_id": "CatMasterSquee",
+        "brand": "Ikea",
+        "productName": "Jomna"
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "10py8sh",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "Master-Most-8319",
+          "text": "[Request] Looking for a bifold wallet that won't slip out of pockets My current wallet is awful! The card slots are embarrassingly tight to where I got to struggle to get the cards out and people look at me funny - I've had it for over a year and they are still tight, and sticky!\n\nAlso it keeps slipping out of my pocket, I am LUCKY I haven't lost it! Just yesterday it fell out at a restaurant and the waiter ran after me in the parking lot saying I dropped my wallet on the floor! This POS has to go! I think the reason it's slipping out is cos the 'leather' (which is cheap) is super smooth finish and it just slides right out of my pocket!\n\nWhat do you guys recommend?\n\nThanks"
+        },
+        {
+          "block_id": 1,
+          "author_id": "ladyhusker39",
+          "text": "I gave my husband the bifold wallet from Saddleback Leather and he absolutely loves it. You might look into those."
+        },
+        {
+          "block_id": 2,
+          "author_id": "SmplTon",
+          "text": "If by slip out of your pocket, you mean squeeze out because it\u2019s so full, have a look at Allett: https://www.all-ett.com  I love my wallet.  But if it slips out for some other reason than that, I\u2019m not sure if a super-slim wallet would be good?"
+        },
+        {
+          "block_id": 3,
+          "author_id": "ComprehensiveRow4189",
+          "text": "Ashland Leather Horween Bugs Moran. Got it myself. Made in the USA (Chicago)."
+        },
+        {
+          "block_id": 4,
+          "author_id": "your_Assholiness",
+          "text": "Big Skinny  Hipster is my all time favorite wallet. comes in nylon  or leather RFID if you like and stays very slim even with a load of cards in it."
+        },
+        {
+          "block_id": 5,
+          "author_id": "Grammar-Police2002",
+          "text": "Great looking wallets.  About to pull the trigger on one.  Thanks."
+        },
+        {
+          "block_id": 6,
+          "author_id": "Junior_Ad2955",
+          "text": "Clayton and Crume, Hanks Wallets, Buffalo Billfold Co, all Options"
+        },
+        {
+          "block_id": 7,
+          "author_id": "ComprehensiveRow4189",
+          "text": "No problem! They've got an amazing warranty as well. Bought mine (From Europe), there was a defect, told them about it, and they shipped me a new one (express) free of charge."
+        },
+        {
+          "block_id": 8,
+          "author_id": "Master-Most-8319",
+          "text": "Cool, they look nice. Do you have the medium bifold? Which color did you get?"
+        },
+        {
+          "block_id": 9,
+          "author_id": "Sailing_Away_From_U",
+          "text": "No love for Bosca?"
+        },
+        {
+          "block_id": 10,
+          "author_id": "duckyboys8",
+          "text": "True religion check them out on sale rn and minimal and good size and quality for price"
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "ladyhusker39",
+        "brand": "Saddleback Leather",
+        "productName": "wallet"
+      },
+      {
+        "author_id": "SmplTon",
+        "brand": "Allett",
+        "productName": "wallet"
+      },
+      {
+        "author_id": "ComprehensiveRow4189",
+        "brand": "Ashland Leather",
+        "productName": "Horween Bugs Moran"
+      },
+      {
+        "author_id": "your_Assholiness",
+        "brand": "Big Skinny",
+        "productName": "Hipster"
+      },
+      {
+        "author_id": "duckyboys8",
+        "brand": "True Religion",
+        "productName": "wallet"
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "u6gc7p",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "TheEggman00",
+          "text": "Carpet Cleaner for home and car? Hello all! I hope everyone enjoyed their weekend. \n\nI\u2019m looking to purchase a carpet cleaner/shampoo for my parents that can be used for larger areas of a home and also in the car. I\u2019m not sure if a $200-$500 Canadian budget is realistic for something like this. Ideally, ease of use and not having to get down on hands/knees would be most preferred. \n\nLooking forward to your suggestions. Thanks so much"
+        },
+        {
+          "block_id": 1,
+          "author_id": "distantreplay",
+          "text": "My opinion only - doesn't really exist.  \"Portable\", convenient, upright, carpet extractor is practically not a thing. Pro equipment uses a truck mounted extractor powered by a PTO off the engine. They work because they produce so much suction. Waaaay more than any typical plug-in 120 VAC appliance. The typical appliance store \"carpet cleaner\" really can't perform close to it. And about 99% of the work comes from simply volume of solution and extraction.   About the closest I've been able to come has been using a commercial/contractor grade wet/dry extractor (vacuum) fitted out with a smaller commercial upholstery extractor head. You can't use the big 14\" to 16\" extractor heads with a small vacuum. It can't produce enough suction. So an \"upholstery\" head around 4\" is a better choice. And that means slow going if you are really trying to clean an entire room. But it will work for spotting and for upholstery. Beyond that, call in the pros. Nice thing is they move the furniture."
+        },
+        {
+          "block_id": 2,
+          "author_id": "ChicagoTRS1",
+          "text": "You want this:    Bissell BigGreen Commercial BG10 Deep Cleaning 2 Motor Extractor Machine  It is by far the only portable consumer carpet cleaner that is worthy.  It is equivalent to the commercial cleaners that can be rented at hardware and some grocery stores.  The separate motor on the agitator makes a huge difference.  It is at the top end of your budget but it is FAR superior to the typical consumer models that have gotten terrible over the last 10 years or so...the consumer Hoover and Bissell models are absolute cheap junk."
+        },
+        {
+          "block_id": 3,
+          "author_id": "PhairPharmer",
+          "text": "This right here. I recently bought a home with plush cream colored carpets throughout, then got a large breed male puppy. You would never know the horrors the carpet has seen by looking at it thanks to the Big Green Machine. Unfortunately light colored carpet UV stains regardless of how quick you are to clean it. I recently bought a flashlight (yep, /r/flashlight ) that had a UV bulb included. It's like a Jackson Pollock masterpiece in every room. I've cleaned a solid 20k sq ft and it's still running strong."
+        },
+        {
+          "block_id": 4,
+          "author_id": "ChicagoTRS1",
+          "text": "Have owned the BigGreen going on 5 years.  5 kids, +3 more part-time daycare, 3400 sf house mostly carpeted.  Can't even begin to estimate but I have cleaned a LOT of carpet with it.  It does an adequate plus job on cleaning carpets - of course not as good as a commercial truck-based unit but pretty good.  I like that it has a large reservoir (2 gal).  For very soiled carpets or spots may have to repeat a few times.   The hand attachment is decent - it does a good job on stairs, upholstery, car interiors.  For maintenance, I clean the entire machine inside/out once a year with a hose.  Still going strong with zero complaints.  If I had one general complaint is that I currently do not like the actual carpet shampoo options.  I used to get some commercial/concentrated stuff from Sam's Club that was a fair price at \\~$7 per gallon that was mixed 2oz per gallon.  Cannot find it anymore and have been using Zep brand which is around $10-12 a gallon but also 4oz concentrate per gallon...so like 2x expensive.  Still looking for a better option.  I think the BigGreen is an outlier - a very good product in a category of very mediocre options."
+        },
+        {
+          "block_id": 5,
+          "author_id": "bad-monkey",
+          "text": "I am going to suggest two pieces of equipment:   1. [Bissell Spot Clean Pro](https://www.amazon.com/BISSELL-SpotClean-Portable-Cleaner-2458/dp/B07D46SQ63/ref=sr_1_3?crid=1F2Z6GX0BMLBP&amp;keywords=bissell%2Bspotclean%2Bpro&amp;qid=1650325482&amp;sprefix=bissell%2B%2Caps%2C122&amp;sr=8-3&amp;th=1) - Handheld, shampoo-vac that is reasonably priced and very convenient. The main drawback is that it does not heat the water (you add warm/hot water), but otherwise it's a good machine. It is not BIFL, however--mine died after 5 years of heavy use (the plastic hose got brittle and broke up in multiple spots).   2. [Steam Machine](https://www.amazon.com/McCulloch-MC1275-Heavy-Duty-Cleaner-Accessories/dp/B0000DF0RB/ref=sr_1_7?crid=24ICKFJ2H1CL6&amp;keywords=mccullough+steam&amp;qid=1650325364&amp;sprefix=mccullough+stea%2Caps%2C180&amp;sr=8-7). Steam is the secret weapon of every car detailer when it comes to working out the toughest, grossest, most difficult stains. It's even good on lesser stains, because steam is inherently a very gentle cleaning method that will not damage your upholstery/furniture/interior. I use my steamer whenever my expensive white dining room chairs get nailed by my kids' bbq sauce fingers and it's quick/easy. The McCullough seems very well made, but it's still relatively new so I don't know if it's BIFL."
+        },
+        {
+          "block_id": 6,
+          "author_id": "[deleted]",
+          "text": "[removed]"
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "ChicagoTRS1",
+        "brand": "Bissell",
+        "productName": "BigGreen"
+      },
+      {
+        "author_id": "PhairPharmer",
+        "brand": "Bissell",
+        "productName": "Big Green"
+      },
+      {
+        "author_id": "bad-monkey",
+        "brand": "Bissell",
+        "productName": "Spot Clean Pro"
+      },
+      {
+        "author_id": "bad-monkey",
+        "brand": "McCulloch",
+        "productName": "steam"
+      },
+      {
+        "author_id": "ChicagoTRS1",
+        "brand": "Bissell",
+        "productName": ""
+      },
+      {
+        "author_id": "ChicagoTRS1",
+        "brand": "Hoover",
+        "productName": ""
+      },
+      {
+        "author_id": "ChicagoTRS1",
+        "brand": "Zep",
+        "productName": ""
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "i7ty9y",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "[deleted]",
+          "text": "Request: Shower Head [deleted]"
+        },
+        {
+          "block_id": 1,
+          "author_id": "ShartTankIdea",
+          "text": "I would love some shower head"
+        },
+        {
+          "block_id": 2,
+          "author_id": "_JahWobble_",
+          "text": "Do you know why the home has low water pressure? You may be able to adjust the pressure regulator to increase the flow.  Also, if the water smells like sulfur there may be a clogged filter that is blocking the flow."
+        },
+        {
+          "block_id": 3,
+          "author_id": "da7619",
+          "text": "Check out high sierra showerheads.  Low flow shower heads that work great and are very reasonably priced.  They also should be less likely to get clogged up then a typical showerhead. I have had one for about a year and I am impressed.  https://www.highsierrashowerheads.com/"
+        },
+        {
+          "block_id": 4,
+          "author_id": "kirbyno1",
+          "text": "What showerhead isn't BIFL?"
+        },
+        {
+          "block_id": 5,
+          "author_id": "MrAnachronist",
+          "text": "There are a ton of really crappy shower heads at the box stores.  Anything with a giant head, or moving parts, or rubber nozzles are usually junk."
+        },
+        {
+          "block_id": 6,
+          "author_id": "cheapersofas",
+          "text": "Did you try running the shower while the shower head was off of it, to make sure the shower head was the problem? Id guess it is, it\u2019s probably just clogged. I don\u2019t bother with vinegar - doesn\u2019t work well and any $25 shower head will be way better than the one that\u2019s clogged with calcium and minerals. They sell citric acid you can use instead that is stronger than vinegar if you want to go that route. To replace it you\u2019ll need a wrench and plumbers tape as well."
+        },
+        {
+          "block_id": 7,
+          "author_id": "marumari",
+          "text": "I replaced all my showerheads with these and have zero regret. Only downside to them is their noise."
+        },
+        {
+          "block_id": 8,
+          "author_id": "tacitmarmot",
+          "text": "Came to say this 100%.  Got mine 6 years ago, have never had an issue with clogging."
+        },
+        {
+          "block_id": 9,
+          "author_id": "aeon_floss",
+          "text": "Look for a showerhead type in which each nozzle is a small silicone nipple. The chalk deposits from water can't properly adhere to silicon and brushing your hand over the nipples once in a while breaks up the deposits allowing them to flush out.   Water saving showerheads are designed for low volumes of water so pick the lowest volume head you can find.  [I have had this one for about 9 years](https://www.mywaterfilter.com.au/ecocamel-jetstorm-fixed-water-saving-shower-head.html?gclid=EAIaIQobChMI-tDe14yV6wIVwxwrCh19zQ82EAYYBCABEgK16_D_BwE) and it uses 7.5L per minute.  It works great at low flow. This is an AU retailer so look for something local and equivalent.     You can get heads that go as low as 6L/min.  If you want to look at extremely low pressure heads look for showerheards designed for working with electric pump showers in caravans and RV's and boats."
+        },
+        {
+          "block_id": 10,
+          "author_id": "aeon_floss",
+          "text": "No no no.. Don't dismiss rubber nozzles like that.   The rubber nozzles, because they are flexy, don't allow calcium to adhere and build up.  They are constantly broken up and flushed out.  I have had a rubber nozzle showerhead for 9 years without a single nozzle clogging up.    The plain metal head I had before that was a disaster with water constantly being ejected at all sorts of angles."
+        },
+        {
+          "block_id": 11,
+          "author_id": "cheapersofas",
+          "text": "Yes! This is very valuable advice"
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "da7619",
+        "brand": "High Sierra",
+        "productName": "showerhead"
+      },
+      {
+        "author_id": "aeon_floss",
+        "brand": "Ecocamel",
+        "productName": "Jetstorm"
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "1qnzuh",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "Hug_A_Snake",
+          "text": "Has anyone had experience with Ariatt work boots? I've had Ariat riding boots, and was generaly very pleased, but the [Ariat Terrains](http://www.ariat.com/English/Men/Footwear/EnduranceBoots/Terrain.html?color=DISTRESSED_BROWN) I had wore out after one year of daily work. What do you think of [Ariat work boots](http://www.ariat.com/Work/Men/Footwear/WorkBoots/) ? "
+        },
+        {
+          "block_id": 1,
+          "author_id": "Sluggerr",
+          "text": "What kind of work are you doing? They look pretty sturdy but it's hard to tell how well they'll hold up just from the picture/information given. Your best bet is obviously to see them 'in the flesh', try them on and make a judgement. Presumably if you've been manual labour for a while you'll know what to look for in a pair of boots."
+        },
+        {
+          "block_id": 2,
+          "author_id": "Hug_A_Snake",
+          "text": "I do farm work, operating tactors, clearing bush, but I need to be able to walk a lot. Leather is also preferable."
+        },
+        {
+          "block_id": 3,
+          "author_id": "Sluggerr",
+          "text": "If you're doing a lot of walking have you considered lace-ups? It'll give a more snug fit that you can adjust, unlike pull-ons. Brands that come to mind are CAT, Timberland, and Danner."
+        },
+        {
+          "block_id": 4,
+          "author_id": "Hug_A_Snake",
+          "text": "Thanks, I'll look into Danner"
+        },
+        {
+          "block_id": 5,
+          "author_id": "georgeguy101",
+          "text": "I've had a pair of Ariat work boots for about a year now. The actual shoe has held up great. I do mostly factory work, cleaning up spills, moving heavy objects, climbing stuff, etc. The only complaint I've had is I got the composite toe pair of them and I dropped a 250lb. ATM on my toe one day. The composite toe saved my foot, but it did collapse and now is fairly squishy. It still provides some protection, but I think it did a decent job for a composite toe. Overall, they have been the most comfortable pair of work boots I've ever had."
+        },
+        {
+          "block_id": 6,
+          "author_id": "karwai",
+          "text": "I have the [Sierra Western model.](http://www.ariat.com/Work/Men/Footwear/WorkBoots/SierraWestern.html?color=DUSTED_BROWN)  I work at a large steel manufacturing company doing a variety of work including sandblasting, welding and yard operations where it is usually wet and muddy. These boots are absolutely top-notch, I haven't even seen a bit of wear on them after a year now. The only thing with cowboy boots is you are going to need to get some nice long, thick socks tell help protect you from getting a rubbing rash on the back of your calf's. They are also unbelievably comfortable after a week of wearing them."
+        },
+        {
+          "block_id": 7,
+          "author_id": "vitaminsforyou",
+          "text": "I know this is a few days old. But Danner will last. My dad has owned his for 7 years and only resoled them twice. He is police officer, just for an idea."
+        },
+        {
+          "block_id": 8,
+          "author_id": "poojuice",
+          "text": "I have tried a lot of boots. For lace ups there is nothing better than Danner pronghorns. I wear them every day. Various thinsulate weight options for our climate, reasonably lightweight, waterproof goretex, easy break in, super comfortable and long lasting.   Something I have found is that if you don't have to have a steel toe, look at hunting boots. They are more likely to have a sole made for walking long distances in the mud and rocks, or farm work. I wore timberland pro's for a bit before I realized this."
+        },
+        {
+          "block_id": 9,
+          "author_id": "Smooth_Drama5128",
+          "text": "I've got a pair of the yellow and black work boots the rubber soles are coming apart why ?230.00no good why?"
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "georgeguy101",
+        "brand": "Ariat",
+        "productName": "work boots"
+      },
+      {
+        "author_id": "karwai",
+        "brand": "Ariat",
+        "productName": "Sierra Western"
+      },
+      {
+        "author_id": "vitaminsforyou",
+        "brand": "Danner",
+        "productName": "boots"
+      },
+      {
+        "author_id": "poojuice",
+        "brand": "Danner",
+        "productName": "pronghorns"
+      },
+      {
+        "author_id": "Hug_A_Snake",
+        "brand": "Ariat",
+        "productName": "riding boots"
+      },
+      {
+        "author_id": "Hug_A_Snake",
+        "brand": "Ariat",
+        "productName": "Terrains"
+      },
+      {
+        "author_id": "poojuice",
+        "brand": "Timberland",
+        "productName": "pro"
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "18p4rx9",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "Riobob",
+          "text": "BIFL luggage tags for suitcases I need some good, sturdy luggage tags. I used to have a few fancy ones but they were stolen or fell off. \n\nWhat can you recommend?"
+        },
+        {
+          "block_id": 1,
+          "author_id": "Junior_Ad2955",
+          "text": "We like the ones from Odin Leather Company"
+        },
+        {
+          "block_id": 2,
+          "author_id": "NicolasPapagiorgio",
+          "text": "Just got monogrammed bag tags from saddleback.  The leather strap closes with a screw.  Very pleased for the price."
+        },
+        {
+          "block_id": 3,
+          "author_id": "xoREZox",
+          "text": "I travel 180 days a year. Why do people use fancy luggage tags?"
+        },
+        {
+          "block_id": 4,
+          "author_id": "trampled93",
+          "text": "I just recognize my bag on the conveyor belt and pick it up. I don\u2019t really see a need for luggage tag. I mean, your name is already on the airline paper tag."
+        },
+        {
+          "block_id": 5,
+          "author_id": "RoyalClintonApperson",
+          "text": "Try Samsonite brand, but it may be a little expensive."
+        },
+        {
+          "block_id": 6,
+          "author_id": "DC3TX",
+          "text": "Visitag. Highly recommend.  https://visitag.com/products/grommet-tag"
+        },
+        {
+          "block_id": 7,
+          "author_id": "501_Error",
+          "text": "Here's what you do...  [Customizing Luggage](https://youtu.be/M6bdpR_3HCU?si=OXfVtQvHeY-EkBZI&t=32)"
+        },
+        {
+          "block_id": 8,
+          "author_id": "Ella0508",
+          "text": "Wirecutter has reviewed several"
+        },
+        {
+          "block_id": 9,
+          "author_id": "[deleted]",
+          "text": "[removed]"
+        },
+        {
+          "block_id": 10,
+          "author_id": "Hardburly44",
+          "text": "Don\u2019t spend a lot of money. Luggage tags are at risk of being destroyed by the luggage moving machinery in airports.   I have a Fjallraven tag that\u2019s lasted 10 years. But, I consider that more a result of luck and carrying my bag on the plane as much as I can. I also bought it on a whim during a clearance sale, so I\u2019m not going to cry too much when it goes.   If you do buy one, look for a model with the shortest strap possible. It should sit flush with the side of the bag and it shouldn\u2019t dangle over the edge of the bag. It should be able to survive a few good tugs. Good luck!"
+        },
+        {
+          "block_id": 11,
+          "author_id": "Financial_Anybody550",
+          "text": "TUMI tags are solid, or try Dynotag, super durable."
+        },
+        {
+          "block_id": 12,
+          "author_id": "Riobob",
+          "text": "I got it as a company gift. Obviously just want something durable, not fancy."
+        },
+        {
+          "block_id": 13,
+          "author_id": "whysoflyson",
+          "text": "Legit Bag Tags brand are very durable."
+        },
+        {
+          "block_id": 14,
+          "author_id": "[deleted]",
+          "text": "[removed]"
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "NicolasPapagiorgio",
+        "brand": "Saddleback",
+        "productName": "bag tags"
+      },
+      {
+        "author_id": "Hardburly44",
+        "brand": "Fjallraven",
+        "productName": "tag"
+      },
+      {
+        "author_id": "Financial_Anybody550",
+        "brand": "TUMI",
+        "productName": "tags"
+      },
+      {
+        "author_id": "Financial_Anybody550",
+        "brand": "Dynotag",
+        "productName": "tags"
+      },
+      {
+        "author_id": "whysoflyson",
+        "brand": "Legit Bag Tags",
+        "productName": "tags"
+      },
+      {
+        "author_id": "Junior_Ad2955",
+        "brand": "Odin Leather Company",
+        "productName": ""
+      },
+      {
+        "author_id": "DC3TX",
+        "brand": "Visitag",
+        "productName": "grommet-tag"
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "j5zoxr",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "PearlCarrico1820",
+          "text": "Spray bottles and nozzles for cleaners, odor spray, etc. I make my own household cleaners and I'm constantly having to buy new spray bottles. The glass bottles are awesome, but the plastic spray nozzles break in a couple week. Cheap plastic ones are cheap and not worth the money. The \"good\" plastic ones from home depot last about twice as long as the cheap ones, but it's still only a couple months. Does anyone have a good reliable spray bottle that won't needs replaced for a year or so? Preferably life, but I feel like that's a huge ask here."
+        },
+        {
+          "block_id": 1,
+          "author_id": "Gnarlodious",
+          "text": "I bought one at a sewing store for $8 snd it seemed like a lot but it has worked for 3 years now. Before that I got the cheap dollar store ones but they only went for a few months. Hint: don\u2019t use tap water as it may contain solid particles that clog the nozzle.  I use osmosis water since it is finely filtered. But even under the best of circumstances they don\u2019t last forever."
+        },
+        {
+          "block_id": 2,
+          "author_id": "Arryreddit",
+          "text": "these are steep as hell but BIFL  https://hitohira-japan.com/products/vafyn-011"
+        },
+        {
+          "block_id": 3,
+          "author_id": "PearlCarrico1820",
+          "text": "Oh man. Those are amazing! Might be slightly out of my price range because I'd need 6, but absolutely a good find. Thank you! I never thought about getting a metal one, so this gives me another avenue to go down :) so thank you!!!!"
+        },
+        {
+          "block_id": 4,
+          "author_id": "Arryreddit",
+          "text": "i dont know how big you need them to be but there are smaller sizes. Still $$$$ but less $$$$$!!!!!"
+        },
+        {
+          "block_id": 5,
+          "author_id": "PearlCarrico1820",
+          "text": "But I just discovered an entire world of commerical nozzles. So many thanks."
+        },
+        {
+          "block_id": 6,
+          "author_id": "PearlCarrico1820",
+          "text": "Good idea. I'll check there too! Going to joannes later this week anyway. :)"
+        },
+        {
+          "block_id": 7,
+          "author_id": "Foxbox405",
+          "text": "If you get one give us an update! I'm interested in these as well!"
+        },
+        {
+          "block_id": 8,
+          "author_id": "ChiYota",
+          "text": "I've commercial versions seen these from Matco? Or Snap-on.  Metal pressurized can seems like what you need in general. I've seen some used for 5+ years for automotive brake cleaner."
+        },
+        {
+          "block_id": 9,
+          "author_id": "einzeln",
+          "text": "Can we get a rundown of your six cleaning recipes \ud83d\udc40"
+        },
+        {
+          "block_id": 10,
+          "author_id": "PearlCarrico1820",
+          "text": "Yes! Omg I love cleaning. Lol. So I make a few and a few I buy in bulk. Here are the ones I make. Anytime I mention alcohol, I'm talking isopropyl, but you could sub vodka or grain alcohol as well. I just use whatever I have the most of on hand. The assumotion here is that we're filling a 32oz spray bottle. Pretty bare bones recipes really.   All purpose - 1pt vinegar, 1pt water, couple drops dish soap (I buy a small bottle of dawn because it works best for cleaning the greasy stove). Couple drops \"cleaning\" blend essential oils. Smells lemony and cleans wonderfully in the kitchen.   Odor remover - 1pt HOT water, tablespoon baking soda (dissolve the baking soda in water, let it cool and make sure it really dissolved or your sprayer will get clogged and break), 1pt alcohol, Couple drops of your favorite essential oils. Sometimes, during the rainy season when my dogs are extra stinky, I'll add a bit of xo \"natural\" odor remover to this mix. It's AMAZING, but Im not sure of the ingredients. If your worried about chemicals, just Google it I guess. I just bought a gallon and it'll last me forever because I use it so sparingly.   Windex -  alcohol, smidge vinegar and one single drop dishsoap. Shake it up. Works really well if you use newspaper as your rag. I put a few drops blue food coloring in there so my husband has a good visual clue it's for the windows :)   Tile/tub/bathroom floor cleaner - baking soda (again, dissolved in hot water), teaspoon dish soap, tablespoon lemon juice, and white vinegar. This paired with a magic eraser takes off soap scum like no one's business. When we moved into this house I thought the tub needed refinishing, but nadda. Turns out the previous owners just didn't clean it very well."
+        },
+        {
+          "block_id": 11,
+          "author_id": "einzeln",
+          "text": "Thanks so much! I\u2019m saving this comment."
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "Arryreddit",
+        "brand": "Hitohira",
+        "productName": "spray"
+      },
+      {
+        "author_id": "ChiYota",
+        "brand": "Matco",
+        "productName": "commercial sprayers"
+      },
+      {
+        "author_id": "ChiYota",
+        "brand": "Snap-on",
+        "productName": "commercial sprayers"
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "c8zn0b",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "R1ckS4nch3z",
+          "text": "[BIFL Request] I need a daily use backpack to carry my laptop and stuffs. Needs to carry espesially when I accidentally drop my backpack. I feel sluggish and I am causing so much trouble on the way to work. One of them is falling my backpack. I have had it twice in a quarter and all of the drops had minor impacts on my laptop and on the backpack(Eagle Creek).\n\nSo I need a better backpack to carry my laptop and daily use for life."
+        },
+        {
+          "block_id": 1,
+          "author_id": "HarbourAce",
+          "text": "Swiss army, seriously I've had mind for 6 years and its \"fallen\" down stairs, off a medium sized cliff and I've still taken it to class in the morning you won't be disappointed."
+        },
+        {
+          "block_id": 2,
+          "author_id": "RotorFC",
+          "text": "Redoxx"
+        },
+        {
+          "block_id": 3,
+          "author_id": "mactib",
+          "text": "Alite Designs Shifter Pack"
+        },
+        {
+          "block_id": 4,
+          "author_id": "axioq",
+          "text": "Might want to post this on r/onebag if any group knows too much about backpacks it's them"
+        },
+        {
+          "block_id": 5,
+          "author_id": "SeldomSeenAI",
+          "text": "LL Bean Day Trekker has been my everyday for 10 years with no problems. Has padding for laptop and is really waterproof. \\#NoCarInOhio \\#LotsOfRain"
+        },
+        {
+          "block_id": 6,
+          "author_id": "Coquito7",
+          "text": "I second this.  Mine got me through 2 years of high school, undergrad, and my masters.  Only got a new one cuz my little brother decided fingerpainting it was the right move..."
+        },
+        {
+          "block_id": 7,
+          "author_id": "DRJRSS",
+          "text": "Osprey Makes the best backpacks. Check out there guarantee.   In terms of dropping you bag, get a good laptop case."
+        },
+        {
+          "block_id": 8,
+          "author_id": "alisuegee",
+          "text": "I have had a STM Revolution backpack that I use daily to travel to school, work, on the Metro, short air travel trips etc., for over 8 years. It even came with a rain cover that zips back in on the bottom. The pockets are great and it\u2019s a comfortable fit on my shoulders no matter the weight. From time to time, I find myself wanting something more updated and then I look around for a replacement. Can\u2019t find one so I throw it in the wash and sun dry to hold onto for another year. Best backpack I\u2019ve ever owned."
+        },
+        {
+          "block_id": 9,
+          "author_id": "memestocknation",
+          "text": "I have a heather grey Dakine backpack. Has a laptop sleeve in the main compartment and a front pocket that's designed to double as a small cooler for a lunch. Paid 80 dollars for it about 8 years ago...used it everyday for 5 years in college and about 3 times a week since and it's as perfect as it was on day one"
+        },
+        {
+          "block_id": 10,
+          "author_id": "besmith87",
+          "text": "I\u2019ve had mine for 10 years! Did have a latch thing fail but got a new one for a few bucks."
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "HarbourAce",
+        "brand": "Swiss Army",
+        "productName": "backpack"
+      },
+      {
+        "author_id": "SeldomSeenAI",
+        "brand": "L.L. Bean",
+        "productName": "Day Trekker"
+      },
+      {
+        "author_id": "Coquito7",
+        "brand": "L.L. Bean",
+        "productName": "Day Trekker"
+      },
+      {
+        "author_id": "DRJRSS",
+        "brand": "Osprey",
+        "productName": "backpacks"
+      },
+      {
+        "author_id": "alisuegee",
+        "brand": "STM",
+        "productName": "Revolution"
+      },
+      {
+        "author_id": "memestocknation",
+        "brand": "Dakine",
+        "productName": "backpack"
+      },
+      {
+        "author_id": "R1ckS4nch3z",
+        "brand": "Eagle Creek",
+        "productName": "backpack"
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "1nysmh2",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "Icy-Tangerine-4696",
+          "text": "Transformer Table Worth It? Is Transformer Table worth it (the price point is almost on par with Room and Board)? I am seeing poor reviews all over Reddit especially about the customer service and the return process.\n\nIf it\u2019s not worth the price, where can I find quality, functional and good-looking extendable dining table in a similar price range?"
+        },
+        {
+          "block_id": 1,
+          "author_id": "nzhockeyfan",
+          "text": "Do you need your table to essentially disappear? I don't need that, so I got a solid hardwood table from a local woodworker. You might also want to look at local Amish/ Mennonite furniture makers"
+        },
+        {
+          "block_id": 2,
+          "author_id": "Financial-Pop1344",
+          "text": "I\u2019ve seen some of those negative reviews too, but my sister has had her Transformer Table for about a year now and she absolutely loves it. She says the quality is great, it\u2019s really versatile, and it\u2019s easy to adjust when she has guests over. The materials and overall build have held up really well with regular use. Based on her experience, I\u2019m actually planning to get one myself for the holidays."
+        },
+        {
+          "block_id": 3,
+          "author_id": "OmgBsitka",
+          "text": "Im sorry but be careful this account looks like a bot. Its a new account (10day) and they are only active in this sub and r/transformertable."
+        },
+        {
+          "block_id": 4,
+          "author_id": "[deleted]",
+          "text": "[removed]"
+        },
+        {
+          "block_id": 5,
+          "author_id": "Thug_Yogi",
+          "text": "I just got mine from Costco. It's so massive. So far good quality. Super easy to extend and make smaller! I LOVE having an empty room. (We didn't get the coffee table to put the leaves in, I just store it in the box it came in in my basement)"
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "Financial-Pop1344",
+        "brand": "Transformer Table",
+        "productName": "table"
+      },
+      {
+        "author_id": "Thug_Yogi",
+        "brand": "Transformer Table",
+        "productName": "table"
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "1m9twgw",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "MajorRepulsive585",
+          "text": "brought this yesterday and is a new item box without seal tape? or is it used item?"
+        },
+        {
+          "block_id": 1,
+          "author_id": "Formal-Sheepherder19",
+          "text": "? wrong sub, also just open it and find out.....its a toaster check the tray to see if there are any crumbs."
+        },
+        {
+          "block_id": 2,
+          "author_id": "Environmental-Sock52",
+          "text": "Wrong subreddit and ask who you bought it from, what are we psychic?"
+        },
+        {
+          "block_id": 3,
+          "author_id": "MerfinRaleigh",
+          "text": "Check to see if there\u2019s already bread in it. If there is, it\u2019s most likely used."
+        },
+        {
+          "block_id": 4,
+          "author_id": "MajorRepulsive585",
+          "text": "i mean if someone else brought this product can tell me if they got seal tape or not"
+        },
+        {
+          "block_id": 5,
+          "author_id": "CandylandCanada",
+          "text": "If you don't know how to read the sub rules, then you probably won't understand the responses to your off-topic question."
+        },
+        {
+          "block_id": 6,
+          "author_id": "Environmental-Sock52",
+          "text": "https://www.bestbuy.com/contact-us"
+        }
+      ]
+    },
+    "expected_benchmark": []
+  },
+  {
+    "document": {
+      "document_id": "je3bv2",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "dmslax45",
+          "text": "ThermoWorks- Thermapen Meat Thermometer I received one of these as a wedding gift a few years back. It comes with a standard 2-year warranty, but if something goes wrong with it after that, they will fix for a flat $35 fee. \n\nI use this thing religiously when cooking chicken/pork and it really is fantastic, however given the one I have is not waterproof, it started to break about 3 years in from washing. \n\nI sent an email to customer service with the information and they immediately sent over a UPS label to send back. A week later the item was sent back to me, and it is as close to brand new as it can get. I was very happy with how it came out and highly recommend. The rep I spoke with suggested simply wiping the probe with an alcohol pad to clean to avoid issues going forward.\n\n\n[Thermapen ](https://www.thermoworks.com/Classic-Thermapen?gclid=Cj0KCQjw8rT8BRCbARIsALWiOvSthRia_NPgrfFfsBEnKulYN-6sZPZpJ0nTFMTUmOvkAb1qwYZebRYaAjBUEALw_wcB)"
+        },
+        {
+          "block_id": 1,
+          "author_id": "ezipper",
+          "text": "I agree! I haven\u2019t had mine for as long but I think it\u2019s a great product and haven\u2019t had issues yet. Way better than the cheap ones I\u2019ve had from the grocery store."
+        },
+        {
+          "block_id": 2,
+          "author_id": "buildfarmart",
+          "text": "Mine developed a crack in the casing and it was never dropped or exposed to crazy heat changes.   I emailed customer support with pictures and was told it's out of warranty and they wouldn't do anything.   Pretty poor response for a 100$ item that I'd bet costs under 5-10 to manufacture."
+        },
+        {
+          "block_id": 3,
+          "author_id": "selvg",
+          "text": "How is it BIFL if you had to warranty it in 3 years"
+        },
+        {
+          "block_id": 4,
+          "author_id": "OGD114",
+          "text": "While I love it, I have had issues with my older one and the new waterproof one. My older one only works when the needle is in certain positions of open. The new one has issues with the backlight not working consistently."
+        },
+        {
+          "block_id": 5,
+          "author_id": "dmslax45",
+          "text": "Well, for one I did not buy the waterproof one but treated it as I did when washing it. I guess I\u2019ll see how it holds up with proper care.   I do feel the support/customer service was excellent and prompt to work with me to provide assistance at a reasonable cost.   I am not too familiar with alternatives, so cannot say how it holds up comparatively, though would love to hear suggestions or other experiences."
+        },
+        {
+          "block_id": 6,
+          "author_id": "dmslax45",
+          "text": "This is basically what happened to mine. I emailed them and they were quick to respond with shipping details. Might be worthwhile to look into if interested in fixing"
+        },
+        {
+          "block_id": 7,
+          "author_id": "Studlier",
+          "text": "Just after mine was out of warranty, it wouldn't turn on unless the probe was extended to a certain finicky position. Got worse and would barely turn on at all. I never dropped it or got the housing wet ... just cleaned the probe by hand each time. Definitely not BIFL, and I had to pay the $35 to get them to fix it when it was only 3 years old, and I don't think they sent me a label for free shipping. Think I had to send it back on my own dime. That was about 2 years ago. It's a handy cooking device when it works, but I'm not impressed with their service or warranty. You'd think they'd back it better with the high price of the item originally."
+        },
+        {
+          "block_id": 8,
+          "author_id": "gnex30",
+          "text": "Also Thermoworks Dot,  I thought they stopped selling it, but I just found it on their website.   I've had mine since 2015 and it's still going strong. I've only changed the battery once on it. With a probe you don't have to open the oven either."
+        },
+        {
+          "block_id": 9,
+          "author_id": "sdiss98",
+          "text": "Damn, I hate to hear this. Pulled mine out of the drawer this morning and noticed a crack as well. I\u2019ve never dropped mine and use it nearly every day. They\u2019re sending me a ups label to ship it back where they said they\u2019ll look into if it was a manufacturer defect that caused the crack and if so, they\u2019ll replace it. If not, it\u2019ll cost me $35 to fix if. Not super stoked about it tbh."
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "dmslax45",
+        "brand": "ThermoWorks",
+        "productName": "Thermapen"
+      },
+      {
+        "author_id": "ezipper",
+        "brand": "ThermoWorks",
+        "productName": "Thermapen"
+      },
+      {
+        "author_id": "buildfarmart",
+        "brand": "ThermoWorks",
+        "productName": "Thermapen"
+      },
+      {
+        "author_id": "OGD114",
+        "brand": "ThermoWorks",
+        "productName": "Thermapen"
+      },
+      {
+        "author_id": "Studlier",
+        "brand": "ThermoWorks",
+        "productName": "Thermapen"
+      },
+      {
+        "author_id": "gnex30",
+        "brand": "ThermoWorks",
+        "productName": "Dot"
+      },
+      {
+        "author_id": "sdiss98",
+        "brand": "ThermoWorks",
+        "productName": "Thermapen"
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "1b3z715",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "InncnceDstryr",
+          "text": "Summer cap, hat or other headwear. I play Disc Golf a lot over the summer months means I\u2019m out in the sun and weather a lot.\n\nI know I won\u2019t find anything that\u2019s legitimately BIFL but I\u2019m looking for a hat/cap before the good weather returns that will hopefully last me a few years, will most likely be buying 2 of whatever it is and rotate them.\n\nI\u2019ve had New Era 59Fifty fitted caps. The fitted caps don\u2019t hold up too well when they get wet, the brim starts to lose shape and take water damage. I also think the cloth that\u2019s used on the New Era caps is a little too heavy for really hot sunny days.\n\nI had 2 Under Armour flex fit style caps last summer, which were comfortable, light and had a plastic brim which held up to being washed - problem with them was the seam taping inside broke down and something I guess it\u2019s plastic reinforcement would scratch and become very uncomfortable.\n\nI should add I have a shaven head so small discomforts are way more prevalent on my head.  "
+        },
+        {
+          "block_id": 1,
+          "author_id": "CarolynsFingers",
+          "text": "Something from Kangol's [Tropic line](https://www.kangol.com/hats-by-fabric/tropic) maybe?  They come in baseball and flat cap styles. I like their bamboo [507](https://www.kangol.com/bamboo-507) flat cap.  Shaven head here too!"
+        },
+        {
+          "block_id": 2,
+          "author_id": "zestylemonn",
+          "text": "Are you hell bent on a tight fitting cap? My red headed husband wears a straw hat/lifeguard hat from hemlock or quicksilver and he works outside everyday for a living. It does fantastic to keep the sun off him and keep him cool. Unless it\u2019s just not your style   He usually gets a few years use out of him but he\u2019s also jn the elements everyday on the ocean. So you\u2019d probably make them last much longer."
+        },
+        {
+          "block_id": 3,
+          "author_id": "OmahaMike402",
+          "text": "I like my Columbia boonies hat. Adjustable,  Spf 50, full brim,v and lightweight.  Washable,  too"
+        },
+        {
+          "block_id": 4,
+          "author_id": "Has2BeFake",
+          "text": "Hear me out and give it a honest look at. The \u201cchillba\u201d by KAVU.   It\u2019s modeled after a rice farmer hat. Offers amazing coverage, breathable and is a fun unique style hat that nobody has.   I wear mine all the time in the summer. It does catch strong breezes like an umbrella, but the chin strap makes it never fly off your head."
+        },
+        {
+          "block_id": 5,
+          "author_id": "Dependent_Control_35",
+          "text": "Check out the Patagonia Duckbill Cap. It's lightweight, breathable, and designed to handle getting wet without losing shape. Plus, it's comfortable for all-day wear, especially for someone with a shaved head. It should last you through several seasons of disc golf."
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "CarolynsFingers",
+        "brand": "Kangol",
+        "productName": "507"
+      },
+      {
+        "author_id": "OmahaMike402",
+        "brand": "Columbia",
+        "productName": "boonies"
+      },
+      {
+        "author_id": "Has2BeFake",
+        "brand": "KAVU",
+        "productName": "chillba"
+      },
+      {
+        "author_id": "InncnceDstryr",
+        "brand": "New Era",
+        "productName": "59Fifty fitted caps"
+      },
+      {
+        "author_id": "InncnceDstryr",
+        "brand": "Under Armour",
+        "productName": "flex fit style caps"
+      },
+      {
+        "author_id": "CarolynsFingers",
+        "brand": "Kangol",
+        "productName": "Tropic line"
+      },
+      {
+        "author_id": "Dependent_Control_35",
+        "brand": "Patagonia",
+        "productName": "Duckbill Cap"
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "10lhewp",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "Just-Mess3012",
+          "text": "Other subreddits to help with BIFL? Let me know if this isn\u2019t allowed, but I was wondering if you all had recommendations for other subreddits that assist in BIFL culture? I am handy with sewing etc so I like r/visiblemending and r/invisiblemending, but there are so many techniques and things that I don\u2019t know about and would love to learn!"
+        },
+        {
+          "block_id": 1,
+          "author_id": "AutoModerator",
+          "text": "Hello /u/Just-Mess3012! Thank you for your submission! The AutoMod thought that your post might be a request type post and has changed the flair accordingly, but if this was wrong feel free to change it back!  *I am a bot, and this action was performed automatically. Please [contact the moderators of this subreddit](/message/compose/?to=/r/BuyItForLife) if you have any questions or concerns.*"
+        },
+        {
+          "block_id": 2,
+          "author_id": "CultistZer0",
+          "text": "Darning is also good. not sure for non textile arts. Maybe woodworking would be worth learning,"
+        },
+        {
+          "block_id": 3,
+          "author_id": "caskey",
+          "text": "I've found /r/frugal to be a good pair to this sub"
+        },
+        {
+          "block_id": 4,
+          "author_id": "Muncie4",
+          "text": "What you want does not exist as there is a broad brush of repair with no broad brush repair sub that I am aware of.  Plus the topic is huge.  There's wallpaper repair...that's a thing.  Leather care and repair...that covers shoes, purses, watch bands and is a hugely broad topic.  Plastic repair is about as huge.  I can stitch a steering wheel cover or use hog nose pliers in my car or I can use the same tools/techniques with furniture.  See how sideways things get?  I'd recommend focusing on a tradecraft then ask the questions nicely, as you have done, in various related subs to find people/posts that may help."
+        },
+        {
+          "block_id": 5,
+          "author_id": "CultistZer0",
+          "text": "They have a lot of weird tips there......."
+        },
+        {
+          "block_id": 6,
+          "author_id": "notreally_real_",
+          "text": "Hence the existence of r/frugal_jerk"
+        },
+        {
+          "block_id": 7,
+          "author_id": "F-21",
+          "text": "Lots of people don't know that being furgal does not mean \"living as cheap as possible\". To me it's a lot more about directing the funds towards things I enjoy, and also investing into fewer lasting, durable and quality items instead of a bunch of disposable shit."
+        },
+        {
+          "block_id": 8,
+          "author_id": "mocheesiest1234",
+          "text": "That\u2019s the age-old frugal vs cheap dilemma."
+        },
+        {
+          "block_id": 9,
+          "author_id": "mad_dog_94",
+          "text": "If you eat the bugs and mice you find in your house then you have free dinner"
+        }
+      ]
+    },
+    "expected_benchmark": []
+  },
+  {
+    "document": {
+      "document_id": "142i7n6",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "[deleted]",
+          "text": "10 Smartphones Hardest to Repair on Your Own (definitely avoid these if you want to BuyItForLife) [deleted]"
+        },
+        {
+          "block_id": 1,
+          "author_id": "SeaworthinessSome454",
+          "text": "There is nothing even close to a but it for life smartphone (or cell phone in general). Even if the hardware lasts that long, 4g and 5g cell towers likely won\u2019t exist in 20 years."
+        },
+        {
+          "block_id": 2,
+          "author_id": "ScotchMalone",
+          "text": "This listacle isn't really helpful and it would be far better just to go to ifixit.com in order to research how easy it is to repair any given phone.  Also it's really difficult for a phone to be bifl as between the hardware failing and the software getting updates it will have a restricted shelf life. With how integral smartphones have become to daily life having security updates are honestly critical to protect your identity/data.  The best thing we can do is support \"right to repair\" legislation as championed by people like Louis Rossmann so that even while we will have to replace phones on a certain basis, the ability to source parts and get them repaired is available"
+        },
+        {
+          "block_id": 3,
+          "author_id": "BolivianDancer",
+          "text": "Why would you want to buy a smartphone for life?"
+        },
+        {
+          "block_id": 4,
+          "author_id": "Fluffy_WAR_Bunny",
+          "text": "I used to break phones every 6 months for over 10 years. I still have them all. Nowadays I just buy Blackview flagship phones (now a 5G BL8800 Pro and previously a 4G BV9900 Pro). These phones have lasted me much longer. They are nearly indestructible. Faster than Caterpillar tough phones.  iPhones are supposedly very bad with right to repair but in the past I saw a guy take apart and fix an iPhone and it seemed much easier and more modular than doing the same operation on an Android."
+        },
+        {
+          "block_id": 5,
+          "author_id": "zombienudist",
+          "text": "I have worked in IT for over 20 years and am pretty well versed in hardware.   I won't even bother to try and fix one these devices.   Just too integrated.  Plus there is the time and cost.  For example my daughter's iPhone needs a battery and it costs Apple $119 to do it.   I could get the battery and try it do it but for that cost I will just get Apple to do it.   Been down that road far too many times and know I would likely end up spending 3 hours trying to sort it out."
+        },
+        {
+          "block_id": 6,
+          "author_id": "nepbug",
+          "text": ">5G BL8800 Pro  How is the battery life on it for your everyday use?"
+        },
+        {
+          "block_id": 7,
+          "author_id": "Fluffy_WAR_Bunny",
+          "text": "1.5 days with moderate use. It can also charge other phones, I think. The battery is pretty huge, 8400 mAh."
+        },
+        {
+          "block_id": 8,
+          "author_id": "Vegetable_Warthog_49",
+          "text": "To some extent, shifting the cultural zeitgeist away from wasteful consumerism isn't going to only require encouraging buying more durable products, but also actively discouraging buying less durable products.   And, since you brought up \"right to repair\", a big part of right to repair is going to be praising the companies that release products that are easy to repair and shaming the companies that release products that are difficult to repair. Having the right to repair a product isn't going to do us much good if the product isn't repairable.  So yes, go to [ifixit.com](https://ifixit.com) in order to research how easy it is to repair any given phone... and now you have 10 less that you have to research because the work has already been done for you (the source they used was [ifixit.com](https://ifixit.com))"
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "Fluffy_WAR_Bunny",
+        "brand": "Blackview",
+        "productName": "phone"
+      },
+      {
+        "author_id": "Fluffy_WAR_Bunny",
+        "brand": "Blackview",
+        "productName": "BV9900 Pro"
+      },
+      {
+        "author_id": "Fluffy_WAR_Bunny",
+        "brand": "Caterpillar",
+        "productName": ""
+      },
+      {
+        "author_id": "Fluffy_WAR_Bunny",
+        "brand": "Apple",
+        "productName": "iPhone"
+      },
+      {
+        "author_id": "zombienudist",
+        "brand": "Apple",
+        "productName": "iPhone"
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "1ffbxqs",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "bruhmomentodelol",
+          "text": "Most reliable button suspenders for work? Hey y\u2019all,\n\nHope y\u2019all are doing well :) I recently landed a new job that I\u2019m very excited about. However I\u2019m in need of new work clothes, and particularly want to give suspenders a try, as I\u2019m a bigger fella and hear suspenders (if worn tactfully) can be a good look. \n\nWondering if you guys had any advice or suggestions for any particular brands? I\u2019m looking for button suspenders, not clips, and particularly brown ones to match my brown shoes. Any and all help is greatly appreciated. Thank you!"
+        },
+        {
+          "block_id": 1,
+          "author_id": "bruhmomentodelol",
+          "text": "Also commenting because I forgot to add it in the post:  I\u2019ve heard some good things about Suspender Store. Can anyone corroborate this?"
+        },
+        {
+          "block_id": 2,
+          "author_id": "Elvis_Fu",
+          "text": "When you say brown are you looking for leather suspenders or just the leather attachments?  If not leather, I\u2019d look at - Chipp Neckwear will make you suspenders in NYC for a good price - J. Press, O\u2019Connell\u2019s - Albert Thurston is you want upper tier."
+        },
+        {
+          "block_id": 3,
+          "author_id": "bruhmomentodelol",
+          "text": "Leather would be \u201cpreferred\u201d but definitely not a requirement by any means. Sorry for the short reply, at work right now, I\u2019ll get back in more depth later!"
+        },
+        {
+          "block_id": 4,
+          "author_id": "Elvis_Fu",
+          "text": "No worries! Maybe someone else is looking for other variations, too."
+        },
+        {
+          "block_id": 5,
+          "author_id": "bruhmomentodelol",
+          "text": "Okay, sorry, just got off work.  So yeah, leather isn\u2019t a requirement by any means, it might be nice to match my boots but like I\u2019ll be completely honest in saying that if it\u2019s going to significantly increase cost, I think I\u2019ll opt out on that.  Main concern is really getting a solid durable set for a good price. Going to be wearing them to my new job at the zoo, so outdoors. Figured brown would be the best color option given our uniforms are going to be khaki and/or olive green. Earth tones, basically.   As mentioned in my addendum comment, I heard some good things about suspender store and found a pair that meets the requirements, I think. But I haven\u2019t really heard much about that site and their offerings.   I\u2019ll have to check out your suggests in more depth for sure, they all look solid. Admittedly, I don\u2019t know too much about suspenders/braces, really this is sort of my first foray, so I appreciate your assistance in this matter."
+        },
+        {
+          "block_id": 6,
+          "author_id": "Elvis_Fu",
+          "text": "Another option is eBay. I\u2019ve picked up a pair of olive grosgrain suspenders for like $15 that retail for ~$80 or so. That way if they get beat up at work, it\u2019s an inexpensive evaluation period."
+        },
+        {
+          "block_id": 7,
+          "author_id": "14mmwrench",
+          "text": "I got a pair from a place online called the suspender shop or something like that after my carhartt ones pissed me off enough."
+        },
+        {
+          "block_id": 8,
+          "author_id": "TobysRetirementGift",
+          "text": "I have a pair of Duluth Trading Co. suspenders in my drawer since like 10 years ago. They got about 5 years of constant use from me, and then only occasional, since my wife hates that style. That said, they never failed me, and I doubt they ever would."
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "TobysRetirementGift",
+        "brand": "Duluth Trading Co.",
+        "productName": "suspenders"
+      },
+      {
+        "author_id": "14mmwrench",
+        "brand": "Carhartt",
+        "productName": ""
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "1dpaulu",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "FrizzleLizard",
+          "text": "maybe not BIFL but how do i get a longer last bath mat..? "
+        },
+        {
+          "block_id": 1,
+          "author_id": "AutoModerator",
+          "text": "Hello /u/FrizzleLizard! Thank you for your submission! The AutoMod thought that your post might be a request type post and has changed the flair accordingly, but if this was wrong feel free to change it back!  *I am a bot, and this action was performed automatically. Please [contact the moderators of this subreddit](/message/compose/?to=/r/BuyItForLife) if you have any questions or concerns.*"
+        },
+        {
+          "block_id": 2,
+          "author_id": "fattylimes",
+          "text": "I know people who swear by wooden bath mats.\u00a0  Couldn\u2019t tell you myself; wife is not a fan so we do not have one."
+        },
+        {
+          "block_id": 3,
+          "author_id": "TwasInUrMom",
+          "text": "I've seen stone bath mats that soak the water, don't have one personally but want to eventually. Girlfriend likes soft bath mats. Will stone last long? Probably. Will it be soft and comfortable on your toes? No."
+        },
+        {
+          "block_id": 4,
+          "author_id": "ReadySetGO0",
+          "text": "Don\u2019t leave it on the floor, put it over the tub side or shower curtain rod when not in use, will last longer."
+        },
+        {
+          "block_id": 5,
+          "author_id": "duketheunicorn",
+          "text": "Washing regularly then hang drying helps\u2014they lose a lot of fiber in the dryer."
+        },
+        {
+          "block_id": 6,
+          "author_id": "[deleted]",
+          "text": "[removed]"
+        },
+        {
+          "block_id": 7,
+          "author_id": "Anon_819",
+          "text": "I have a memory foam one.  It seems to retain it's shape well and look like new after the washing machine.  Mine must be about 15 years old and looks like new."
+        },
+        {
+          "block_id": 8,
+          "author_id": "bblickle",
+          "text": "I have a Teak one. I\u2019ve had it since 2016 I think. It\u2019s just as it was new. Having a traditional tub, I like that I can feel confident stepping over and out, it will never be slippery and the embedded rubber on the bottom never allows it to slide on the tile. It\u2019s not in my Amazon history so, no clue anymore where I bought it."
+        },
+        {
+          "block_id": 9,
+          "author_id": "Sure_Brick_249",
+          "text": "We have a wooden one. Best mat we ever had and the last one we'll buy."
+        }
+      ]
+    },
+    "expected_benchmark": []
+  },
+  {
+    "document": {
+      "document_id": "1bb6fx4",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "Money_Refrigerator_5",
+          "text": "Specific electric toothbrush  Me and my gf are looking for an electric toothbrush to buy. Do you have any recommendations? Price range is around 100\u20ac each. I was looking at a double pack of the diamondclean 9000 for about 230. I seem to not get a hold of the many toothbrushes there are and considering that we are gonna use them for a long time, i don't want to pick something wrong. That's also why I'm asking for a specific model, because I've seen alot of post where people just comment \"Sonicare\", but there are like a gazillion different ones. If it matters, because of models, we are from Germany.\nTy in advance."
+        },
+        {
+          "block_id": 1,
+          "author_id": "DiBalls",
+          "text": "Oral-B not expensive and I'm on year 8+"
+        },
+        {
+          "block_id": 2,
+          "author_id": "C_Majuscula",
+          "text": "The standard Oral-B mechanical lasts at least 10 years."
+        },
+        {
+          "block_id": 3,
+          "author_id": "lamalamapusspuss",
+          "text": "oral-b pro 1000"
+        },
+        {
+          "block_id": 4,
+          "author_id": "Flat_Parfait",
+          "text": "Thanks, this is a sign for me to finally buy it."
+        },
+        {
+          "block_id": 5,
+          "author_id": "scott_lantz",
+          "text": "Oral-B Pro 1000, Philips Sonicare 4100"
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "DiBalls",
+        "brand": "Oral-B",
+        "productName": "toothbrush"
+      },
+      {
+        "author_id": "C_Majuscula",
+        "brand": "Oral-B",
+        "productName": "mechanical"
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "synth_struct_01_starvation",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "op",
+          "text": "I have been thinking a lot about the nature of consumerism lately. When I was a child, my grandfather used to tell me stories about how he would walk 15 miles to school in the snow, barefoot. He always said that character is built in the difficult moments. We really lost our way as a society when we started depending on cheap plastics. I remember one time we were fishing on the lake in Michigan and it started pouring rain. We had to huddle under an aluminum canoe for hours. It was miserable but it built character. Anyway, Timberlands suck, don't buy them."
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "op",
+        "brand": "Timberland",
+        "productName": ""
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "synth_struct_02_starvation_long",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "op",
+          "text": "Are there any good toasters anymore?"
+        },
+        {
+          "block_id": 1,
+          "author_id": "user_1",
+          "text": "Nope. They all break. Buy a pan."
+        },
+        {
+          "block_id": 2,
+          "author_id": "user_2",
+          "text": "Nope. They all break. Buy a pan."
+        },
+        {
+          "block_id": 3,
+          "author_id": "user_3",
+          "text": "Nope. They all break. Buy a pan."
+        },
+        {
+          "block_id": 4,
+          "author_id": "user_4",
+          "text": "Nope. They all break. Buy a pan."
+        },
+        {
+          "block_id": 5,
+          "author_id": "user_5",
+          "text": "Nope. They all break. Buy a pan."
+        },
+        {
+          "block_id": 6,
+          "author_id": "user_6",
+          "text": "Nope. They all break. Buy a pan."
+        },
+        {
+          "block_id": 7,
+          "author_id": "user_7",
+          "text": "Nope. They all break. Buy a pan."
+        },
+        {
+          "block_id": 8,
+          "author_id": "user_8",
+          "text": "Nope. They all break. Buy a pan."
+        },
+        {
+          "block_id": 9,
+          "author_id": "user_9",
+          "text": "Nope. They all break. Buy a pan."
+        },
+        {
+          "block_id": 10,
+          "author_id": "user_10",
+          "text": "Nope. They all break. Buy a pan."
+        },
+        {
+          "block_id": 11,
+          "author_id": "user_11",
+          "text": "Nope. They all break. Buy a pan."
+        },
+        {
+          "block_id": 12,
+          "author_id": "user_12",
+          "text": "Nope. They all break. Buy a pan."
+        },
+        {
+          "block_id": 13,
+          "author_id": "user_13",
+          "text": "Nope. They all break. Buy a pan."
+        },
+        {
+          "block_id": 14,
+          "author_id": "user_14",
+          "text": "Nope. They all break. Buy a pan."
+        },
+        {
+          "block_id": 15,
+          "author_id": "savior",
+          "text": "Dualit is the only one that lasts. Buy the Classic."
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "savior",
+        "brand": "Dualit",
+        "productName": "Classic"
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "synth_struct_03_listicle",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "op",
+          "text": "What boot brand should I buy?"
+        },
+        {
+          "block_id": 1,
+          "author_id": "list_guy",
+          "text": "Red Wing broke, Danner is heavy, Carolina is cheap, Wolverine is mid, Nicks are perfect, Whites are overkill, Thorogood is comfortable but the soles wear fast, JK Boots are tanks, Viberg is too expensive fashion crap, and Blundstones fall apart in a year."
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "list_guy",
+        "brand": "Red Wing",
+        "productName": ""
+      },
+      {
+        "author_id": "list_guy",
+        "brand": "Danner",
+        "productName": ""
+      },
+      {
+        "author_id": "list_guy",
+        "brand": "Carolina",
+        "productName": ""
+      },
+      {
+        "author_id": "list_guy",
+        "brand": "Wolverine",
+        "productName": ""
+      },
+      {
+        "author_id": "list_guy",
+        "brand": "Nicks",
+        "productName": ""
+      },
+      {
+        "author_id": "list_guy",
+        "brand": "Whites",
+        "productName": ""
+      },
+      {
+        "author_id": "list_guy",
+        "brand": "Thorogood",
+        "productName": ""
+      },
+      {
+        "author_id": "list_guy",
+        "brand": "JK Boots",
+        "productName": ""
+      },
+      {
+        "author_id": "list_guy",
+        "brand": "Viberg",
+        "productName": ""
+      },
+      {
+        "author_id": "list_guy",
+        "brand": "Blundstone",
+        "productName": ""
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "synth_struct_04_listicle_short",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "knife_guy",
+          "text": "My 5 favorites: Spyderco PM2, Benchmade 940, Chris Reeve Sebenza, Microtech Ultratech, Demko AD20."
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "knife_guy",
+        "brand": "Spyderco",
+        "productName": "PM2"
+      },
+      {
+        "author_id": "knife_guy",
+        "brand": "Benchmade",
+        "productName": "940"
+      },
+      {
+        "author_id": "knife_guy",
+        "brand": "Chris Reeve",
+        "productName": "Sebenza"
+      },
+      {
+        "author_id": "knife_guy",
+        "brand": "Microtech",
+        "productName": "Ultratech"
+      },
+      {
+        "author_id": "knife_guy",
+        "brand": "Demko",
+        "productName": "AD20"
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "synth_struct_05_zero_signal_dog",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "op",
+          "text": "Just wanted to show everyone a picture of my Golden Retriever! Best companion ever."
+        }
+      ]
+    },
+    "expected_benchmark": []
+  },
+  {
+    "document": {
+      "document_id": "synth_struct_06_zero_signal_test",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "op",
+          "text": "Testing if my flair shows up. test test 123"
+        }
+      ]
+    },
+    "expected_benchmark": []
+  },
+  {
+    "document": {
+      "document_id": "synth_struct_07_promo_spam",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "bot",
+          "text": "Are you tired of bad sleep? Do you wake up with back pain? Try the all new Casper Mattress Core today and use code REDDIT15 for 15% off your first order! Hundreds of thousands of users agree!"
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "bot",
+        "brand": "Casper",
+        "productName": "Mattress Core"
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "synth_struct_08_promo_spam_2",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "bot",
+          "text": "NordVPN is the best way to stay safe online! Protect your data today!"
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "bot",
+        "brand": "NordVPN",
+        "productName": ""
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "synth_struct_09_markdown_gore",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "emoji",
+          "text": "I \ud83e\ude77 my b r a n d n e w \u2b50\ufe0f *Toyota*!!! \ud83d\ude97\ud83d\udca8 Never buying anything else \u2728\ud83e\udd2f"
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "emoji",
+        "brand": "Toyota",
+        "productName": ""
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "synth_struct_10_markdown_gore_2",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "hacker",
+          "text": "<script>alert(1)</script> \n\n \t ~~~Dyson vacuum~~~ is trash :D\u0000"
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "hacker",
+        "brand": "Dyson",
+        "productName": "vacuum"
+      }
+    ]
+  }
+]

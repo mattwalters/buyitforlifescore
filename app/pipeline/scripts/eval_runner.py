@@ -29,12 +29,13 @@ async def run_judge_alignment(expected_mentions: list[dict], extracted_mentions:
 
     client = genai.Client()
     
-    # Strip down to just indices, brand, and productName for the Judge to avoid distraction
-    expected_for_judge = [{"index": i, "brand": e.get("brand"), "productName": e.get("productName")} for i, e in enumerate(expected_mentions)]
-    extracted_for_judge = [{"index": i, "brand": e.get("brand"), "productName": e.get("productName")} for i, e in enumerate(extracted_mentions)]
+    # Strip down to just indices, author, brand, and productName for the Judge to avoid distraction
+    expected_for_judge = [{"index": i, "author_id": e.get("author_id"), "brand": e.get("brand"), "productName": e.get("productName")} for i, e in enumerate(expected_mentions)]
+    extracted_for_judge = [{"index": i, "author_id": e.get("author_id"), "brand": e.get("brand"), "productName": e.get("productName")} for i, e in enumerate(extracted_mentions)]
 
     prompt = f"""You are an expert taxonomy aligner. Your task is to match extracted product mentions to a ground-truth expected list. 
 The items might have spelling errors, missing words, or different specificity, but you must map them if they obviously refer to the exact same product from the underlying conversation.
+CRITICAL RULE: The extracted item and the expected item MUST have the exact same 'author_id' to be considered a match.
 
 Expected Mentions:
 {json.dumps(expected_for_judge, indent=2)}
@@ -90,7 +91,19 @@ async def run_evaluation(model_name: str, thinking_budget: str | None, csv_out: 
         t = item['thread']
         sid = t['submission_id']
         threads.append((sid, t['title'], t.get('body', ''), t.get('comments', [])))
-        golden_map[sid] = item['expected_mentions']
+        
+        # Convert sourceId to author_id to support Phase 1 testing without rewriting the JSON
+        mapped_expected = []
+        for e in item['expected_mentions']:
+            s_id = e.get('sourceId', 0)
+            author = "OP" if s_id == 0 else f"Commenter_{s_id}"
+            
+            # Copy item and inject author_id
+            new_e = e.copy()
+            new_e['author_id'] = author
+            mapped_expected.append(new_e)
+            
+        golden_map[sid] = mapped_expected
         
     print(f"Loaded {len(threads)} golden threads.")
     
