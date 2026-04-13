@@ -1,0 +1,233 @@
+Loaded 50 synthetic evaluation cases.
+--- Entity Attributes Phase 2 Eval: gemini-2.5-flash-lite (Thinking: 1024) ---
+
+--- Fixture 2: KitchenAid Artisan ---
+❌ [MM] usageIntensity: Expected <LIGHT_HOBBY> | Got <STANDARD>
+
+--- Fixture 4: Patagonia Torrentshell ---
+❌ [MM] sentiment: Expected <NEUTRAL> | Got <POSITIVE>
+
+--- Fixture 8: Toyota Camry ---
+❌ [FP] alternativeBrandMentioned: Expected <null> | Got <Honda>
+
+--- Fixture 9: Zojirushi  ---
+❌ [MM] sentiment: Expected <NEUTRAL> | Got <NEGATIVE>
+
+--- Fixture 10: Speed Queen TC5 ---
+❌ [MM] usageIntensity: Expected <HEAVY_PROFESSIONAL> | Got <STANDARD>
+
+--- Fixture 14: Apple M3 Max MacBook ---
+❌ [FN] alternativeBrandMentioned: Expected <Intel> | Got <null>
+
+--- Fixture 21: Lodge Cast Iron Skillet ---
+❌ [MM] status: Expected <functional> | Got <ACTIVE_USE>
+❌ [MM] usageIntensity: Expected <moderate> | Got <STANDARD>
+❌ [MM] maintenanceDiscipline: Expected <average> | Got <CASUAL>
+❌ [FN] diyRepairability: Expected <easy> | Got <null>
+❌ [MM] sentiment: Expected <mixed> | Got <POSITIVE>
+❌ [FP] alternativeBrandMentioned: Expected <null> | Got <stainless steel>
+
+--- Fixture 22: Craftsman Socket Wrench Set ---
+❌ [MM] status: Expected <functional> | Got <ACTIVE_USE>
+❌ [MM] usageIntensity: Expected <moderate> | Got <STANDARD>
+❌ [MM] maintenanceDiscipline: Expected <average> | Got <CASUAL>
+
+--- Fixture 23: Red Wing Iron Ranger Boots ---
+❌ [MM] status: Expected <functional> | Got <ACTIVE_USE>
+❌ [MM] usageIntensity: Expected <heavy> | Got <STANDARD>
+❌ [MM] maintenanceDiscipline: Expected <average> | Got <CASUAL>
+
+--- Fixture 24: KitchenAid Stand Mixer ---
+❌ [MM] status: Expected <functional> | Got <ACTIVE_USE>
+❌ [MM] usageIntensity: Expected <moderate> | Got <STANDARD>
+❌ [MM] maintenanceDiscipline: Expected <average> | Got <CASUAL>
+
+--- Fixture 25: Osprey Atmos Backpack ---
+❌ [MM] status: Expected <functional> | Got <ACTIVE_USE>
+❌ [MM] usageIntensity: Expected <heavy> | Got <STANDARD>
+❌ [MM] maintenanceDiscipline: Expected <average> | Got <CASUAL>
+❌ [FP] primaryFlawOrFailure: Expected <null> | Got <No major failures, just some scuffs and a faded color.>
+❌ [FP] diyRepairability: Expected <null> | Got <EASY>
+❌ [MM] warrantyExperience: Expected <positive> | Got <IGNORED>
+
+--- Fixture 26: Seiko SKX007 Dive Watch ---
+❌ [MM] status: Expected <functional> | Got <ACTIVE_USE>
+❌ [MM] usageIntensity: Expected <heavy> | Got <STANDARD>
+❌ [MM] maintenanceDiscipline: Expected <neglectful> | Got <CASUAL>
+❌ [FP] primaryFlawOrFailure: Expected <null> | Got <Scratches on crystal and bezel>
+❌ [FP] diyRepairability: Expected <null> | Got <EASY>
+❌ [FP] retailerMentioned: Expected <null> | Got <online>
+
+--- Fixture 27: IKEA BILLY Bookcase ---
+❌ [MM] status: Expected <functional> | Got <ACTIVE_USE>
+❌ [MM] usageIntensity: Expected <heavy> | Got <STANDARD>
+❌ [MM] maintenanceDiscipline: Expected <neglectful> | Got <CASUAL>
+❌ [FN] diyRepairability: Expected <easy> | Got <null>
+
+--- Fixture 28: Parker Jotter Pen ---
+❌ [MM] status: Expected <functional> | Got <ACTIVE_USE>
+❌ [MM] usageIntensity: Expected <moderate> | Got <STANDARD>
+❌ [MM] maintenanceDiscipline: Expected <average> | Got <CASUAL>
+
+--- Fixture 29: Miele C3 Canister Vacuum ---
+❌ [MM] status: Expected <functional> | Got <ACTIVE_USE>
+❌ [MM] usageIntensity: Expected <heavy> | Got <STANDARD>
+❌ [MM] maintenanceDiscipline: Expected <average> | Got <CASUAL>
+
+--- Fixture 30: Le Creuset Round Dutch Oven ---
+❌ [MM] status: Expected <functional> | Got <ACTIVE_USE>
+❌ [MM] ownershipDurationMonths: Expected <540> | Got <552>
+❌ [MM] usageIntensity: Expected <moderate> | Got <STANDARD>
+❌ [MM] maintenanceDiscipline: Expected <average> | Got <CASUAL>
+❌ [MM] diyRepairability: Expected <impossible> | Got <IMPOSSIBLE_SEALED>
+❌ [MM] sentiment: Expected <mixed> | Got <POSITIVE>
+❌ [FP] alternativeBrandMentioned: Expected <null> | Got <Amazon>
+❌ [FN] retailerMentioned: Expected <Amazon> | Got <null>
+
+--- Fixture 31: Levi's 501 Jeans ---
+❌ [MM] status: Expected <functional> | Got <ACTIVE_USE>
+❌ [MM] usageIntensity: Expected <moderate> | Got <STANDARD>
+❌ [MM] maintenanceDiscipline: Expected <average> | Got <CASUAL>
+❌ [FP] primaryFlawOrFailure: Expected <null> | Got <Fading and perceived loss of coolness>
+
+--- Fixture 32: Technivorm Moccamaster Coffee Brewer ---
+❌ [MM] status: Expected <functional> | Got <ACTIVE_USE>
+❌ [MM] usageIntensity: Expected <heavy> | Got <STANDARD>
+❌ [MM] maintenanceDiscipline: Expected <diligent> | Got <CASUAL>
+❌ [FN] warrantyExperience: Expected <positive> | Got <null>
+
+--- Fixture 33: Maglite D-Cell Flashlight ---
+❌ [MM] status: Expected <functional> | Got <ACTIVE_USE>
+❌ [MM] usageIntensity: Expected <heavy> | Got <HEAVY_PROFESSIONAL>
+❌ [MM] maintenanceDiscipline: Expected <neglectful> | Got <CASUAL>
+❌ [FP] primaryFlawOrFailure: Expected <null> | Got <not 'bright' by today's LED standards>
+❌ [FP] alternativeBrandMentioned: Expected <null> | Got <Amazon>
+❌ [FN] retailerMentioned: Expected <Amazon> | Got <null>
+
+--- Fixture 34: Saddleback Leather Co. Bifold Wallet ---
+❌ [MM] status: Expected <functional> | Got <ACTIVE_USE>
+❌ [MM] usageIntensity: Expected <heavy> | Got <STANDARD>
+❌ [MM] maintenanceDiscipline: Expected <neglectful> | Got <CASUAL>
+❌ [FN] warrantyExperience: Expected <positive> | Got <null>
+
+--- Fixture 35: Sennheiser HD 600 Headphones ---
+❌ [MM] status: Expected <functional> | Got <ACTIVE_USE>
+❌ [MM] usageIntensity: Expected <heavy> | Got <STANDARD>
+❌ [MM] maintenanceDiscipline: Expected <diligent> | Got <CASUAL>
+
+--- Fixture 36: John Boos Maple Cutting Board ---
+❌ [MM] status: Expected <functional> | Got <ACTIVE_USE>
+❌ [MM] usageIntensity: Expected <heavy> | Got <STANDARD>
+❌ [MM] maintenanceDiscipline: Expected <diligent> | Got <METICULOUS>
+❌ [FP] primaryFlawOrFailure: Expected <null> | Got <It's a bit of a pain to clean because of the size>
+❌ [FP] alternativeBrandMentioned: Expected <null> | Got <plastic cutting boards>
+❌ [FN] acquiredPrice: Expected <200> | Got <null>
+
+--- Fixture 37: Stanley Classic Vacuum Bottle ---
+❌ [MM] status: Expected <functional> | Got <ACTIVE_USE>
+❌ [MM] usageIntensity: Expected <heavy> | Got <STANDARD>
+❌ [MM] maintenanceDiscipline: Expected <neglectful> | Got <CASUAL>
+❌ [FP] primaryFlawOrFailure: Expected <null> | Got <looks like it's been through a war>
+
+--- Fixture 38: Griswold Cast Iron Griddle ---
+❌ [MM] status: Expected <functional> | Got <ACTIVE_USE>
+❌ [FN] ownershipDurationMonths: Expected <888> | Got <null>
+❌ [MM] usageIntensity: Expected <moderate> | Got <STANDARD>
+❌ [MM] maintenanceDiscipline: Expected <diligent> | Got <METICULOUS>
+❌ [FP] primaryFlawOrFailure: Expected <null> | Got <ugly, uneven, and took a lot of scrubbing and re-seasoning to get right>
+❌ [FN] diyRepairability: Expected <easy> | Got <null>
+
+--- Fixture 39: Hilleberg Nallo 2 Tent ---
+❌ [MM] status: Expected <functional> | Got <ACTIVE_USE>
+❌ [MM] usageFrequency: Expected <rarely> | Got <SEASONAL>
+❌ [MM] usageIntensity: Expected <heavy> | Got <STANDARD>
+❌ [FN] maintenanceDiscipline: Expected <average> | Got <null>
+❌ [MM] retailerMentioned: Expected <outdoor store in Portland> | Got <an outdoor store in Portland>
+
+--- Fixture 40: Audio-Technica ATH-M50x Headphones ---
+❌ [MM] status: Expected <functional> | Got <ACTIVE_USE>
+❌ [MM] usageIntensity: Expected <heavy> | Got <STANDARD>
+❌ [MM] maintenanceDiscipline: Expected <diligent> | Got <CASUAL>
+❌ [MM] sentiment: Expected <mixed> | Got <POSITIVE>
+
+--- Fixture 41: Darn Tough Merino Wool Socks ---
+❌ [MM] status: Expected <functional> | Got <ACTIVE_USE>
+❌ [MM] usageFrequency: Expected <weekly> | Got <DAILY>
+❌ [MM] usageIntensity: Expected <heavy> | Got <STANDARD>
+❌ [MM] maintenanceDiscipline: Expected <average> | Got <CASUAL>
+❌ [MM] warrantyExperience: Expected <positive> | Got <SEAMLESS_REPLACEMENT>
+
+--- Fixture 42: Weber Kettle Grill ---
+❌ [MM] status: Expected <functional> | Got <ACTIVE_USE>
+❌ [MM] ownershipDurationMonths: Expected <360> | Got <348>
+❌ [MM] usageIntensity: Expected <moderate> | Got <STANDARD>
+❌ [FN] diyRepairability: Expected <easy> | Got <null>
+❌ [MM] sentiment: Expected <mixed> | Got <POSITIVE>
+❌ [FP] alternativeBrandMentioned: Expected <null> | Got <Home Depot>
+❌ [FN] retailerMentioned: Expected <Home Depot> | Got <null>
+
+--- Fixture 43: Victorinox Fibrox Pro Chef's Knife ---
+❌ [MM] status: Expected <functional> | Got <ACTIVE_USE>
+❌ [MM] usageIntensity: Expected <heavy> | Got <STANDARD>
+❌ [FP] primaryFlawOrFailure: Expected <null> | Got <Not fancy or beautiful>
+❌ [FN] diyRepairability: Expected <easy> | Got <null>
+
+--- Fixture 44: Makita Cordless Drill ---
+❌ [MM] status: Expected <functional> | Got <ACTIVE_USE>
+❌ [MM] usageFrequency: Expected <monthly> | Got <WEEKLY>
+❌ [MM] usageIntensity: Expected <heavy> | Got <STANDARD>
+
+--- Fixture 45: Felco F-2 Pruners ---
+❌ [MM] status: Expected <functional> | Got <ACTIVE_USE>
+❌ [MM] usageIntensity: Expected <heavy> | Got <STANDARD>
+❌ [MM] maintenanceDiscipline: Expected <diligent> | Got <METICULOUS>
+❌ [FN] diyRepairability: Expected <easy> | Got <null>
+❌ [FP] alternativeBrandMentioned: Expected <null> | Got <Walmart>
+
+--- Fixture 46: Rimowa Original Cabin Suitcase ---
+❌ [MM] status: Expected <functional> | Got <ACTIVE_USE>
+❌ [MM] usageIntensity: Expected <heavy> | Got <STANDARD>
+❌ [MM] maintenanceDiscipline: Expected <neglectful> | Got <CASUAL>
+❌ [FP] primaryFlawOrFailure: Expected <null> | Got <Cosmetic damage (dented and scratched)>
+❌ [MM] retailerMentioned: Expected <boutique store in NYC> | Got <their boutique store in NYC>
+
+--- Fixture 47: Duluth Trading Co. Longtail T-Shirt ---
+❌ [MM] status: Expected <functional> | Got <ACTIVE_USE>
+❌ [MM] usageIntensity: Expected <heavy> | Got <STANDARD>
+❌ [MM] maintenanceDiscipline: Expected <average> | Got <CASUAL>
+❌ [FP] primaryFlawOrFailure: Expected <null> | Got <not exactly 'fashionable'>
+❌ [FP] retailerMentioned: Expected <null> | Got <online>
+
+--- Fixture 48: Pendleton Wool Blanket ---
+❌ [MM] status: Expected <functional> | Got <ACTIVE_USE>
+❌ [MM] ownershipDurationMonths: Expected <768> | Got <240>
+❌ [MM] usageIntensity: Expected <moderate> | Got <STANDARD>
+❌ [MM] maintenanceDiscipline: Expected <neglectful> | Got <CASUAL>
+❌ [FN] diyRepairability: Expected <easy> | Got <null>
+❌ [MM] sentiment: Expected <mixed> | Got <POSITIVE>
+❌ [FP] alternativeBrandMentioned: Expected <null> | Got <Target>
+❌ [FN] retailerMentioned: Expected <Target> | Got <null>
+
+--- Fixture 49: Swingline 747 Stapler ---
+❌ [MM] status: Expected <functional> | Got <ACTIVE_USE>
+❌ [MM] usageIntensity: Expected <heavy> | Got <STANDARD>
+❌ [MM] maintenanceDiscipline: Expected <neglectful> | Got <CASUAL>
+❌ [FN] retailerMentioned: Expected <Office Depot> | Got <null>
+
+--- Fixture 50: Pyrex Glass Food Storage Containers ---
+❌ [MM] status: Expected <functional> | Got <ACTIVE_USE>
+❌ [MM] usageIntensity: Expected <heavy> | Got <STANDARD>
+❌ [MM] maintenanceDiscipline: Expected <average> | Got <CASUAL>
+❌ [MM] diyRepairability: Expected <impossible> | Got <IMPOSSIBLE_SEALED>
+❌ [MM] sentiment: Expected <mixed> | Got <POSITIVE>
+
+=========================================
+ ABSA CORE METRICS (500 total dim. checks)
+=========================================
+F1-Score:    65.6%
+Precision:   65.2% (TP: 244, FP: 130)
+Recall:      65.9% (TP: 244, FN: 126)
+Inference Cost:   $0.01887
+Judge Cost:       $0.01801
+Total API Cost:   $0.03688
+=========================================

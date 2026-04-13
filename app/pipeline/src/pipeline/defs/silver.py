@@ -12,10 +12,13 @@ from google.genai import types
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
 from ..utils.pricing import calculate_gemini_cost, AiModel
-from ..utils.paths import get_data_dir, get_ledger_path
+from ..utils.paths import get_read_path, get_write_path, get_ledger_path
 from ..utils.db import get_duckdb_connection
 
 PROMPT_VERSION = "v1.0.0"
+# UPDATE THIS STRING manually whenever you make schema or prompt changes that invalidate older data.
+# Do NOT update this for simple code cleanups, formatting, or comments.
+SILVER_CODE_VERSION = "v1"
 
 # We define a Daily Partition from Jan 2012. 
 bifl_daily_partitions = DailyPartitionsDefinition(start_date="2012-01-01")
@@ -50,20 +53,22 @@ async def _process_thread_batch(threads: list[tuple], model_name: str, semaphore
             content_blocks.append({
                 "block_id": 0,
                 "author_id": "OP",
-                "text": f"Title: {title}\nBody: {body or ''}"
+                "text": f"Title: {title}\nBody: {body or ''}",
+                "created_utc": created_utc
             })
             
         if chunk:
-            for idx, c_body in enumerate(chunk):
-                if c_body:
+            for idx, c_obj in enumerate(chunk):
+                if c_obj and isinstance(c_obj, dict) and c_obj.get('body'):
                     true_idx = (chunk_index * 10) + idx + 1
                     content_blocks.append({
                         "block_id": true_idx,
                         "author_id": f"Commenter_{true_idx}",
-                        "text": c_body
+                        "text": c_obj['body'],
+                        "created_utc": c_obj.get('created_utc')
                     })
                     
-        thread_text = json.dumps(content_blocks, indent=2)
+        thread_text = json.dumps([{k: v for k, v in b.items() if k != 'created_utc'} for b in content_blocks], indent=2)
 
         prompt = f"""You are an Entity Discovery agent studying text blocks.
 Your task is to identify every durable product mentioned.
@@ -131,6 +136,21 @@ Thread to analyze (JSON ContentBlocks):
                     items = json.loads(response.text)
                     for item in items:
                         item['submission_id'] = submission_id
+                        
+                        # Enrich Payload for Phase 2
+                        matched_texts = []
+                        target_timestamp = None
+                        for bid in item.get('source_block_ids', []):
+                            matching_block = next((b for b in content_blocks if b['block_id'] == bid), None)
+                            if matching_block:
+                                matched_texts.append(matching_block['text'])
+                                if target_timestamp is None:
+                                    target_timestamp = matching_block.get('created_utc')
+                                    
+                        item['target_text'] = "\n\n---\n\n".join(matched_texts)
+                        item['target_authored_at'] = target_timestamp
+                        item['parent_text'] = title
+
                         results.append(item)
             except Exception as e:
                 # In Dagster, we fail gracefully per-item or log warnings, but for simplicity we skip failing texts.
@@ -139,8 +159,9 @@ Thread to analyze (JSON ContentBlocks):
     tasks = []
     chunk_size = 10
     for thread in threads:
-        created_utc = thread[4] if len(thread) >= 5 else None
-        submission_id, title, body, comments_list = thread[0], thread[1], thread[2], thread[3]
+        submission_id, title, body = thread[0], thread[1], thread[2]
+        created_utc = thread[3] if len(thread) >= 4 else None
+        comments_list = thread[4] if len(thread) >= 5 else []
         
         if not comments_list:
             comments_list = []
@@ -156,21 +177,17 @@ Thread to analyze (JSON ContentBlocks):
 @asset(
     group_name="silver",
     partitions_def=bifl_daily_partitions,
+    code_version=SILVER_CODE_VERSION,
     deps=["raw_reddit_buyitforlife_comments", "raw_reddit_buyitforlife_submissions"],
     description="Phase 1: Runs LLM inferences to discover entities in Bronze data."
 )
 def silver_entity_discovery(context: AssetExecutionContext, config: SilverExtractionConfig) -> MaterializeResult:
     partition_date_str = context.partition_key
     
-    data_dir = get_data_dir()
-    bronze_comments_parquet = f"{data_dir}/bronze/reddit_buyitforlife_comments.parquet"
-    bronze_submissions_parquet = f"{data_dir}/bronze/reddit_buyitforlife_submissions.parquet"
-    
-    silver_dir_str = f"{data_dir}/silver"
-    if not silver_dir_str.startswith("s3://"):
-        Path(silver_dir_str).mkdir(parents=True, exist_ok=True)
+    bronze_comments_parquet = get_read_path("bronze/reddit_buyitforlife_comments.parquet")
+    bronze_submissions_parquet = get_read_path("bronze/reddit_buyitforlife_submissions.parquet")
         
-    target_parquet = f"{silver_dir_str}/entity_discovery_{partition_date_str}.parquet"
+    target_parquet = get_write_path(f"silver/entity_discovery_{partition_date_str}.parquet")
     
     limit_clause = f"LIMIT {config.limit}" if config.limit else ""
     
@@ -181,7 +198,7 @@ def silver_entity_discovery(context: AssetExecutionContext, config: SilverExtrac
             s.title, 
             s.selftext as body, 
             s.created_utc,
-            list(c.body ORDER BY c.created_utc ASC) as comments
+            list({{'body': c.body, 'created_utc': c.created_utc}} ORDER BY c.created_utc ASC) as comments
         FROM '{str(bronze_submissions_parquet)}' s
         LEFT JOIN '{str(bronze_comments_parquet)}' c ON c.link_id = 't3_' || s.id
         WHERE strftime(to_timestamp(CAST(s.created_utc AS BIGINT)), '%Y-%m-%d') = '{partition_date_str}'
@@ -268,9 +285,10 @@ def silver_entity_discovery(context: AssetExecutionContext, config: SilverExtrac
 @asset(
     group_name="silver",
     partitions_def=bifl_daily_partitions,
+    code_version=SILVER_CODE_VERSION,
     deps=["silver_entity_discovery"],
-    description="Phase 2: Reads the mapped entities and uses Gemini 3.1 Pro to extract nuanced sentiment and durability metrics."
+    description="Phase 2: Reads the mapped entities and uses Gemini 3.1 Pro to extract nuanced qualitative attributes, sentiment, and durability metrics."
 )
-def silver_nuance_extraction(context: AssetExecutionContext) -> MaterializeResult:
-    context.log.info("Phase 2 Nuance Extraction is a stub. It will read entity_discovery parquet and fan out.")
+def silver_entity_attributes(context: AssetExecutionContext) -> MaterializeResult:
+    context.log.info("Phase 2 Entity Attributes is a stub. It will read entity_discovery parquet and fan out.")
     return MaterializeResult(metadata={"status": "stub"})

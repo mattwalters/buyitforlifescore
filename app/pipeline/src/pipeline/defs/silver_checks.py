@@ -12,9 +12,9 @@ def canary_validity_check(context) -> AssetCheckResult:
     Randomly samples exactly 1,067 extractions across all materialized daily partitions
     and evaluates them using an un-anchored Gemini Blind Judge to compute a ~95% Confidence Interval.
     """
-    from ..utils.paths import get_data_dir
-    data_dir = get_data_dir()
-    source_glob = f"{data_dir}/silver/entity_discovery_*.parquet"
+    from ..utils.paths import get_read_path
+    
+    source_glob = get_read_path("silver/entity_discovery_*.parquet")
     
     with get_duckdb_connection() as con:
         try:

@@ -1,0 +1,766 @@
+[
+  {
+    "id": "1",
+    "brand": "Red Wing",
+    "productName": "Iron Ranger",
+    "text": "I've worn my Iron Rangers to the construction site 5 days a week for the last 4 years. I brush them weekly and condition them every 6 months. Around year 3 the sole started to delaminate slightly at the toe, but I took it to a local cobbler and it was super easy for them to stitch back up since it's a Goodyear welt. Definitely got my $350 worth. Still wear them every single day.",
+    "parent_text": "Looking for boots that can survive professional contracting work.",
+    "expected": {
+      "status": "ACTIVE_USE",
+      "ownershipDurationMonths": 48,
+      "usageFrequency": "DAILY",
+      "primaryFlawOrFailure": "sole delamination at toe",
+      "diyRepairability": null,
+      "acquiredPrice": 350.0,
+      "sentiment": "POSITIVE"
+    }
+  },
+  {
+    "id": "2",
+    "brand": "KitchenAid",
+    "productName": "Artisan",
+    "text": "Honestly I totally regret buying the Artisan. I picked one up at Target on sale for $250. I only bake cookies maybe once a month, but within 6 months the planetary gear just shattered while mixing regular dough. Reached out to their support and they completely ignored my emails. It's basically a paperweight now.",
+    "parent_text": "Is the KitchenAid really Buy It For Life?",
+    "expected": {
+      "status": "BROKEN",
+      "ownershipDurationMonths": 6,
+      "usageFrequency": "MONTHLY",
+      "primaryFlawOrFailure": "planetary gear shattered",
+      "warrantyExperience": "IGNORED",
+      "acquiredPrice": 250.0,
+      "sentiment": "NEGATIVE"
+    }
+  },
+  {
+    "id": "3",
+    "brand": "Herman Miller",
+    "productName": "Aeron",
+    "text": "Upgraded to an Aeron from a cheap Staples chair last winter. The mesh is incredibly supportive for 8-hour office days, but the plastic armrests squeak constantly whenever I shift my weight. It's so annoying for a $1000 chair. Still using it though.",
+    "parent_text": "Desk chair recommendations?",
+    "expected": {
+      "status": "ACTIVE_USE",
+      "usageFrequency": "DAILY",
+      "primaryFlawOrFailure": "plastic armrests squeak constantly",
+      "acquiredPrice": 1000.0,
+      "sentiment": "NEUTRAL"
+    }
+  },
+  {
+    "id": "4",
+    "brand": "Patagonia",
+    "productName": "Torrentshell",
+    "text": "This rain jacket is decent, had it for 5 years now for hiking once or twice a year. Unfortunately the inner lining started flaking off heavily. Sent it back to Patagonia and they honored the warranty immediately, sent me a brand new updated version no questions asked. I didn't even have to pay shipping.",
+    "parent_text": "Good rain gear?",
+    "expected": {
+      "ownershipDurationMonths": 60,
+      "usageFrequency": "SEASONAL",
+      "primaryFlawOrFailure": "inner lining flaking off",
+      "warrantyExperience": "SEAMLESS_REPLACEMENT",
+      "sentiment": "NEUTRAL"
+    }
+  },
+  {
+    "id": "5",
+    "brand": "Vitamix",
+    "productName": "5200",
+    "text": "Bought the 5200 mainly for the analog switches, I hate touchscreens. Have used it pretty much every morning for smoothies for over a decade (12 years to be exact). Never skipped a beat. Best $450 I ever spent. Nothing has ever broken so I can't speak to repairability, but it feels like a tank.",
+    "parent_text": "Vitamix blender reviews",
+    "expected": {
+      "status": "ACTIVE_USE",
+      "ownershipDurationMonths": 144,
+      "usageFrequency": "DAILY",
+      "acquiredPrice": 450.0,
+      "sentiment": "POSITIVE"
+    }
+  },
+  {
+    "id": "6",
+    "brand": "Apple",
+    "productName": "AirPods Pro",
+    "text": "I used to be an Android guy using Galaxy Buds, but switching to the AirPods was a game changer for calls. Sound is great. But honestly? The batteries died completely at the 2 year mark and because they are glued shut, you literally cannot fix them yourself. Apple wanted $180 for battery replacement. Threw them in the trash.",
+    "parent_text": "Are Airpods durable?",
+    "expected": {
+      "status": "BROKEN",
+      "ownershipDurationMonths": 24,
+      "diyRepairability": "IMPOSSIBLE_SEALED",
+      "primaryFlawOrFailure": "batteries died completely",
+      "sentiment": "NEGATIVE"
+    }
+  },
+  {
+    "id": "7",
+    "brand": "Darn Tough",
+    "productName": "Tactical Socks",
+    "text": "These are invincible. Issued them on a deployment and wore them day in and day out on patrols. Got a hole in the heel after 3 years, sent them in, got a new pair. It's legit.",
+    "parent_text": "Best socks?",
+    "expected": {
+      "usageFrequency": "DAILY",
+      "primaryFlawOrFailure": "hole in heel",
+      "warrantyExperience": "SEAMLESS_REPLACEMENT",
+      "ownershipDurationMonths": 36,
+      "sentiment": "POSITIVE"
+    }
+  },
+  {
+    "id": "8",
+    "brand": "Toyota",
+    "productName": "Camry",
+    "text": "It's a commuter car, I put about 10k miles on it a year. Bought it fresh off the lot. 5 years in and zero mechanical issues, but the infotainment screen is incredibly laggy in the cold, drives me nuts. I wish I had just bought a Honda Accord to be honest.",
+    "parent_text": "Reliable daily driver under 30k?",
+    "expected": {
+      "status": "ACTIVE_USE",
+      "ownershipDurationMonths": 60,
+      "usageFrequency": "DAILY",
+      "primaryFlawOrFailure": "infotainment screen is laggy in the cold",
+      "sentiment": "NEUTRAL"
+    }
+  },
+  {
+    "id": "9",
+    "brand": "Zojirushi",
+    "productName": "",
+    "text": "I was gifted one of their neuro fuzzy rice cookers. It makes perfect rice, but the non-stick bowl scratches really easily even if you use the plastic paddle. I ended up giving it away to my sister because I didn't want to deal with replacing the bowl.",
+    "parent_text": "Rice cooker recommendations",
+    "expected": {
+      "status": "SOLD_OR_GIFTED",
+      "primaryFlawOrFailure": "non-stick bowl scratches easily",
+      "sentiment": "NEUTRAL"
+    }
+  },
+  {
+    "id": "10",
+    "brand": "Speed Queen",
+    "productName": "TC5",
+    "text": "Our Whirlpool died so we bit the bullet and got the Speed Queen for our family of 6. We do easily 10 loads a week. Going on 2 years now. Zero plastic gears, entirely metal. The only downside is it uses a ton of water, but I don't care. Never had to test the warranty.",
+    "parent_text": "Washer/Dryer BIFL?",
+    "expected": {
+      "ownershipDurationMonths": 24,
+      "usageFrequency": "WEEKLY",
+      "primaryFlawOrFailure": null,
+      "sentiment": "POSITIVE"
+    }
+  },
+  {
+    "id": "11",
+    "brand": "Banana Republic",
+    "productName": "wool cargo pants",
+    "text": "Plan on wearing long-johns underneath. Looking for something water and wind resistant that preferably doesnt make loud swooshing sounds when walking. edit Took the advice of wool pants. I was able to score a nice pair of wool cargo pants at Goodwill. Banana Republic band, hate to think what they cost new, but I paid .50 (Goodwill has sales apparently, they were half off).",
+    "parent_text": "Winter pants?",
+    "expected": {
+      "acquiredPrice": 0.5,
+      "sentiment": "NEUTRAL"
+    }
+  },
+  {
+    "id": "12",
+    "brand": "Technics",
+    "productName": "SL-1200",
+    "text": "My dad just handed down his old Technics SL-1200 turntable. Still works flawlessly after 30 years.",
+    "parent_text": "Vintage turntables",
+    "expected": {
+      "status": "ACTIVE_USE",
+      "ownershipDurationMonths": 360,
+      "sentiment": "POSITIVE"
+    }
+  },
+  {
+    "id": "13",
+    "brand": "Victorinox",
+    "productName": "Fibrox Chef's Knife",
+    "text": "The Fibrox Chef's Knife is the ultimate workhorse. Holds an edge decently and you don't cry if you chip it.",
+    "parent_text": "Is Victorinox really the best starter knife?",
+    "expected": {
+      "sentiment": "POSITIVE",
+      "primaryFlawOrFailure": null
+    }
+  },
+  {
+    "id": "14",
+    "brand": "Apple",
+    "productName": "M3 Max MacBook",
+    "text": "I highly recommend the M3 Max. The battery life is insane compared to my old Intel one.",
+    "parent_text": "Looking for a new laptop, thinking about a MacBook.",
+    "expected": {
+      "sentiment": "POSITIVE"
+    }
+  },
+  {
+    "id": "15",
+    "brand": "Red Wing",
+    "productName": "boots",
+    "text": "My Red Wings finally died after 10 years.",
+    "parent_text": "Boots that last?",
+    "expected": {
+      "status": "BROKEN",
+      "ownershipDurationMonths": 120,
+      "sentiment": "POSITIVE"
+    }
+  },
+  {
+    "id": "16",
+    "brand": "Toyota",
+    "productName": "Tacoma",
+    "text": "The Tacoma is immortal. Mine has 300k miles.",
+    "parent_text": "Is Toyota actually reliable?",
+    "expected": {
+      "status": "ACTIVE_USE",
+      "sentiment": "POSITIVE"
+    }
+  },
+  {
+    "id": "17",
+    "brand": "HexClad",
+    "productName": "",
+    "text": "Do not buy HexClad. The non-stick coating started peeling after exactly a year of careful use.",
+    "parent_text": "Pots and pans",
+    "expected": {
+      "status": "BROKEN",
+      "ownershipDurationMonths": 12,
+      "primaryFlawOrFailure": "non-stick coating peeling",
+      "sentiment": "NEGATIVE"
+    }
+  },
+  {
+    "id": "18",
+    "brand": "North Face",
+    "productName": "",
+    "text": "North Face quality has tanked so hard. Zippers break, seams rip.",
+    "parent_text": "Good hiking jackets",
+    "expected": {
+      "primaryFlawOrFailure": "zippers break and seams rip",
+      "sentiment": "NEGATIVE"
+    }
+  },
+  {
+    "id": "19",
+    "brand": "Honda",
+    "productName": "CRV",
+    "text": "Stay away from the Honda CRV 2018 model. The infotainment system is completely broken.",
+    "parent_text": "reliable cars?",
+    "expected": {
+      "primaryFlawOrFailure": "infotainment system is broken",
+      "sentiment": "NEGATIVE"
+    }
+  },
+  {
+    "id": "20",
+    "brand": "Breville",
+    "productName": "Barista Express",
+    "text": "I used to swear by the Breville Barista Express, but the grinder kept jamming. The Rancilio Silvia is much harder to learn but the build quality is industrial.",
+    "parent_text": "Espresso machines",
+    "expected": {
+      "primaryFlawOrFailure": "grinder kept jamming",
+      "sentiment": "NEGATIVE"
+    }
+  },
+  {
+    "id": "21",
+    "brand": "Lodge",
+    "productName": "Cast Iron Skillet",
+    "text": "Oh yeah, my Lodge skillet. Bought it at Walmart for like $30 back in '98. It's ugly as sin, heavy like a brick, and rusty if you even *look* at it wrong, but goddammit if it doesn't cook a perfect steak every single time. My grandma had one, too, probably from the 50s. She swore by it, unlike her 'fancy' stainless steel set she got from Macy's that warped after a year. Still using it daily, though I'm sure some 'expert' will tell me I'm seasoning it wrong.",
+    "parent_text": "What's your most reliable kitchen item?",
+    "expected": {
+      "status": "ACTIVE_USE",
+      "ownershipDurationMonths": 312,
+      "usageFrequency": "daily",
+      "primaryFlawOrFailure": "rusts easily",
+      "diyRepairability": null,
+      "warrantyExperience": null,
+      "sentiment": "POSITIVE",
+      "acquiredPrice": 30
+    }
+  },
+  {
+    "id": "22",
+    "brand": "Craftsman",
+    "productName": "Socket Wrench Set",
+    "text": "My dad got his Craftsman socket set from his dad in 1980. It's missing a 10mm socket, naturally, and the case is cracked, but those wrenches still grip better than any cheap crap from Harbor Freight. I use it probably once a week for various car shenanigans. Never had to replace a single wrench. The ratchets are a bit stiff now, but a little oil fixes that right up. Heard their new stuff isn't as good, but this old set? Indestructible.",
+    "parent_text": "Old tools vs. new tools: which do you prefer?",
+    "expected": {
+      "status": "ACTIVE_USE",
+      "ownershipDurationMonths": 528,
+      "usageFrequency": "WEEKLY",
+      "primaryFlawOrFailure": "ratchets stiff",
+      "diyRepairability": null,
+      "warrantyExperience": null,
+      "sentiment": "POSITIVE",
+      "acquiredPrice": null
+    }
+  },
+  {
+    "id": "23",
+    "brand": "Red Wing",
+    "productName": "Iron Ranger Boots",
+    "text": "Red Wing Iron Rangers. Yeah, they cost me $350 at the Red Wing store downtown, but that was 8 years ago. Break-in was hell, felt like walking on bricks for a month, but now they're like a second skin. Wear 'em almost daily for work and weekends. Had them resoled once, which was easy enough, but the leather itself is just built different. My buddy's cheap 'fashion boots' from Nordstrom literally fell apart after a year. These? Still going strong. The laces are the only thing I've had to replace more than once.",
+    "parent_text": "What boots have actually lasted you a lifetime?",
+    "expected": {
+      "status": "ACTIVE_USE",
+      "ownershipDurationMonths": 96,
+      "usageFrequency": "daily",
+      "primaryFlawOrFailure": "laces wear out",
+      "diyRepairability": null,
+      "warrantyExperience": null,
+      "sentiment": "POSITIVE",
+      "acquiredPrice": 350
+    }
+  },
+  {
+    "id": "24",
+    "brand": "KitchenAid",
+    "productName": "Stand Mixer",
+    "text": "My KitchenAid stand mixer is older than me. Seriously, my mom got it as a wedding gift in '78. It's the almond color, still works perfectly. We use it for baking at least a few times a month. It's a beast. Had to replace the planetary gear once myself, which was surprisingly simple thanks to YouTube. My sister bought a Cuisinart mixer and it died after two years. Guess they don't make 'em like they used to, huh?",
+    "parent_text": "What kitchen gadget has stood the test of time?",
+    "expected": {
+      "status": "ACTIVE_USE",
+      "ownershipDurationMonths": 552,
+      "usageFrequency": "MONTHLY",
+      "primaryFlawOrFailure": "planetary gear failure",
+      "diyRepairability": null,
+      "warrantyExperience": null,
+      "sentiment": "POSITIVE",
+      "acquiredPrice": null
+    }
+  },
+  {
+    "id": "25",
+    "brand": "Osprey",
+    "productName": "Atmos Backpack",
+    "text": "My Osprey Atmos 65L has been through hell and back. Climbed Kilimanjaro, backpacked Europe for 6 months, even survived my dog chewing on a strap. Bought it at REI for ~$250, maybe 10 years ago. It's seen heavy use, I'd say, almost constantly for a few years, then monthly. No major failures, just some scuffs and a faded color. The zippers are still smooth, surprisingly. I've seen cheaper packs from Decathlon rip at the seams on their first trip. Osprey's 'All Mighty Guarantee' is legit too, though I haven't needed it.",
+    "parent_text": "Best backpacking pack for durability?",
+    "expected": {
+      "status": "ACTIVE_USE",
+      "ownershipDurationMonths": 120,
+      "usageFrequency": "MONTHLY",
+      "primaryFlawOrFailure": null,
+      "diyRepairability": null,
+      "warrantyExperience": "SEAMLESS_REPLACEMENT",
+      "sentiment": "POSITIVE",
+      "acquiredPrice": 250
+    }
+  },
+  {
+    "id": "26",
+    "brand": "Seiko",
+    "productName": "SKX007 Dive Watch",
+    "text": "My Seiko SKX007. Got it for my high school graduation in 2005 for about $180 online. Worn it daily ever since, through college, first job, even diving. It's got scratches all over the crystal and bezel, but it keeps ticking. Never serviced it, probably should, but hey, if it ain't broke. My buddy's fancy Apple Watch needs charging every night, this just needs my wrist. It's ugly now, but it's *my* ugly. Definitely positive.",
+    "parent_text": "What's a watch you've owned forever?",
+    "expected": {
+      "status": "ACTIVE_USE",
+      "ownershipDurationMonths": 228,
+      "usageFrequency": "daily",
+      "primaryFlawOrFailure": null,
+      "diyRepairability": null,
+      "warrantyExperience": null,
+      "sentiment": "POSITIVE",
+      "acquiredPrice": 180
+    }
+  },
+  {
+    "id": "27",
+    "brand": "IKEA",
+    "productName": "BILLY Bookcase",
+    "text": "Hear me out: my IKEA BILLY Bookcase. Everyone says IKEA is disposable, and yeah, some of it is. But this specific bookcase? I bought it for $50 back in 2002. It's moved apartments with me 7 times, been overloaded with books, and even survived a cat climbing it like a tree. It's wobbly now, sure, but it's still holding strong. My sister's 'solid wood' bookshelf from Wayfair collapsed last year. Maybe I just got lucky with a good batch, but it's definitely BIFL for me.",
+    "parent_text": "Surprising BIFL items?",
+    "expected": {
+      "status": "ACTIVE_USE",
+      "ownershipDurationMonths": 264,
+      "usageFrequency": "daily",
+      "primaryFlawOrFailure": "wobbly",
+      "diyRepairability": null,
+      "warrantyExperience": null,
+      "sentiment": "POSITIVE",
+      "acquiredPrice": 50
+    }
+  },
+  {
+    "id": "28",
+    "brand": "Parker",
+    "productName": "Jotter Pen",
+    "text": "My Parker Jotter. Cost me a tenner at Staples like 15 years ago. Lost it a few times, always found it. Writes perfectly every single time, never blobs, never skips. Use it daily at work. I've gone through countless Bic pens, those things are trash, but the Jotter just keeps on going. It's a simple, elegant design that just works. Couldn't ask for more from a pen.",
+    "parent_text": "What's the best pen you've ever owned?",
+    "expected": {
+      "status": "ACTIVE_USE",
+      "ownershipDurationMonths": 180,
+      "usageFrequency": "daily",
+      "primaryFlawOrFailure": null,
+      "diyRepairability": null,
+      "warrantyExperience": null,
+      "sentiment": "POSITIVE",
+      "acquiredPrice": 10
+    }
+  },
+  {
+    "id": "29",
+    "brand": "Miele",
+    "productName": "C3 Canister Vacuum",
+    "text": "Yeah, I shelled out nearly $700 for my Miele C3 at Bed Bath & Beyond 7 years ago. My wife thought I was crazy. But it's been a godsend. We have three shedding dogs and two kids, so it gets heavy use, probably daily. Never lost suction, never needed a repair. My old Dyson died after 3 years, and I heard Shark vacuums are just as bad. Miele? Worth every penny. It's a tank.",
+    "parent_text": "Is it worth spending a lot on a vacuum?",
+    "expected": {
+      "status": "ACTIVE_USE",
+      "ownershipDurationMonths": 84,
+      "usageFrequency": "daily",
+      "primaryFlawOrFailure": null,
+      "diyRepairability": null,
+      "warrantyExperience": null,
+      "sentiment": "POSITIVE",
+      "acquiredPrice": 700
+    }
+  },
+  {
+    "id": "30",
+    "brand": "Le Creuset",
+    "productName": "Round Dutch Oven",
+    "text": "My Le Creuset dutch oven. My mom gave it to me, she got it in the late 70s. It's chipped in a few places, and the enamel is stained, but it still cooks like a dream. We use it weekly for stews, bread, whatever. It's heavy as hell, and a pain to clean sometimes, but it conducts heat perfectly. My friend bought a cheap knock-off from Amazon and the enamel flaked off after a few uses. This thing is a family heirloom.",
+    "parent_text": "What's your most cherished kitchen item?",
+    "expected": {
+      "status": "ACTIVE_USE",
+      "ownershipDurationMonths": 540,
+      "usageFrequency": "WEEKLY",
+      "primaryFlawOrFailure": "chipped enamel",
+      "diyRepairability": null,
+      "warrantyExperience": null,
+      "sentiment": "POSITIVE",
+      "acquiredPrice": null
+    }
+  },
+  {
+    "id": "31",
+    "brand": "Levi's",
+    "productName": "501 Jeans",
+    "text": "My Levi's 501s. I bought them for about $60 at Kohl's maybe 10 years ago. They're faded and have a few patches, but they're still my go-to pair. I wear them probably twice a week. They've outlasted countless 'fashion' jeans from other brands like American Eagle that just shred after a year. The denim is just so thick and durable. I guess they're not as 'cool' as they used to be, but who cares when they last this long?",
+    "parent_text": "Most durable jeans you've owned?",
+    "expected": {
+      "status": "ACTIVE_USE",
+      "ownershipDurationMonths": 120,
+      "usageFrequency": "WEEKLY",
+      "primaryFlawOrFailure": null,
+      "diyRepairability": null,
+      "warrantyExperience": null,
+      "sentiment": "POSITIVE",
+      "acquiredPrice": 60
+    }
+  },
+  {
+    "id": "32",
+    "brand": "Technivorm",
+    "productName": "Moccamaster Coffee Brewer",
+    "text": "Technivorm Moccamaster. Yeah, it was a splurge at $300 from Williams Sonoma five years ago, but it makes the best coffee and it's built like a tank. My old Keurig was a joke, constantly breaking down, and those plastic Nespresso machines feel like they're designed to fail. I use the Moccamaster daily, sometimes twice. Never had an issue. Cleaning is super simple too. I heard their customer service is great if anything ever does go wrong, but I haven't needed it.",
+    "parent_text": "Best coffee maker for longevity?",
+    "expected": {
+      "status": "ACTIVE_USE",
+      "ownershipDurationMonths": 60,
+      "usageFrequency": "daily",
+      "primaryFlawOrFailure": null,
+      "diyRepairability": null,
+      "warrantyExperience": "SEAMLESS_REPLACEMENT",
+      "sentiment": "POSITIVE",
+      "acquiredPrice": 300
+    }
+  },
+  {
+    "id": "33",
+    "brand": "Maglite",
+    "productName": "D-Cell Flashlight",
+    "text": "My Maglite 3D-Cell. My grandad bought it in the 80s, gave it to my dad, who gave it to me. It's dented, scratched, and definitely not 'bright' by today's LED standards, but it ALWAYS works. Change the batteries maybe once a year, that's it. It's been dropped, used as a hammer, even left in the rain. My little LED tactical flashlight from Amazon broke after a single drop. This Maglite is practically a weapon, and it still lights up the dark.",
+    "parent_text": "What's an old-school item that still holds up?",
+    "expected": {
+      "status": "ACTIVE_USE",
+      "ownershipDurationMonths": 480,
+      "usageFrequency": "RARELY",
+      "primaryFlawOrFailure": null,
+      "diyRepairability": null,
+      "warrantyExperience": null,
+      "sentiment": "POSITIVE",
+      "acquiredPrice": null
+    }
+  },
+  {
+    "id": "34",
+    "brand": "Saddleback Leather Co.",
+    "productName": "Bifold Wallet",
+    "text": "Saddleback Leather bifold. Paid $100 for it online maybe 12 years ago. It's beat up, covered in character, but still perfectly functional. The leather is thick and indestructible. It's ugly in a beautiful way. My old Fossil wallet lasted maybe 3 years before falling apart. Saddleback has a 100-year warranty, which is probably overkill, but it speaks to their confidence. I use it daily, obviously.",
+    "parent_text": "Best wallet for BIFL?",
+    "expected": {
+      "status": "ACTIVE_USE",
+      "ownershipDurationMonths": 144,
+      "usageFrequency": "daily",
+      "primaryFlawOrFailure": null,
+      "diyRepairability": null,
+      "warrantyExperience": "SEAMLESS_REPLACEMENT",
+      "sentiment": "POSITIVE",
+      "acquiredPrice": 100
+    }
+  },
+  {
+    "id": "35",
+    "brand": "Sennheiser",
+    "productName": "HD 600 Headphones",
+    "text": "Sennheiser HD 600s. I bought these for $400 at a specialty audio store back in 2008. They're not wireless, they're not 'trendy,' but the sound quality is still incredible. I use them daily for music and gaming. I've replaced the earpads twice and the cable once (easy DIY fix), but the drivers themselves are still perfect. My friend's Beats by Dre broke after a year, and my cheap Sony earbuds are always crapping out. These are a different league.",
+    "parent_text": "What's your go-to pair of headphones?",
+    "expected": {
+      "status": "ACTIVE_USE",
+      "ownershipDurationMonths": 192,
+      "usageFrequency": "daily",
+      "primaryFlawOrFailure": "earpads wear out",
+      "diyRepairability": "EASY",
+      "warrantyExperience": null,
+      "sentiment": "POSITIVE",
+      "acquiredPrice": 400
+    }
+  },
+  {
+    "id": "36",
+    "brand": "John Boos",
+    "productName": "Maple Cutting Board",
+    "text": "John Boos maple cutting board. Got it as a wedding gift 15 years ago. It's massive, heavy, and was probably expensive (I heard they're like $200+). We use it daily. Yeah, it's got knife marks all over it, but a little mineral oil once a month keeps it looking good. My plastic cutting boards get nasty and warp, but this thing is a workhorse. It's a bit of a pain to clean because of the size, but totally worth it.",
+    "parent_text": "What's a kitchen item you can't live without?",
+    "expected": {
+      "status": "ACTIVE_USE",
+      "ownershipDurationMonths": 180,
+      "usageFrequency": "daily",
+      "primaryFlawOrFailure": null,
+      "diyRepairability": null,
+      "warrantyExperience": null,
+      "sentiment": "POSITIVE",
+      "acquiredPrice": 200
+    }
+  },
+  {
+    "id": "37",
+    "brand": "Stanley",
+    "productName": "Classic Vacuum Bottle",
+    "text": "My Stanley Classic thermos. My dad had one from the 70s, and I bought my own from Target for $30 about 10 years ago. It's dented to hell from countless drops, but it still keeps coffee hot all day. I use it daily for work. My Hydro Flask chipped and lost its insulating power after a year. This Stanley is truly a 'built for life' product, even if it looks like it's been through a war.",
+    "parent_text": "Most durable thermos/water bottle?",
+    "expected": {
+      "status": "ACTIVE_USE",
+      "ownershipDurationMonths": 120,
+      "usageFrequency": "daily",
+      "primaryFlawOrFailure": null,
+      "diyRepairability": null,
+      "warrantyExperience": null,
+      "sentiment": "POSITIVE",
+      "acquiredPrice": 30
+    }
+  },
+  {
+    "id": "38",
+    "brand": "Griswold",
+    "productName": "Cast Iron Griddle",
+    "text": "My Griswold cast iron griddle. Found it at a flea market for $15, probably made in the 40s or 50s. It's ugly, uneven, and took a lot of scrubbing and re-seasoning to get right, but now it's my go-to for pancakes and bacon every Sunday. It heats so evenly. My modern Lodge griddle is good, but this old Griswold just has a certain magic. Definitely takes diligent care, but it's worth it.",
+    "parent_text": "What's your best flea market find?",
+    "expected": {
+      "status": "ACTIVE_USE",
+      "ownershipDurationMonths": 888,
+      "usageFrequency": "WEEKLY",
+      "primaryFlawOrFailure": null,
+      "diyRepairability": null,
+      "warrantyExperience": null,
+      "sentiment": "POSITIVE",
+      "acquiredPrice": 15
+    }
+  },
+  {
+    "id": "39",
+    "brand": "Hilleberg",
+    "productName": "Nallo 2 Tent",
+    "text": "Hilleberg Nallo 2. I dropped nearly $800 on it at an outdoor store in Portland 7 years ago. My friends called me insane. But it's survived blizzards, torrential downpours, and gale-force winds in the Rockies. I use it maybe 3-4 times a year for serious backpacking. Zero failures, no tears, no broken poles. My old North Face tent ripped after a couple of seasons. Hilleberg is expensive, but it's genuinely bombproof.",
+    "parent_text": "Best 4-season tent for durability?",
+    "expected": {
+      "status": "ACTIVE_USE",
+      "ownershipDurationMonths": 84,
+      "usageFrequency": "RARELY",
+      "primaryFlawOrFailure": null,
+      "diyRepairability": null,
+      "warrantyExperience": null,
+      "sentiment": "POSITIVE",
+      "acquiredPrice": 800
+    }
+  },
+  {
+    "id": "40",
+    "brand": "Audio-Technica",
+    "productName": "ATH-M50x Headphones",
+    "text": "Audio-Technica ATH-M50x. Bought them for $150 from Amazon 6 years ago. The sound is still fantastic, and I use them daily for work and music. The *only* downside is the pleather earpads flake off after a year or two, but replacements are cheap and easy to swap out. The build quality of the actual headphones is stellar, though. My friend's Bose QC35s had a battery issue after 3 years and were impossible to repair.",
+    "parent_text": "Durable over-ear headphones?",
+    "expected": {
+      "status": "ACTIVE_USE",
+      "ownershipDurationMonths": 72,
+      "usageFrequency": "daily",
+      "primaryFlawOrFailure": "earpads flaking",
+      "diyRepairability": null,
+      "warrantyExperience": null,
+      "sentiment": "POSITIVE",
+      "acquiredPrice": 150
+    }
+  },
+  {
+    "id": "41",
+    "brand": "Darn Tough",
+    "productName": "Merino Wool Socks",
+    "text": "Darn Tough socks. Seriously, I've got pairs I bought 8 years ago from REI for $20 a pop. I wear them weekly, sometimes daily. They're thin, comfortable, and somehow never wear out. My Smartwool socks develop holes after a year, but these? Unstoppable. And their warranty is no joke, send them back if they ever get a hole, and they replace them. It's almost too good to be true, but it's real.",
+    "parent_text": "What's a surprisingly BIFL item?",
+    "expected": {
+      "status": "ACTIVE_USE",
+      "ownershipDurationMonths": 96,
+      "usageFrequency": "WEEKLY",
+      "primaryFlawOrFailure": null,
+      "diyRepairability": null,
+      "warrantyExperience": "SEAMLESS_REPLACEMENT",
+      "sentiment": "POSITIVE",
+      "acquiredPrice": 20
+    }
+  },
+  {
+    "id": "42",
+    "brand": "Weber",
+    "productName": "Kettle Grill",
+    "text": "My Weber Kettle grill. My dad bought it in the 90s, passed it down to me. It's rusty, greasy, and looks like it belongs in a junkyard, but it cooks a mean burger every time. We grill weekly in the summer. The wheels are a bit wobbly, and the ash catcher is cracked, but the core is solid. My neighbor's fancy gas grill from Home Depot broke down after 5 years and cost a fortune to fix. This ugly duckling just keeps going.",
+    "parent_text": "Best grill for longevity?",
+    "expected": {
+      "status": "ACTIVE_USE",
+      "ownershipDurationMonths": 360,
+      "usageFrequency": "SEASONAL",
+      "primaryFlawOrFailure": "wobbly wheels",
+      "diyRepairability": null,
+      "warrantyExperience": null,
+      "sentiment": "POSITIVE",
+      "acquiredPrice": null
+    }
+  },
+  {
+    "id": "43",
+    "brand": "Victorinox",
+    "productName": "Fibrox Pro Chef's Knife",
+    "text": "Victorinox Fibrox Pro chef's knife. Got it for $40 on Amazon 7 years ago. It's not fancy, it's not beautiful like a Shun or Wusthof, but it takes an edge easily and holds it, and it's super comfortable. I use it daily for all my cooking. It's been through the dishwasher more times than I can count (I know, I know, don't do that to good knives!), and it still performs perfectly. Best value knife out there.",
+    "parent_text": "What's your most reliable kitchen knife?",
+    "expected": {
+      "status": "ACTIVE_USE",
+      "ownershipDurationMonths": 84,
+      "usageFrequency": "daily",
+      "primaryFlawOrFailure": null,
+      "diyRepairability": null,
+      "warrantyExperience": null,
+      "sentiment": "POSITIVE",
+      "acquiredPrice": 40
+    }
+  },
+  {
+    "id": "44",
+    "brand": "Makita",
+    "productName": "Cordless Drill",
+    "text": "My Makita 18V drill. I bought it at Lowe's for $120 about 10 years ago. It's been dropped off ladders, left in the rain, and used for every DIY project imaginable. The original batteries finally died last year, but new ones were easy to find. The drill itself is still a beast. My old Ryobi drill smoked itself after a couple of years. Makita just feels more robust.",
+    "parent_text": "Most durable cordless drill?",
+    "expected": {
+      "status": "ACTIVE_USE",
+      "ownershipDurationMonths": 120,
+      "usageFrequency": "MONTHLY",
+      "primaryFlawOrFailure": "battery failure",
+      "diyRepairability": null,
+      "warrantyExperience": null,
+      "sentiment": "POSITIVE",
+      "acquiredPrice": 120
+    }
+  },
+  {
+    "id": "45",
+    "brand": "Felco",
+    "productName": "F-2 Pruners",
+    "text": "Felco F-2 pruners. My grandpa bought his pair in the 70s, and they still work. I got my own pair for $60 from a local hardware store 5 years ago. I use them weekly during gardening season. They're sharp, comfortable, and can cut through thick branches with ease. I sharpen them regularly and oil them, which keeps them like new. Cheaper brands from Walmart bend or break after a season. Felco is truly BIFL.",
+    "parent_text": "What gardening tools actually last?",
+    "expected": {
+      "status": "ACTIVE_USE",
+      "ownershipDurationMonths": 60,
+      "usageFrequency": "WEEKLY",
+      "primaryFlawOrFailure": null,
+      "diyRepairability": null,
+      "warrantyExperience": null,
+      "sentiment": "POSITIVE",
+      "acquiredPrice": 60
+    }
+  },
+  {
+    "id": "46",
+    "brand": "Rimowa",
+    "productName": "Original Cabin Suitcase",
+    "text": "My Rimowa Original Cabin. Yeah, I know, it cost me like $1200 at their boutique store in NYC. And yeah, it's dented and scratched to hell after 5 years of heavy travel (monthly flights). But it's still perfectly functional. The wheels are smooth, the handle is sturdy, and it protects my stuff. My old Samsonite zipper broke after a year. Rimowa is an investment, but it's built to take a beating.",
+    "parent_text": "Most durable carry-on luggage?",
+    "expected": {
+      "status": "ACTIVE_USE",
+      "ownershipDurationMonths": 60,
+      "usageFrequency": "MONTHLY",
+      "primaryFlawOrFailure": null,
+      "diyRepairability": null,
+      "warrantyExperience": null,
+      "sentiment": "POSITIVE",
+      "acquiredPrice": 1200
+    }
+  },
+  {
+    "id": "47",
+    "brand": "Duluth Trading Co.",
+    "productName": "Longtail T-Shirt",
+    "text": "Duluth Trading Co. Longtail T-shirts. I've been buying these for about 10 years, $25 a pop online. They're thick, comfortable, and they don't shrink or get holes like every other t-shirt I own. I wear them daily for work. They're not exactly 'fashionable,' but who cares when they last this long? My Hanes shirts are trash after 6 months. Duluth just makes solid, no-nonsense clothes.",
+    "parent_text": "What clothing item has surprised you with its durability?",
+    "expected": {
+      "status": "ACTIVE_USE",
+      "ownershipDurationMonths": 120,
+      "usageFrequency": "daily",
+      "primaryFlawOrFailure": null,
+      "diyRepairability": null,
+      "warrantyExperience": null,
+      "sentiment": "POSITIVE",
+      "acquiredPrice": 25
+    }
+  },
+  {
+    "id": "48",
+    "brand": "Pendleton",
+    "productName": "Wool Blanket",
+    "text": "Pendleton wool blanket. My great-aunt gave it to my parents in the 60s, and it's been on my bed for the last 20 years. It's got a few moth holes (my fault, probably), but it's still incredibly warm and soft. It's seen daily use. My cheap fleece blankets from Target pill and fall apart after a year. This Pendleton will probably outlive me. It's a bit scratchy, but that's wool for ya.",
+    "parent_text": "Most durable blanket for warmth?",
+    "expected": {
+      "status": "ACTIVE_USE",
+      "ownershipDurationMonths": 768,
+      "usageFrequency": "daily",
+      "primaryFlawOrFailure": "moth holes",
+      "diyRepairability": null,
+      "warrantyExperience": null,
+      "sentiment": "POSITIVE",
+      "acquiredPrice": null
+    }
+  },
+  {
+    "id": "49",
+    "brand": "Swingline",
+    "productName": "747 Stapler",
+    "text": "My Swingline 747 stapler. The iconic red one. My office has had it for like 30 years, probably bought it from some office supply store back then. It's still stapling like a champ, daily use by multiple people. Never jams, never breaks. My cheap plastic stapler at home from Office Depot barely lasted a year. This thing is a relic, but a functional one.",
+    "parent_text": "What's an office supply item that's BIFL?",
+    "expected": {
+      "status": "ACTIVE_USE",
+      "ownershipDurationMonths": 360,
+      "usageFrequency": "daily",
+      "primaryFlawOrFailure": null,
+      "diyRepairability": null,
+      "warrantyExperience": null,
+      "sentiment": "POSITIVE",
+      "acquiredPrice": null
+    }
+  },
+  {
+    "id": "50",
+    "brand": "Pyrex",
+    "productName": "Glass Food Storage Containers",
+    "text": "Pyrex glass food storage containers. My mom has sets from the 70s, and I've bought my own from Macy's over the last 10 years for maybe $30 a set. They're heavy, they chip if you drop them on tile (oops), but they never stain, never warp, and they're perfect for meal prep. I use them daily. My plastic Tupperware always gets stained and smells weird. Pyrex is the only way to go for food storage.",
+    "parent_text": "Best food storage containers for durability?",
+    "expected": {
+      "status": "ACTIVE_USE",
+      "ownershipDurationMonths": 120,
+      "usageFrequency": "daily",
+      "primaryFlawOrFailure": "chips when dropped",
+      "diyRepairability": null,
+      "warrantyExperience": null,
+      "sentiment": "POSITIVE",
+      "acquiredPrice": 30
+    }
+  }
+]

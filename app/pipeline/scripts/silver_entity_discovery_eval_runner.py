@@ -178,7 +178,9 @@ async def run_evaluation(model_name: str, thinking_budget: str | None, verbose: 
     print(f"Entity F1-Score:    {f1*100:.1f}%")
     print(f"  Precision:        {precision*100:.1f}% (TP: {tp}, FP: {fp})")
     print(f"  Recall:           {recall*100:.1f}% (TP: {tp}, FN: {fn})")
-    print(f"Judge Overhead:     ${total_judge_cost:.5f}")
+    print(f"Inference Cost:     ${total_candidate_cost:.5f}")
+    print(f"Judge Cost:         ${total_judge_cost:.5f}")
+    print(f"Total API Cost:     ${total_candidate_cost + total_judge_cost:.5f}")
 
 
 if __name__ == "__main__":

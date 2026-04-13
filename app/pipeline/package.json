@@ -1,0 +1,10 @@
+{
+  "name": "@mono/pipeline",
+  "private": true,
+  "scripts": {
+    "dev": "dotenv -e ../../.env -- uv run dg dev",
+    "start": "dotenv -e ../../.env -- ./run.sh",
+    "build": "echo 'No build step required for local python dev.'",
+    "lint": "echo 'Python linting uses ruff handled outside of npm.'"
+  }
+}

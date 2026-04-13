@@ -13,15 +13,10 @@ def silver_entity_discovery_monthly(context) -> MaterializeResult:
     """Compacts the small daily Parquet files into a large monthly partition."""
     target_month_str = context.partition_key # e.g. "2012-01"
     
-    from ..utils.paths import get_data_dir
-    data_dir = get_data_dir()
+    from ..utils.paths import get_read_path, get_write_path
     
-    source_glob = f"{data_dir}/silver/entity_discovery_{target_month_str}-*.parquet"
-    target_dir = f"{data_dir}/silver_monthly"
-    target_parquet = f"{target_dir}/entity_discovery_{target_month_str}.parquet"
-    
-    if not target_dir.startswith("s3://"):
-        os.makedirs(target_dir, exist_ok=True)
+    source_glob = get_read_path(f"silver/entity_discovery_{target_month_str}-*.parquet")
+    target_parquet = get_write_path(f"silver_monthly/entity_discovery_{target_month_str}.parquet")
     
     with get_duckdb_connection() as con:
         try:
