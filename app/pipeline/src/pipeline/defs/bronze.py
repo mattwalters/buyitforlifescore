@@ -7,7 +7,7 @@ from dagster import asset, MaterializeResult, AssetExecutionContext, MetadataVal
 )
 def raw_reddit_buyitforlife_comments(context: AssetExecutionContext) -> MaterializeResult:
     # Use R2 paths
-    source_zst = "s3://buyitforlifescore/ore/reddit_BuyItForLife_comments.zst"
+    source_zst = "s3://buyitforlifescore/ore/reddit_buyitforlife_comments.zst"
     target_parquet = "s3://buyitforlifescore/bronze/reddit_buyitforlife_comments.parquet"
     
     context.log.info(f"Connecting to DuckDB and reading from {source_zst}")
@@ -48,7 +48,7 @@ def raw_reddit_buyitforlife_comments(context: AssetExecutionContext) -> Material
     description="Extract raw Reddit ZST dump for Submissions and convert it into highly optimized columnar Parquet."
 )
 def raw_reddit_buyitforlife_submissions(context: AssetExecutionContext) -> MaterializeResult:
-    source_zst = "s3://buyitforlifescore/ore/reddit_BuyItForLife_submissions.zst"
+    source_zst = "s3://buyitforlifescore/ore/reddit_buyitforlife_submissions.zst"
     target_parquet = "s3://buyitforlifescore/bronze/reddit_buyitforlife_submissions.parquet"
     
     context.log.info(f"Connecting to DuckDB and reading from {source_zst}")
