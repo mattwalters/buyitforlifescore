@@ -1,0 +1,11 @@
+:{$PORT:8080} {
+    # Specify the basicauth credentials dynamically.
+    # Pass BASIC_AUTH_USER and BASIC_AUTH_HASH via Railway environment variables.
+    basicauth / {
+        {$BASIC_AUTH_USER} {$BASIC_AUTH_HASH}
+    }
+
+    # Proxy to the Dagster instance running on the private Railway network.
+    # We fallback to `http://pipeline.railway.internal:3000` assuming standard naming.
+    reverse_proxy /* {$UPSTREAM_URL:http://pipeline.railway.internal:3000}
+}
