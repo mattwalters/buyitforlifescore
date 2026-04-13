@@ -17,13 +17,15 @@ ENV PATH="/app/.venv/bin:$PATH"
 # Ensure python prints unbuffered logs instantly to Railway UI
 ENV PYTHONUNBUFFERED=1
 
-# Install dependencies (without our source code yet, for docker caching)
-COPY pyproject.toml uv.lock ./
+# Because Railway runs the build from the Monorepo ROOT context, 
+# we must explicitly copy from the app/pipeline/ directory!
+COPY app/pipeline/pyproject.toml app/pipeline/uv.lock ./
+
 # We purposely sync everything including dev (like dagster-webserver which is in the dev group)
 RUN uv sync --frozen
 
 # Copy our source code in
-COPY . .
+COPY app/pipeline/ .
 
 # Run a final sync to install the `pipeline` package itself
 RUN uv sync --frozen
