@@ -26,7 +26,7 @@ class SilverExtractionConfig(Config):
 class MentionItem(BaseModel):
     author_id: str = Field(description="The unique author identifier from the ContentBlock.")
     brand: str = Field(description="The stated brand name. Normalize to canonical proper spelling.")
-    productName: str = Field(description="The specific marketed product line or model name. Empty string if BRAND_ONLY.")
+    productName: str = Field(description="The specific marketed product line or model name. Leave as empty string if no specific model is mentioned.")
     source_block_ids: list[int] = Field(description="The list of block_ids where this author explicitly mentioned this product.")
 
 async def _process_thread_batch(threads: list[tuple], model_name: str, semaphore: asyncio.Semaphore, thinking: Optional[str] = None) -> tuple[list[dict], float, int, int]:
@@ -71,9 +71,10 @@ CRITICAL INSTRUCTIONS:
 - You can extract general brand mentions (e.g., "Georgia has dropped in quality") if an opinion is attached. Do not limit yourself strictly to "physical" models if the brand quality itself is being reviewed.
 - If a commenter refers to a specific model name but omits the brand (e.g., "The SL-1200 is a tank"), you MUST use the preceding conversation blocks to infer the correct brand name ("Technics").
 - CRITICAL BOUNDARY: You MUST be able to tie an opinion to a specific BRAND. If a user states an experience about a generic component (e.g. "side zippers fail") or a generic product (e.g. "I love my boots") but the BRAND is unknown and cannot be inferred from context, you MUST NOT extract it.
-- DO NOT extract rhetorical metaphors or analogies (e.g., "You are asking for a Cadillac at a Chevy price"). You must only extract products that are explicitly part of the literal discussion.
-- DO NOT extract generic nouns, raw materials, or components as brands (e.g., "Teak", "memory foam", "Goretex", "leather", "wooden"). A brand MUST represent a specific named manufacturer/store.
-- DO NOT extract a comment if the brand is unknown. NEVER output literal string values like 'Unknown', 'N/A', or 'BRAND_ONLY'. If you cannot find or confidently infer a specific brand name, you must skip the extraction entirely.
+- Validation Gate 1 (Metaphors): Check if the statement is a rhetorical analogy (e.g., "asking for a Cadillac at a Chevy price"). If it is a metaphor, ABORT the extraction.
+- Validation Gate 2 (Retailers): Check if the brand is actually a generic retailer (e.g., Costco, Home Depot, Amazon). Retailers are not product brands unless explicitly an in-house brand (e.g. Kirkland). If it is just a retailer, ABORT the extraction.
+- Validation Gate 3 (Raw Materials): Check if the brand is actually a raw material or generic noun (e.g., teak, wooden, plastic, memory foam, goretex). If it is a material, ABORT the extraction. A brand must represent a named manufacturer.
+- Validation Gate 4 (Unknown Identity): Check if the identity of the brand is vague or unnamed (e.g. "these showerheads"). If you cannot confidently identify the exact capitalized proper noun of the brand, YOU MUST ABORT the extraction. The brand field must always contain a specific, capitalized proper noun.
 - Do NOT extract generic product nouns (e.g., "mixer", "backpack", "pan").
 
 Thread to analyze (JSON ContentBlocks):
@@ -178,7 +179,7 @@ def silver_entity_discovery(context: AssetExecutionContext, config: SilverExtrac
         FROM '{str(bronze_submissions_parquet)}' s
         LEFT JOIN '{str(bronze_comments_parquet)}' c ON c.link_id = 't3_' || s.id
         WHERE strftime(to_timestamp(CAST(s.created_utc AS BIGINT)), '%Y-%m-%d') = '{partition_date_str}'
-        GROUP BY s.id, s.title, s.selftext
+        GROUP BY s.id, s.title, s.selftext, s.created_utc
         {limit_clause}
     """
     

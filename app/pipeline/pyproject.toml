@@ -8,7 +8,8 @@ dependencies = [
     "google-genai",
     "pydantic",
     "pandas",
-    "tabulate"
+    "tabulate",
+    "tqdm>=4.67.3",
 ]
 
 [dependency-groups]

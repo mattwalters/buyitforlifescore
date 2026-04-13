@@ -7,6 +7,8 @@ from pathlib import Path
 from pydantic import BaseModel, Field
 from google import genai
 from google.genai import types
+from tqdm import tqdm
+import tqdm.asyncio
 
 # Allow import of the pipeline package
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
@@ -16,7 +18,7 @@ from pipeline.utils.pricing import AiModel, calculate_gemini_cost
 class MentionItem(BaseModel):
     author_id: str = Field(description="The unique author identifier from the ContentBlock.")
     brand: str = Field(description="The stated brand name. Normalize to canonical proper spelling.")
-    productName: str = Field(description="The specific marketed product line or model name. Empty string if BRAND_ONLY.")
+    productName: str = Field(description="The specific marketed product line or model name. Leave as empty string if no specific model is mentioned.")
     source_block_ids: list[int] = Field(description="The list of block_ids where this author explicitly mentioned this product.")
 
 # --- Judge Pydantic Schemas ---
@@ -43,9 +45,10 @@ CRITICAL INSTRUCTIONS:
 - You can extract general brand mentions (e.g., "Georgia has dropped in quality") if an opinion is attached. Do not limit yourself strictly to "physical" models if the brand quality itself is being reviewed.
 - If a commenter refers to a specific model name but omits the brand (e.g., "The SL-1200 is a tank"), you MUST use the preceding conversation blocks to infer the correct brand name ("Technics").
 - CRITICAL BOUNDARY: You MUST be able to tie an opinion to a specific BRAND. If a user states an experience about a generic component (e.g. "side zippers fail") or a generic product (e.g. "I love my boots") but the BRAND is unknown and cannot be inferred from context, you MUST NOT extract it.
-- DO NOT extract rhetorical metaphors or analogies (e.g., "You are asking for a Cadillac at a Chevy price"). You must only extract products that are explicitly part of the literal discussion.
-- DO NOT extract generic nouns, raw materials, or components as brands (e.g., "Teak", "memory foam", "Goretex", "leather", "wooden"). A brand MUST represent a specific named manufacturer/store.
-- DO NOT extract a comment if the brand is unknown. NEVER output literal string values like 'Unknown', 'N/A', or 'BRAND_ONLY'. If you cannot find or confidently infer a specific brand name, you must skip the extraction entirely.
+- Validation Gate 1 (Metaphors): Check if the statement is a rhetorical analogy (e.g., "asking for a Cadillac at a Chevy price"). If it is a metaphor, ABORT the extraction.
+- Validation Gate 2 (Retailers): Check if the brand is actually a generic retailer (e.g., Costco, Home Depot, Amazon). Retailers are not product brands unless explicitly an in-house brand (e.g. Kirkland). If it is just a retailer, ABORT the extraction.
+- Validation Gate 3 (Raw Materials): Check if the brand is actually a raw material or generic noun (e.g., teak, wooden, plastic, memory foam, goretex). If it is a material, ABORT the extraction. A brand must represent a named manufacturer.
+- Validation Gate 4 (Unknown Identity): Check if the identity of the brand is vague or unnamed (e.g. "these showerheads"). If you cannot confidently identify the exact capitalized proper noun of the brand, YOU MUST ABORT the extraction. The brand field must always contain a specific, capitalized proper noun.
 - Do NOT extract generic product nouns (e.g., "mixer", "backpack", "pan").
 
 Thread to analyze (JSON ContentBlocks):
@@ -90,7 +93,7 @@ Thread to analyze (JSON ContentBlocks):
     return results, cost
 
 
-async def run_judge_alignment(expected_mentions: list[dict], extracted_mentions: list[dict]) -> tuple[list[AlignmentMapping], float]:
+async def run_judge_alignment(expected_mentions: list[dict], extracted_mentions: list[dict], semaphore: asyncio.Semaphore) -> tuple[list[AlignmentMapping], float]:
     """Uses Gemini 3.1 Pro (High Thinking) as a Judge to semantically map Candidate -> Benchmark."""
     if not expected_mentions and not extracted_mentions:
         return [], 0.0
@@ -121,11 +124,12 @@ Return a list of mappings bridging the matching indices."""
     )
 
     try:
-        response = await client.aio.models.generate_content(
-            model=AiModel.GEMINI_3_FLASH.value,
-            contents=prompt,
-            config=gen_config,
-        )
+        async with semaphore:
+            response = await client.aio.models.generate_content(
+                model=AiModel.GEMINI_3_FLASH.value,
+                contents=prompt,
+                config=gen_config,
+            )
         
         cost = 0.0
         if response.usage_metadata:
@@ -164,7 +168,7 @@ async def run_evaluation(model_name: str, thinking_budget: str | None, verbose: 
         golden_map[doc_id] = item["expected_benchmark"]
         extraction_tasks.append(_extract_candidate(doc_id, blocks, model_name, thinking_budget, semaphore))
         
-    extraction_results = await asyncio.gather(*extraction_tasks)
+    extraction_results = await tqdm.asyncio.tqdm.gather(*extraction_tasks, desc="Extracting Entities")
     
     # Aggregate Extraction Results
     all_extracted_items = []
@@ -176,16 +180,13 @@ async def run_evaluation(model_name: str, thinking_budget: str | None, verbose: 
     latency = time.time() - start_time
     print(f"Inference complete. Cost: ${total_candidate_cost:.5f}. Latency: {latency:.2f}s")
     
-    print("\nFiring Gemini 3.1 Pro Judge Alignment...")
+    print(f"\nFiring {AiModel.GEMINI_3_FLASH.value} Judge Alignment...")
     # 2. RUN JUDGE ALIGNMENT
-    tp, fp, fn = 0, 0, 0
-    total_judge_cost = 0.0
+    judge_semaphore = asyncio.Semaphore(10)
     
-    for doc_id, expected_benchmark in golden_map.items():
+    async def _judge_wrapper(doc_id, expected_benchmark):
         doc_extractions = [e for e in all_extracted_items if e.get('document_id') == doc_id]
-        
-        mappings, judge_cost = await run_judge_alignment(expected_benchmark, doc_extractions)
-        total_judge_cost += judge_cost
+        mappings, judge_cost = await run_judge_alignment(expected_benchmark, doc_extractions, judge_semaphore)
         
         matched_expected_indices = set([m.expected_index for m in mappings])
         matched_extracted_indices = set([m.extracted_index for m in mappings])
@@ -193,10 +194,22 @@ async def run_evaluation(model_name: str, thinking_budget: str | None, verbose: 
         thread_tp = len(mappings)
         thread_fp = len(doc_extractions) - len(matched_extracted_indices)
         thread_fn = len(expected_benchmark) - len(matched_expected_indices)
+
+        return doc_id, expected_benchmark, doc_extractions, matched_expected_indices, matched_extracted_indices, thread_tp, thread_fp, thread_fn, judge_cost
+        
+    judge_tasks = [_judge_wrapper(doc_id, ec) for doc_id, ec in golden_map.items()]
+    judge_results = await tqdm.asyncio.tqdm.gather(*judge_tasks, desc="Judging Alignments")
+    
+    tp, fp, fn = 0, 0, 0
+    total_judge_cost = 0.0
+    
+    for res in judge_results:
+        doc_id, expected_benchmark, doc_extractions, matched_expected_indices, matched_extracted_indices, thread_tp, thread_fp, thread_fn, judge_cost = res
         
         tp += thread_tp
         fp += thread_fp
         fn += thread_fn
+        total_judge_cost += judge_cost
         
         if verbose:
             if thread_fp > 0 or thread_fn > 0:

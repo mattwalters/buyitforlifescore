@@ -1628,6 +1628,7 @@ dependencies = [
     { name = "pandas", version = "3.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "pydantic" },
     { name = "tabulate" },
+    { name = "tqdm" },
 ]
 
 [package.dev-dependencies]
@@ -1644,6 +1645,7 @@ requires-dist = [
     { name = "pandas" },
     { name = "pydantic" },
     { name = "tabulate" },
+    { name = "tqdm", specifier = ">=4.67.3" },
 ]
 
 [package.metadata.requires-dev]
