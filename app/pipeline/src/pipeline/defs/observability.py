@@ -19,7 +19,7 @@ def llm_cost_dashboard(context) -> MaterializeResult:
                 SELECT 
                     split_part(split_part(filename, '/', -1), '_payloads', 1) as asset_name,
                     model_used,
-                    COUNT(DISTINCT split_part(chunk_id, '_chunk_', 1)) as unique_submissions,
+                    COUNT(chunk_id) as total_payloads,
                     SUM(input_tokens) as total_input_tokens,
                     SUM(output_tokens) as total_output_tokens,
                     SUM(cost_usd) as total_cost_usd

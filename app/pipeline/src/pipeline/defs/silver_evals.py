@@ -1,13 +1,13 @@
 import duckdb
 import asyncio
-from dagster import asset, MaterializeResult, MetadataValue, Config
+from dagster import asset, MaterializeResult, MetadataValue, Config, SkipReason
 from .silver import silver_entity_discovery
 from ..utils.pricing import AiModel
-from ..utils.judge import run_blind_canary_evaluation
+from ..utils.judge import run_blind_evaluation
 from ..utils.db import get_duckdb_connection
 
 class DiscoveryEvalConfig(Config):
-    sample_size: int = 1067  # Default 95% Confidence Interval for typical BIFL thread density
+    sample_size: int = 385  # 95% Confidence interval with a 5% margin of error
 
 @asset(group_name="evaluations", deps=[silver_entity_discovery])
 def silver_entity_discovery_eval(context, config: DiscoveryEvalConfig) -> MaterializeResult:
@@ -23,51 +23,48 @@ def silver_entity_discovery_eval(context, config: DiscoveryEvalConfig) -> Materi
         try:
             # We use RESERVOIR sampling in DuckDB to pull an exact subset of the population longitudinally
             query = f"""
-                SELECT brand, productName, target_text 
+                SELECT brand, productName, target_text, llm_generation_prompt 
                 FROM read_parquet('{source_glob}') 
                 USING SAMPLE {config.sample_size} ROWS
             """
             sample_rows = con.execute(query).fetchall()
         except duckdb.IOException:
-            context.log.info("No silver parquet files found to sample.")
-            return MaterializeResult(metadata={"skipped": "No data"})
+            raise SkipReason("No silver parquet files found to sample.")
 
     if not sample_rows:
-        return MaterializeResult(metadata={"skipped": "No data"})
+        raise SkipReason("No sample rows generated.")
         
-    extractions_for_judge = [{"brand": r[0], "productName": r[1], "body": r[2]} for r in sample_rows]
+    extractions_for_judge = [{"brand": r[0], "productName": r[1], "body": r[2], "llm_generation_prompt": r[3]} for r in sample_rows]
     num_samples = len(extractions_for_judge)
-    context.log.info(f"Running blind judge canary on {num_samples} longitudinally-mixed samples...")
+    context.log.info(f"Running blind judge evaluation on {num_samples} longitudinally-mixed samples...")
     
     judge_semaphore = asyncio.Semaphore(10)
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     
-    chunk_size = 50 
-    chunks = [extractions_for_judge[i:i + chunk_size] for i in range(0, num_samples, chunk_size)]
-    
-    async def process_chunk(chunk):
-        res, cost, it, ot, raw_json = await run_blind_canary_evaluation(
-            chunk, 
+    async def process_single(item, idx):
+        res, cost, it, ot, raw_json = await run_blind_evaluation(
+            item, 
             judge_semaphore, 
             AiModel.GEMINI_3_FLASH.value, 
             "high"
         )
-        return res, cost, it, ot, raw_json
+        return res, cost, it, ot, raw_json, idx
 
     async def run_all():
-        tasks = [process_chunk(c) for c in chunks]
+        tasks = [process_single(item, i) for i, item in enumerate(extractions_for_judge)]
         results = await asyncio.gather(*tasks)
         
         all_res = []
         tot_cost = 0.0
         
         payload_rows = []
-        for idx, (r, c, it, ot, raw_json) in enumerate(results):
-            all_res.extend(r)
+        for res, c, it, ot, raw_json, idx in results:
+            if res is not None:
+                all_res.append(res)
             tot_cost += c
             payload_rows.append({
-                "chunk_id": f"discovery_eval_{context.run_id}_chunk_{idx}",
+                "chunk_id": f"discovery_eval_{context.run_id}_item_{idx}",
                 "model_used": AiModel.GEMINI_3_FLASH.value,
                 "input_tokens": it,
                 "output_tokens": ot,
@@ -121,7 +118,7 @@ from .silver import silver_entity_extraction
 from ..utils.judge import run_extraction_blind_canary_evaluation
 
 class ExtractionEvalConfig(Config):
-    sample_size: int = 1067
+    sample_size: int = 385
 
 @asset(group_name="evaluations", deps=[silver_entity_extraction])
 def silver_entity_extraction_eval(context, config: ExtractionEvalConfig) -> MaterializeResult:
@@ -142,11 +139,10 @@ def silver_entity_extraction_eval(context, config: ExtractionEvalConfig) -> Mate
             """
             sample_rows = con.execute(query).fetchall()
         except duckdb.IOException:
-            context.log.info("No silver extraction parquet files found to sample.")
-            return MaterializeResult(metadata={"skipped": "No data"})
+            raise SkipReason("No silver extraction parquet files found to sample.")
 
     if not sample_rows:
-        return MaterializeResult(metadata={"skipped": "No data"})
+        raise SkipReason("No sample extraction rows generated.")
         
     extractions_for_judge = [{"brand": r[0], "productName": r[1], "quote": r[2], "sentiment": r[3], "ownershipDurationMonths": r[4]} for r in sample_rows]
     num_samples = len(extractions_for_judge)

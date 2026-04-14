@@ -29,26 +29,26 @@ CRITICAL INSTRUCTIONS:
 Thread to analyze (JSON ContentBlocks):
 {thread_text}"""
 
-# --- Blind Canary Evaluation Schema ---
+# --- Eval Verification Schema ---
 
-class CanaryValidation(BaseModel):
+class JudgeValidation(BaseModel):
     is_valid_durable_good: bool = Field(description="True if the extraction is a valid physical, durable BIFL brand/product. False if it is a retailer, hallucination, raw material, metaphor, or generic concept.")
     reasoning: str = Field(description="A brief 1-sentence reasoning for the decision.")
 
-class CanaryResult(BaseModel):
-    validations: list[CanaryValidation] = Field(description="List of validations matching the exact order of the input dataset.")
+def get_discovery_judge_prompt(extraction: dict) -> str:
+    original_prompt = extraction["llm_generation_prompt"]
+    return f"""You are an expert Eval-as-a-Judge acting as a safeguard for an Entity Discovery pipeline.
 
-def get_discovery_canary_prompt(batch_for_judge: list) -> str:
-    return f"""You are an expert Data Quality Judge analyzing a pipeline that extracts "Buy It For Life" (BIFL) product recommendations from Reddit.
-Your job is to blindly evaluate a sample batch of extractions to determine if they are legitimate physical, durable goods.
+Below is the EXACT prompt and instructions that the pipeline agent was given:
+--- ORIGINAL PIPELINE AGENT PROMPT START ---
+{original_prompt}
+--- ORIGINAL PIPELINE AGENT PROMPT END ---
 
-CRITICAL RULES FOR INVALID EXTRACTIONS (Return False):
-1. RETAILERS: "Costco", "Amazon", "Target", "Home Depot" are invalid. (Unless it explicitly says the in-house brand like Kirkland).
-2. RAW MATERIALS: "Leather", "Wood", "Plastic", "Steel" are invalid brands.
-3. METAPHORS: "Bulletproof", "Tank", "Workhorse" are invalid.
-4. UNKNOWN/GENERIC: "unknown", "BRAND_ONLY", "N/A" are invalid.
+Your task is to judge whether the pipeline's output strictly adhered to the rules and instructions provided to it, given the text context.
 
-Batch to Evaluate:
-{json.dumps(batch_for_judge, indent=2)}
+Text Context:
+{extraction.get("context_snippet")}
 
-Output the validation result matching the exact index order of the batch."""
+Pipeline Output:
+Brand: {extraction.get("brand")}
+Product Name: {extraction.get("productName")}"""

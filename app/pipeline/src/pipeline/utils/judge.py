@@ -73,28 +73,33 @@ Return a list of mappings bridging the matching indices."""
     return [], 0.0
 
 
-from pipeline.prompts.entity_discovery import CanaryValidation, CanaryResult, get_discovery_canary_prompt
+from pipeline.prompts.entity_discovery import JudgeValidation, get_discovery_judge_prompt
 
-async def run_blind_canary_evaluation(
-    extractions: list[dict],
+async def run_blind_evaluation(
+    extraction: dict,
     semaphore: asyncio.Semaphore,
     judge_model_name: str,
     judge_thinking_level: str
-) -> tuple[list[CanaryValidation], float, int, int, str]:
-    """Uses a reference-free Judge to evaluate live extracted entities for statistical canary checking."""
-    if not extractions:
-        return [], 0.0, 0, 0, "[]"
+) -> tuple[Optional[JudgeValidation], float, int, int, str]:
+    """Uses a reference-free Judge to evaluate a live extracted entity."""
+    if not extraction:
+        return None, 0.0, 0, 0, "{}"
 
     client = genai.Client()
     
     # Strip unnecessary noise, keep relevant text mapping
-    batch_for_judge = [{"index": i, "brand": e.get("brand"), "productName": e.get("productName"), "context_snippet": e.get("body", "")} for i, e in enumerate(extractions)]
+    cleaned_extraction = {
+        "brand": extraction.get("brand"), 
+        "productName": extraction.get("productName"), 
+        "context_snippet": extraction.get("body", ""),
+        "llm_generation_prompt": extraction["llm_generation_prompt"]
+    }
 
-    prompt = get_discovery_canary_prompt(batch_for_judge)
+    prompt = get_discovery_judge_prompt(cleaned_extraction)
 
     gen_config = types.GenerateContentConfig(
         response_mime_type="application/json",
-        response_schema=CanaryResult,
+        response_schema=JudgeValidation,
         temperature=0.0,
         thinking_config=types.ThinkingConfig(thinking_level=judge_thinking_level)
     )
@@ -117,11 +122,11 @@ async def run_blind_canary_evaluation(
             
         if response.text:
             result_dict = json.loads(response.text)
-            return [CanaryValidation(**m) for m in result_dict.get("validations", [])], cost, input_tokens, output_tokens, response.text
+            return JudgeValidation(**result_dict), cost, input_tokens, output_tokens, response.text
     except Exception as e:
-        pass # Allow calling process to handle the empty canary response gracefully.
+        pass # Allow calling process to handle the empty response gracefully.
         
-    return [], 0.0, 0, 0, "[]"
+    return None, 0.0, 0, 0, "{}"
 
 from pipeline.prompts.entity_extraction import ExtractionCanaryValidation, ExtractionCanaryResult, get_extraction_canary_prompt
 
