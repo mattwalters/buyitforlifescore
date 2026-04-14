@@ -1,5 +1,5 @@
 import os
-from ..utils.db import get_duckdb_connection
+from pipeline.utils.db import get_duckdb_connection
 from dagster import asset, MaterializeResult, MetadataValue
 
 @asset(group_name="observability")
@@ -8,7 +8,7 @@ def llm_cost_dashboard(context) -> MaterializeResult:
     Unpartitioned standalone asset. Queries the local duckdb Cost Ledger 
     to sum all API spend across various models and tasks without waiting for entire backfills.
     """
-    from ..utils.paths import get_read_path
+    from pipeline.utils.paths import get_read_path
     
     silver_glob = str(get_read_path("silver/*_payloads_*.parquet"))
     eval_glob = str(get_read_path("evaluations/*_payloads_*.parquet"))

@@ -107,8 +107,51 @@ def main():
     
     print(f"\n[INFO] Deterministic Hashing complete: Targeting {len(partitions_to_run)} specific date partitions.")
     
+    # --- FILTER ALREADY MATERIALIZED PARTITIONS ---
+    materialized_query = """
+    query GetMaterialized($assetKey: String!) {
+      assetNodeOrError(assetKey: {path: [$assetKey]}) {
+        ... on AssetNode {
+          assetPartitionStatuses {
+            ... on TimePartitionStatuses {
+              ranges {
+                status
+                startTime
+              }
+            }
+          }
+        }
+      }
+    }
+    """
+    try:
+        res = requests.post(gql_url, json={
+            "query": materialized_query, 
+            "variables": {"assetKey": asset_name}
+        }).json()
+        
+        node = res.get("data", {}).get("assetNodeOrError", {})
+        statuses = node.get("assetPartitionStatuses", {}).get("ranges", [])
+        
+        import datetime
+        materialized_dates = set()
+        for rng in statuses:
+            if rng.get("status") == "MATERIALIZED":
+                dt = datetime.datetime.fromtimestamp(rng["startTime"], tz=datetime.timezone.utc)
+                materialized_dates.add(dt.strftime("%Y-%m-%d"))
+                
+        original_count = len(partitions_to_run)
+        partitions_to_run = [p for p in partitions_to_run if p not in materialized_dates]
+        
+        if len(partitions_to_run) < original_count:
+            print(f"[INFO] Skipping {original_count - len(partitions_to_run)} already materialized partitions.")
+            print(f"[INFO] Remaining missing partitions to build: {len(partitions_to_run)}")
+            
+    except Exception as e:
+        print(f"[WARNING] Could not fetch materialized status from Dagster: {e}")
+
     if not partitions_to_run:
-        print("No partitions selected. Exiting.")
+        print("All targeted partitions are already materialized. Nothing to do! Exiting.")
         return
         
     print(f"\n[EXEC] Enqueueing {len(partitions_to_run)} targeted executions into Dagster Daemon concurrently...\n")

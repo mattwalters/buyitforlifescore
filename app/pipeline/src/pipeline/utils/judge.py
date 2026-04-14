@@ -73,33 +73,26 @@ Return a list of mappings bridging the matching indices."""
     return [], 0.0
 
 
-from pipeline.prompts.entity_discovery import JudgeValidation, get_discovery_judge_prompt
 
-async def run_blind_evaluation(
-    extraction: dict,
+
+from pipeline.prompts.entity_discovery import JudgePayloadValidation, get_payload_judge_prompt
+
+async def run_discovery_payload_evaluation(
+    content_blocks_json: str,
+    raw_json_output: str,
     semaphore: asyncio.Semaphore,
     judge_model_name: str,
     judge_thinking_level: str
-) -> tuple[Optional[JudgeValidation], float, int, int, str]:
-    """Uses a reference-free Judge to evaluate a live extracted entity."""
-    if not extraction:
+) -> tuple[Optional[JudgePayloadValidation], float, int, int, str]:
+    if not raw_json_output or raw_json_output == "[]":
         return None, 0.0, 0, 0, "{}"
 
     client = genai.Client()
-    
-    # Strip unnecessary noise, keep relevant text mapping
-    cleaned_extraction = {
-        "brand": extraction.get("brand"), 
-        "productName": extraction.get("productName"), 
-        "context_snippet": extraction.get("body", ""),
-        "llm_generation_prompt": extraction["llm_generation_prompt"]
-    }
-
-    prompt = get_discovery_judge_prompt(cleaned_extraction)
+    prompt = get_payload_judge_prompt(content_blocks_json, raw_json_output)
 
     gen_config = types.GenerateContentConfig(
         response_mime_type="application/json",
-        response_schema=JudgeValidation,
+        response_schema=JudgePayloadValidation,
         temperature=0.0,
         thinking_config=types.ThinkingConfig(thinking_level=judge_thinking_level)
     )
@@ -122,7 +115,7 @@ async def run_blind_evaluation(
             
         if response.text:
             result_dict = json.loads(response.text)
-            return JudgeValidation(**result_dict), cost, input_tokens, output_tokens, response.text
+            return JudgePayloadValidation(**result_dict), cost, input_tokens, output_tokens, response.text
     except Exception as e:
         pass # Allow calling process to handle the empty response gracefully.
         

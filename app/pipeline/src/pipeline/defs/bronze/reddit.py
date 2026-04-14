@@ -1,5 +1,5 @@
-from ..utils.db import get_duckdb_connection
-from ..utils.paths import get_read_path, get_write_path
+from pipeline.utils.db import get_duckdb_connection
+from pipeline.utils.paths import get_read_path, get_write_path
 from dagster import asset, MaterializeResult, AssetExecutionContext, MetadataValue
 
 @asset(

@@ -31,12 +31,18 @@ Thread to analyze (JSON ContentBlocks):
 
 # --- Eval Verification Schema ---
 
-class JudgeValidation(BaseModel):
-    is_valid_durable_good: bool = Field(description="True if the extraction is a valid physical, durable BIFL brand/product. False if it is a retailer, hallucination, raw material, metaphor, or generic concept.")
-    reasoning: str = Field(description="A brief 1-sentence reasoning for the decision.")
+class PayloadItemValidation(BaseModel):
+    brand: str = Field(description="The brand that was extracted.")
+    is_valid_durable_good: bool = Field(description="True if this specific extraction is a valid physical, durable BIFL brand/product. False if it is a retailer, hallucination, raw material, metaphor, or generic concept.")
+    reasoning: str = Field(description="A brief 1-sentence reasoning for this specific decision.")
 
-def get_discovery_judge_prompt(extraction: dict) -> str:
-    original_prompt = extraction["llm_generation_prompt"]
+class JudgePayloadValidation(BaseModel):
+    item_validations: list[PayloadItemValidation] = Field(description="List of validations matching the exact order of the items in the extracted JSON array.")
+    missed_entities: list[str] = Field(description="List of obvious BIFL products mentioned in the text that the agent neglected to extract (False Negatives).")
+    hallucinated_entities: list[str] = Field(description="List of products the agent completely fabricated that were NOT in the text.")
+
+def get_payload_judge_prompt(content_blocks_json: str, raw_json_output: str) -> str:
+    original_prompt = get_discovery_prompt(content_blocks_json)
     return f"""You are an expert Eval-as-a-Judge acting as a safeguard for an Entity Discovery pipeline.
 
 Below is the EXACT prompt and instructions that the pipeline agent was given:
@@ -44,11 +50,12 @@ Below is the EXACT prompt and instructions that the pipeline agent was given:
 {original_prompt}
 --- ORIGINAL PIPELINE AGENT PROMPT END ---
 
-Your task is to judge whether the pipeline's output strictly adhered to the rules and instructions provided to it, given the text context.
+Your task is to judge whether the pipeline's output strictly adhered to the rules and instructions provided to it, given the same text context. 
 
-Text Context:
-{extraction.get("context_snippet")}
+Specifically, you need to:
+1. Grade EVERY item present in the Pipeline Output array (is it a valid extraction based on the rules?).
+2. Identify any obvious physical BIFL products that were mentioned in the text but NOT extracted by the pipeline.
+3. Identify any complete fabrications (the agent extracted a brand/product that simply doesn't exist anywhere in the text).
 
-Pipeline Output:
-Brand: {extraction.get("brand")}
-Product Name: {extraction.get("productName")}"""
+Pipeline Output (JSON Array):
+{raw_json_output}"""
