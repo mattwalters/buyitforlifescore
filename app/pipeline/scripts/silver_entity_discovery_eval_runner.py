@@ -112,36 +112,41 @@ async def run_evaluation(model_name: str, thinking_budget: str | None, verbose: 
     
     print(f"\nFiring Deterministic Evaluation...")
     
-    def _evaluate_doc(doc_id, expected_benchmark, doc_extractions):
-        matched_expected_indices = set()
-        matched_extracted_indices = set()
-        
-        for g_idx, g in enumerate(expected_benchmark):
-            g_raw = g.get('raw_mention', '').lower()
+    def _evaluate_doc(doc_id, expected_benchmark, raw_doc_extractions):
+        import re
+        def norm(text):
+            return re.sub(r'[^\w\s]', '', text.lower()).strip()
             
-            for ex_idx, ex in enumerate(doc_extractions):
-                if ex_idx in matched_extracted_indices:
-                    continue
-                ex_raw = ex.get('raw_mention', '').lower()
-                
-                # Deterministic Greedy Match
-                if g_raw in ex_raw or ex_raw in g_raw:
-                    matched_expected_indices.add(g_idx)
-                    matched_extracted_indices.add(ex_idx)
-                    break
-                    
-        thread_tp = len(matched_expected_indices)
-        thread_fp = len(doc_extractions) - len(matched_extracted_indices)
-        thread_fn = len(expected_benchmark) - len(matched_expected_indices)
+        expected_set = set(norm(g.get('raw_mention', '')) for g in expected_benchmark)
+        extracted_set = set(norm(ex.get('raw_mention', '')) for ex in raw_doc_extractions)
+        
+        expected_set.discard('')
+        extracted_set.discard('')
+        
+        matched_expected = set()
+        matched_extracted = set()
+        
+        for exp in expected_set:
+            for ext in extracted_set:
+                if exp in ext or ext in exp:
+                    matched_expected.add(exp)
+                    matched_extracted.add(ext)
+        
+        missed = expected_set - matched_expected
+        hallucinations = extracted_set - matched_extracted
+        
+        thread_tp = len(matched_expected)
+        thread_fp = len(hallucinations)
+        thread_fn = len(missed)
 
-        return doc_id, expected_benchmark, doc_extractions, matched_expected_indices, matched_extracted_indices, thread_tp, thread_fp, thread_fn
+        return doc_id, missed, hallucinations, thread_tp, thread_fp, thread_fn
         
     judge_results = [_evaluate_doc(doc_id, ec, [e for e in all_extracted_items if e.get('document_id') == doc_id]) for doc_id, ec in golden_map.items()]
     
     tp, fp, fn = 0, 0, 0
     
     for res in judge_results:
-        doc_id, expected_benchmark, doc_extractions, matched_expected_indices, matched_extracted_indices, thread_tp, thread_fp, thread_fn = res
+        doc_id, missed, hallucinations, thread_tp, thread_fp, thread_fn = res
         
         tp += thread_tp
         fp += thread_fp
@@ -149,12 +154,10 @@ async def run_evaluation(model_name: str, thinking_budget: str | None, verbose: 
         if verbose:
             if thread_fp > 0 or thread_fn > 0:
                 print(f"\n--- Document {doc_id} Mismatches ---")
-            for ex_idx, ex in enumerate(doc_extractions):
-                if ex_idx not in matched_extracted_indices:
-                    print(f"[HALLUCINATION (FP)]: {ex.get('author_id')} -> {ex.get('raw_mention')}")
-            for g_idx, g in enumerate(expected_benchmark):
-                if g_idx not in matched_expected_indices:
-                    print(f"[MISS (FN)]: {g.get('author_id')} -> {g.get('raw_mention')}")
+            for h in hallucinations:
+                print(f"[HALLUCINATION (FP)]: {h}")
+            for m in missed:
+                print(f"[MISS (FN)]: {m}")
 
     # 3. METRICS
     print("\n--- RESULTS PHASE 1 (Entity Discovery) ---")
