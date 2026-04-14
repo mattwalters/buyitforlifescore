@@ -204,3 +204,4 @@ __marimo__/
 
 # Dagster Temp History
 .tmp_dagster_home_*
+.dagster/
