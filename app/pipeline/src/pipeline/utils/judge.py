@@ -75,52 +75,6 @@ Return a list of mappings bridging the matching indices."""
 
 
 
-from pipeline.prompts.entity_discovery import JudgePayloadValidation, get_payload_judge_prompt
-
-async def run_discovery_payload_evaluation(
-    content_blocks_json: str,
-    raw_json_output: str,
-    semaphore: asyncio.Semaphore,
-    judge_model_name: str,
-    judge_thinking_level: str
-) -> tuple[Optional[JudgePayloadValidation], float, int, int, str]:
-    if not raw_json_output or raw_json_output == "[]":
-        return None, 0.0, 0, 0, "{}"
-
-    client = genai.Client()
-    prompt = get_payload_judge_prompt(content_blocks_json, raw_json_output)
-
-    gen_config = types.GenerateContentConfig(
-        response_mime_type="application/json",
-        response_schema=JudgePayloadValidation,
-        temperature=0.0,
-        thinking_config=types.ThinkingConfig(thinking_level=judge_thinking_level)
-    )
-
-    try:
-        async with semaphore:
-            response = await client.aio.models.generate_content(
-                model=judge_model_name,
-                contents=prompt,
-                config=gen_config,
-            )
-        
-        cost = 0.0
-        input_tokens = 0
-        output_tokens = 0
-        if response.usage_metadata:
-            cost = calculate_gemini_cost(judge_model_name, response.usage_metadata)
-            input_tokens = response.usage_metadata.prompt_token_count or 0
-            output_tokens = response.usage_metadata.candidates_token_count or 0
-            
-        if response.text:
-            result_dict = json.loads(response.text)
-            return JudgePayloadValidation(**result_dict), cost, input_tokens, output_tokens, response.text
-    except Exception as e:
-        pass # Allow calling process to handle the empty response gracefully.
-        
-    return None, 0.0, 0, 0, "{}"
-
 from pipeline.prompts.entity_extraction import ExtractionCanaryValidation, ExtractionCanaryResult, get_extraction_canary_prompt
 
 async def run_extraction_blind_canary_evaluation(
