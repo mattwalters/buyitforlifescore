@@ -3,7 +3,7 @@ import asyncio
 from dagster import asset, MaterializeResult, MetadataValue, Config
 from pipeline.utils.pricing import AiModel
 from pipeline.utils.db import get_duckdb_connection
-from pipeline.defs.silver.extraction import silver_entity_extraction_payloads
+from pipeline.defs.silver.entity_extraction import silver_entity_extraction_payloads
 
 from pipeline.utils.judge import run_extraction_blind_canary_evaluation
 

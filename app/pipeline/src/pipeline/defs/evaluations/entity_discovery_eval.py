@@ -3,7 +3,7 @@ import asyncio
 from dagster import asset, MaterializeResult, MetadataValue, Config
 from pipeline.utils.pricing import AiModel
 from pipeline.utils.db import get_duckdb_connection
-from pipeline.defs.silver.discovery import silver_entity_discovery_payloads
+from pipeline.defs.silver.entity_discovery import silver_entity_discovery_payloads
 class DiscoveryEvalConfig(Config):
     sample_size: int = 385  # 95% Confidence interval with a 5% margin of error
 
