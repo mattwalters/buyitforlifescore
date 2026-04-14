@@ -5,7 +5,7 @@ import pandas as pd
 from pathlib import Path
 from typing import Optional, List, Literal, Any
 from pydantic import BaseModel, Field
-from dagster import asset, MaterializeResult, AssetExecutionContext, DailyPartitionsDefinition, Config, MetadataValue, SkipReason
+from dagster import asset, MaterializeResult, AssetExecutionContext, DailyPartitionsDefinition, Config, MetadataValue
 
 from google import genai
 from google.genai import types
@@ -202,7 +202,8 @@ def silver_entity_discovery_payloads(context: AssetExecutionContext, config: Sil
         rows = con.execute(query).fetchall()
 
     if not rows:
-        raise SkipReason(f"No threads found for {partition_date_str}. Skipping.")
+        context.log.info(f"No threads found for {partition_date_str}. Skipping.")
+        return MaterializeResult()
 
     context.log.info(f"Loaded {len(rows)} threads for extraction. Firing asyncio pool...")
 
@@ -266,7 +267,8 @@ def silver_entity_discovery(context: AssetExecutionContext) -> MaterializeResult
     
     import os
     if not os.path.exists(payloads_parquet):
-        raise SkipReason(f"No payloads found for {partition_date_str}. Skipping.")
+        context.log.info(f"No payloads found for {partition_date_str}. Skipping.")
+        return MaterializeResult()
         
     query = f"SELECT * FROM '{str(payloads_parquet)}'"
     
@@ -434,7 +436,8 @@ def silver_entity_extraction_payloads(context: AssetExecutionContext, config: Si
     # Check if discovery output exists, otherwise skip
     import os
     if not os.path.exists(discovery_parquet):
-        raise SkipReason(f"Skipping extraction, no Discovery outputs found for {partition_date_str}")
+        context.log.info(f"Skipping extraction, no Discovery outputs found for {partition_date_str}")
+        return MaterializeResult(metadata={"status": "skipped", "reason": "No upstream partition data"})
         
     query = f"""
         SELECT 
@@ -453,7 +456,8 @@ def silver_entity_extraction_payloads(context: AssetExecutionContext, config: Si
         df = con.execute(query).df()
         
     if df.empty:
-        raise SkipReason(f"No BIFL entities discovered for this partition.")
+        context.log.info(f"No BIFL entities discovered for this partition.")
+        return MaterializeResult(metadata={"items_processed": 0})
         
     items = df.to_dict('records')
     context.log.info(f"Processing {len(items)} entity extractions natively.")
@@ -473,7 +477,8 @@ def silver_entity_extraction_payloads(context: AssetExecutionContext, config: Si
     )
     
     if not results:
-        raise SkipReason(f"No successful extractions processed for {partition_date_str}.")
+        context.log.info("No successful extractions processed for {partition_date_str}.")
+        return MaterializeResult(metadata={"items_processed": 0})
         
     out_df = pd.DataFrame(results)
     out_df['prompt_version'] = PROMPT_VERSION
@@ -506,7 +511,8 @@ def silver_entity_extraction(context: AssetExecutionContext) -> MaterializeResul
     import os
     import json
     if not os.path.exists(payloads_parquet):
-        raise SkipReason(f"Skipping unnest, no extraction payloads found for {partition_date_str}")
+        context.log.info(f"Skipping unnest, no extraction payloads found for {partition_date_str}")
+        return MaterializeResult(metadata={"status": "skipped"})
         
     query = f"SELECT * FROM '{str(payloads_parquet)}'"
     with get_duckdb_connection() as con:

@@ -1,6 +1,6 @@
 import duckdb
 import asyncio
-from dagster import asset, MaterializeResult, MetadataValue, Config, SkipReason
+from dagster import asset, MaterializeResult, MetadataValue, Config
 from .silver import silver_entity_discovery
 from ..utils.pricing import AiModel
 from ..utils.judge import run_blind_evaluation
@@ -29,10 +29,11 @@ def silver_entity_discovery_eval(context, config: DiscoveryEvalConfig) -> Materi
             """
             sample_rows = con.execute(query).fetchall()
         except duckdb.IOException:
-            raise SkipReason("No silver parquet files found to sample.")
+            context.log.info("No silver parquet files found to sample.")
+            return MaterializeResult(metadata={"skipped": "No data"})
 
     if not sample_rows:
-        raise SkipReason("No sample rows generated.")
+        return MaterializeResult(metadata={"skipped": "No data"})
         
     extractions_for_judge = [{"brand": r[0], "productName": r[1], "body": r[2], "llm_generation_prompt": r[3]} for r in sample_rows]
     num_samples = len(extractions_for_judge)
@@ -139,10 +140,11 @@ def silver_entity_extraction_eval(context, config: ExtractionEvalConfig) -> Mate
             """
             sample_rows = con.execute(query).fetchall()
         except duckdb.IOException:
-            raise SkipReason("No silver extraction parquet files found to sample.")
+            context.log.info("No silver extraction parquet files found to sample.")
+            return MaterializeResult(metadata={"skipped": "No data"})
 
     if not sample_rows:
-        raise SkipReason("No sample extraction rows generated.")
+        return MaterializeResult(metadata={"skipped": "No data"})
         
     extractions_for_judge = [{"brand": r[0], "productName": r[1], "quote": r[2], "sentiment": r[3], "ownershipDurationMonths": r[4]} for r in sample_rows]
     num_samples = len(extractions_for_judge)
