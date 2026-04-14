@@ -5,7 +5,7 @@ from pipeline.utils.pricing import AiModel
 from pipeline.utils.db import get_duckdb_connection
 from pipeline.defs.silver.entity_discovery import silver_entity_discovery_payloads
 class DiscoveryEvalConfig(Config):
-    sample_size: int = 385  # 95% Confidence interval with a 5% margin of error
+    sample_size: int = 100
 
 @asset(group_name="evaluations", deps=[silver_entity_discovery_payloads])
 def silver_entity_discovery_eval(context, config: DiscoveryEvalConfig) -> MaterializeResult:

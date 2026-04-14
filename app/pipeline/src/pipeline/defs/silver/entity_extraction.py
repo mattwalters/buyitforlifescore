@@ -88,7 +88,8 @@ async def _process_extraction_batch(items: list[dict], model_name: str, semaphor
                 "input_tokens": prompt_tokens,
                 "output_tokens": candidates_tokens,
                 "cost_usd": cost,
-                "raw_json_output": raw_json
+                "raw_json_output": raw_json,
+                "full_prompt_text": prompt
             })
 
         except Exception as e:
@@ -157,9 +158,8 @@ def silver_entity_extraction_payloads(context: AssetExecutionContext, config: Si
         _process_extraction_batch(items, config.model, semaphore, config.thinking)
     )
     
-    if not results:
-        context.log.info("No successful extractions processed for {partition_date_str}.")
-        return MaterializeResult(metadata={"items_processed": 0})
+    if not results and len(items) > 0:
+        raise Exception(f"CRITICAL: 0 out of {len(items)} LLM extractions succeeded after retries. Failing partition to prevent silent data loss.")
         
     out_df = pd.DataFrame(results)
     out_df['prompt_version'] = PROMPT_VERSION
@@ -216,6 +216,7 @@ def silver_entity_extraction(context: AssetExecutionContext) -> MaterializeResul
             item['brand'] = row['brand']
             item['productName'] = row['productName']
             item['target_authored_at'] = row['target_authored_at']
+            item['llm_full_prompt_text'] = row.get('full_prompt_text')
             
             extracted_items.append(item)
             

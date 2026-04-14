@@ -13,7 +13,7 @@ from pipeline.utils.paths import get_read_path, get_write_path
 from pipeline.utils.db import get_duckdb_connection
 
 from .shared import bifl_daily_partitions, SILVER_CODE_VERSION, PROMPT_VERSION, SilverLLMConfig
-from pipeline.prompts.entity_discovery import MentionItem, get_discovery_prompt
+from pipeline.prompts.entity_discovery import MentionItem, get_entity_discovery_prompt
 
 async def _process_discovery_batch(threads: list[tuple], model_name: str, semaphore: asyncio.Semaphore, thinking: Optional[str] = None) -> tuple[list[dict], float, int, int]:
     import datetime
@@ -49,7 +49,7 @@ async def _process_discovery_batch(threads: list[tuple], model_name: str, semaph
                     
         thread_text = json.dumps([{k: v for k, v in b.items() if k != 'created_utc'} for b in content_blocks], indent=2)
 
-        prompt = get_discovery_prompt(thread_text)
+        prompt = get_entity_discovery_prompt(thread_text)
         
         nonlocal total_cost, total_input, total_output
         gen_config = types.GenerateContentConfig(
@@ -121,7 +121,8 @@ async def _process_discovery_batch(threads: list[tuple], model_name: str, semaph
                     "cost_usd": cost,
                     "raw_json_output": raw_json,
                     "parent_text": title,
-                    "content_blocks_json": json.dumps(content_blocks)
+                    "content_blocks_json": json.dumps(content_blocks),
+                    "full_prompt_text": prompt
                 })
 
             except Exception as e:
@@ -207,6 +208,9 @@ def silver_entity_discovery_payloads(context: AssetExecutionContext, config: Sil
     
     context.log.info(f"Extracted {len(extracted_items)} items. Total Cost: ${total_cost:.4f}")
     
+    if len(extracted_items) == 0 and len(rows) > 0:
+        raise Exception(f"CRITICAL: 0 out of {len(rows)} LLM inferences succeeded after retries. Failing partition to prevent silent data loss.")
+        
     # 3. WRITE SILVER TO PARQUET
     if extracted_items:
         df = pd.DataFrame(extracted_items)
@@ -276,6 +280,7 @@ def silver_entity_discovery(context: AssetExecutionContext) -> MaterializeResult
                 item['llm_chunk_input_tokens'] = row.get('input_tokens')
                 item['llm_chunk_output_tokens'] = row.get('output_tokens')
                 item['llm_chunk_yield'] = len(items)
+                item['llm_full_prompt_text'] = row.get('full_prompt_text')
                 
                 # Contextual Data Mapping Idempotently
                 matched_texts = []

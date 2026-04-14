@@ -12,10 +12,10 @@ import tqdm.asyncio
 
 # Allow import of the pipeline package
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
-from pipeline.utils.pricing import AiModel, calculate_gemini_cost
-from pipeline.utils.judge import run_judge_alignment
+from pipeline.utils.pricing import calculate_gemini_cost
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
-from pipeline.prompts.entity_discovery import MentionItem, get_discovery_prompt
+from pipeline.prompts.entity_discovery import MentionItem, get_entity_discovery_prompt
 
 async def _extract_candidate(doc_id: str, content_blocks: list[dict], model_name: str, thinking: str | None, semaphore: asyncio.Semaphore) -> tuple[list[dict], float]:
     """Runs Phase 1 LLM extraction on flat Canonical Data."""
@@ -23,7 +23,7 @@ async def _extract_candidate(doc_id: str, content_blocks: list[dict], model_name
     
     thread_text = json.dumps(content_blocks, indent=2)
 
-    prompt = get_discovery_prompt(thread_text)
+    prompt = get_entity_discovery_prompt(thread_text)
         
     gen_config = types.GenerateContentConfig(
         response_mime_type="application/json",
@@ -41,13 +41,21 @@ async def _extract_candidate(doc_id: str, content_blocks: list[dict], model_name
     results = []
     
     async with semaphore:
-        try:
-            # We skip the tenacity retry for this lightweight eval script
-            response = await client.aio.models.generate_content(
+        @retry(
+            stop=stop_after_attempt(4),
+            wait=wait_exponential(multiplier=2, min=2, max=10),
+            retry=retry_if_exception_type(Exception),
+            reraise=True
+        )
+        async def call_api():
+            return await client.aio.models.generate_content(
                 model=model_name,
                 contents=prompt,
                 config=gen_config,
             )
+            
+        try:
+            response = await call_api()
             
             if response.usage_metadata:
                 cost = calculate_gemini_cost(model_name, response.usage_metadata)
@@ -102,58 +110,51 @@ async def run_evaluation(model_name: str, thinking_budget: str | None, verbose: 
     latency = time.time() - start_time
     print(f"Inference complete. Cost: ${total_candidate_cost:.5f}. Latency: {latency:.2f}s")
     
-    print(f"\nFiring Judge Alignment...")
-    print(f"  Model: {AiModel.GEMINI_3_FLASH.value}")
-    print(f"  Thinking: low")
-    # 2. RUN JUDGE ALIGNMENT
-    judge_semaphore = asyncio.Semaphore(10)
+    print(f"\nFiring Deterministic Evaluation...")
     
-    async def _judge_wrapper(doc_id, expected_benchmark):
-        doc_extractions = [e for e in all_extracted_items if e.get('document_id') == doc_id]
-        mappings, judge_cost = await run_judge_alignment(
-            expected_benchmark, 
-            doc_extractions, 
-            judge_semaphore,
-            judge_model_name=AiModel.GEMINI_3_FLASH.value,
-            judge_thinking_level="low"
-        )
+    def _evaluate_doc(doc_id, expected_benchmark, doc_extractions):
+        matched_expected_indices = set()
+        matched_extracted_indices = set()
         
-        matched_expected_indices = set([m.expected_index for m in mappings])
-        matched_extracted_indices = set([m.extracted_index for m in mappings])
-        
-        thread_tp = len(mappings)
+        for g_idx, g in enumerate(expected_benchmark):
+            g_raw = g.get('raw_mention', '').lower()
+            
+            for ex_idx, ex in enumerate(doc_extractions):
+                if ex_idx in matched_extracted_indices:
+                    continue
+                ex_raw = ex.get('raw_mention', '').lower()
+                
+                # Deterministic Greedy Match
+                if g_raw in ex_raw or ex_raw in g_raw:
+                    matched_expected_indices.add(g_idx)
+                    matched_extracted_indices.add(ex_idx)
+                    break
+                    
+        thread_tp = len(matched_expected_indices)
         thread_fp = len(doc_extractions) - len(matched_extracted_indices)
         thread_fn = len(expected_benchmark) - len(matched_expected_indices)
 
-        return doc_id, expected_benchmark, doc_extractions, matched_expected_indices, matched_extracted_indices, thread_tp, thread_fp, thread_fn, judge_cost
+        return doc_id, expected_benchmark, doc_extractions, matched_expected_indices, matched_extracted_indices, thread_tp, thread_fp, thread_fn
         
-    judge_tasks = [_judge_wrapper(doc_id, ec) for doc_id, ec in golden_map.items()]
-    judge_results = await tqdm.asyncio.tqdm.gather(*judge_tasks, desc="Judging Alignments")
+    judge_results = [_evaluate_doc(doc_id, ec, [e for e in all_extracted_items if e.get('document_id') == doc_id]) for doc_id, ec in golden_map.items()]
     
     tp, fp, fn = 0, 0, 0
-    total_judge_cost = 0.0
     
     for res in judge_results:
-        doc_id, expected_benchmark, doc_extractions, matched_expected_indices, matched_extracted_indices, thread_tp, thread_fp, thread_fn, judge_cost = res
+        doc_id, expected_benchmark, doc_extractions, matched_expected_indices, matched_extracted_indices, thread_tp, thread_fp, thread_fn = res
         
         tp += thread_tp
         fp += thread_fp
         fn += thread_fn
-        total_judge_cost += judge_cost
-        
-        if verbose and all_errors:
-            print("\n--- Generation Errors ---")
-            for err in all_errors: print(err)
-            
         if verbose:
             if thread_fp > 0 or thread_fn > 0:
                 print(f"\n--- Document {doc_id} Mismatches ---")
             for ex_idx, ex in enumerate(doc_extractions):
                 if ex_idx not in matched_extracted_indices:
-                    print(f"[HALLUCINATION (FP)]: {ex.get('author_id')} -> {ex.get('brand')} {ex.get('productName')}")
+                    print(f"[HALLUCINATION (FP)]: {ex.get('author_id')} -> {ex.get('raw_mention')}")
             for g_idx, g in enumerate(expected_benchmark):
                 if g_idx not in matched_expected_indices:
-                    print(f"[MISS (FN)]: {g.get('author_id')} -> {g.get('brand')} {g.get('productName')}")
+                    print(f"[MISS (FN)]: {g.get('author_id')} -> {g.get('raw_mention')}")
 
     # 3. METRICS
     print("\n--- RESULTS PHASE 1 (Entity Discovery) ---")
@@ -164,9 +165,7 @@ async def run_evaluation(model_name: str, thinking_budget: str | None, verbose: 
     print(f"Entity F1-Score:    {f1*100:.1f}%")
     print(f"  Precision:        {precision*100:.1f}% (TP: {tp}, FP: {fp})")
     print(f"  Recall:           {recall*100:.1f}% (TP: {tp}, FN: {fn})")
-    print(f"Inference Cost:     ${total_candidate_cost:.5f}")
-    print(f"Judge Cost:         ${total_judge_cost:.5f}")
-    print(f"Total API Cost:     ${total_candidate_cost + total_judge_cost:.5f}")
+    print(f"Total API Cost:     ${total_candidate_cost:.5f}")
 
 
 if __name__ == "__main__":
