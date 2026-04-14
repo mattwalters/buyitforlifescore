@@ -4,7 +4,7 @@ import os
 
 def _get_local_base_dir() -> str:
     """Returns the local MacBook storage directory."""
-    return "/Users/matt/src/mattwalters/buyitforlifeclub/data"
+    return "/Users/matt/src/mattwalters/buyitforlifescore/data"
 
 
 def get_write_path(stage_and_filename: str) -> str:
@@ -59,7 +59,7 @@ def get_ledger_path() -> str:
     this must always point to a local block storage folder. 
     We default to Railway's `/data` volume if in production, else your Macbook!
     """
-    ledger_dir = os.environ.get("LEDGER_DIR", "/Users/matt/src/mattwalters/buyitforlifeclub/data/metrics")
+    ledger_dir = os.environ.get("LEDGER_DIR", "/Users/matt/src/mattwalters/buyitforlifescore/data/metrics")
     if not os.path.exists(ledger_dir):
         os.makedirs(ledger_dir, exist_ok=True)
     return os.path.join(ledger_dir, "ledger.duckdb")

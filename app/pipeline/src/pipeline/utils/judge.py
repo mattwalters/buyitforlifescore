@@ -87,15 +87,15 @@ async def run_blind_canary_evaluation(
     semaphore: asyncio.Semaphore,
     judge_model_name: str,
     judge_thinking_level: str
-) -> tuple[list[CanaryValidation], float]:
+) -> tuple[list[CanaryValidation], float, int, int, str]:
     """Uses a reference-free Judge to evaluate live extracted entities for statistical canary checking."""
     if not extractions:
-        return [], 0.0
+        return [], 0.0, 0, 0, "[]"
 
     client = genai.Client()
     
     # Strip unnecessary noise, keep relevant text mapping
-    batch_for_judge = [{"index": i, "brand": e.get("brand"), "productName": e.get("productName"), "context_snippet": e.get("body", "")[:200]} for i, e in enumerate(extractions)]
+    batch_for_judge = [{"index": i, "brand": e.get("brand"), "productName": e.get("productName"), "context_snippet": e.get("body", "")} for i, e in enumerate(extractions)]
 
     prompt = f"""You are an expert Data Quality Judge analyzing a pipeline that extracts "Buy It For Life" (BIFL) product recommendations from Reddit.
 Your job is to blindly evaluate a sample batch of extractions to determine if they are legitimate physical, durable goods.
@@ -127,13 +127,17 @@ Output the validation result matching the exact index order of the batch."""
             )
         
         cost = 0.0
+        input_tokens = 0
+        output_tokens = 0
         if response.usage_metadata:
             cost = calculate_gemini_cost(judge_model_name, response.usage_metadata)
+            input_tokens = response.usage_metadata.prompt_token_count or 0
+            output_tokens = response.usage_metadata.candidates_token_count or 0
             
         if response.text:
             result_dict = json.loads(response.text)
-            return [CanaryValidation(**m) for m in result_dict.get("validations", [])], cost
+            return [CanaryValidation(**m) for m in result_dict.get("validations", [])], cost, input_tokens, output_tokens, response.text
     except Exception as e:
         print(f"Skipping blind judge evaluation due to API Error: {e}")
         
-    return [], 0.0
+    return [], 0.0, 0, 0, "[]"

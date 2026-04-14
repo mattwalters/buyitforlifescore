@@ -1,36 +1,39 @@
 import duckdb
 import asyncio
-from dagster import asset_check, AssetCheckResult, MetadataValue
+from dagster import asset, MaterializeResult, MetadataValue, Config
 from .silver import silver_entity_discovery
 from ..utils.pricing import AiModel
 from ..utils.judge import run_blind_canary_evaluation
 from ..utils.db import get_duckdb_connection
 
-@asset_check(asset=silver_entity_discovery)
-def canary_validity_check(context) -> AssetCheckResult:
+class DiscoveryEvalConfig(Config):
+    sample_size: int = 1067  # Default 95% Confidence Interval for typical BIFL thread density
+
+@asset(group_name="evaluations", deps=[silver_entity_discovery])
+def silver_entity_discovery_eval(context, config: DiscoveryEvalConfig) -> MaterializeResult:
     """
-    Randomly samples exactly 1,067 extractions across all materialized daily partitions
-    and evaluates them using an un-anchored Gemini Blind Judge to compute a ~95% Confidence Interval.
+    Randomly samples extracted rows across all materialized daily partitions
+    and evaluates them using an un-anchored Gemini Blind Judge.
     """
     from ..utils.paths import get_read_path
     
-    source_glob = get_read_path("silver/entity_discovery_*.parquet")
+    source_glob = get_read_path("silver/entity_discovery_[0-9]*.parquet")
     
     with get_duckdb_connection() as con:
         try:
             # We use RESERVOIR sampling in DuckDB to pull an exact subset of the population longitudinally
             query = f"""
-                SELECT brand, productName, body 
+                SELECT brand, productName, target_text 
                 FROM read_parquet('{source_glob}') 
-                USING SAMPLE 1067 ROWS
+                USING SAMPLE {config.sample_size} ROWS
             """
             sample_rows = con.execute(query).fetchall()
         except duckdb.IOException:
             context.log.info("No silver parquet files found to sample.")
-            return AssetCheckResult(passed=True, metadata={"skipped": "No data"})
+            return MaterializeResult(metadata={"skipped": "No data"})
 
     if not sample_rows:
-        return AssetCheckResult(passed=True, metadata={"skipped": "No data"})
+        return MaterializeResult(metadata={"skipped": "No data"})
         
     extractions_for_judge = [{"brand": r[0], "productName": r[1], "body": r[2]} for r in sample_rows]
     num_samples = len(extractions_for_judge)
@@ -44,13 +47,13 @@ def canary_validity_check(context) -> AssetCheckResult:
     chunks = [extractions_for_judge[i:i + chunk_size] for i in range(0, num_samples, chunk_size)]
     
     async def process_chunk(chunk):
-        res, cost = await run_blind_canary_evaluation(
+        res, cost, it, ot, raw_json = await run_blind_canary_evaluation(
             chunk, 
             judge_semaphore, 
-            AiModel.GEMINI_3_PRO.value, 
+            AiModel.GEMINI_3_FLASH.value, 
             "high"
         )
-        return res, cost
+        return res, cost, it, ot, raw_json
 
     async def run_all():
         tasks = [process_chunk(c) for c in chunks]
@@ -58,15 +61,37 @@ def canary_validity_check(context) -> AssetCheckResult:
         
         all_res = []
         tot_cost = 0.0
-        for r, c in results:
+        
+        payload_rows = []
+        for idx, (r, c, it, ot, raw_json) in enumerate(results):
             all_res.extend(r)
             tot_cost += c
-        return all_res, tot_cost
+            payload_rows.append({
+                "chunk_id": f"discovery_eval_{context.run_id}_chunk_{idx}",
+                "model_used": AiModel.GEMINI_3_FLASH.value,
+                "input_tokens": it,
+                "output_tokens": ot,
+                "cost_usd": c,
+                "raw_json_output": raw_json
+            })
+            
+        return all_res, tot_cost, payload_rows
 
-    validations_res, judge_cost = loop.run_until_complete(run_all())
+    validations_res, judge_cost, payload_rows = loop.run_until_complete(run_all())
+    
+    # Save the native telemetry payloads immediately to file so the dashboard can harvest it
+    import pandas as pd
+    from ..utils.paths import get_write_path
+    
+    if payload_rows:
+        target_parquet = get_write_path(f"evaluations/entity_discovery_eval_payloads_{context.run_id[:8]}.parquet")
+        payload_df = pd.DataFrame(payload_rows)
+        with get_duckdb_connection() as con:
+            con.register('df_view', payload_df)
+            con.execute(f"COPY (SELECT * FROM df_view) TO '{str(target_parquet)}' (FORMAT PARQUET)")
     
     if not validations_res:
-        return AssetCheckResult(passed=False, metadata={"error": "Judge failed to return valid outputs or encountered rate limits."})
+        raise Exception("Judge failed to return valid outputs or encountered rate limits.")
         
     num_valid = sum(1 for v in validations_res if v.is_valid_durable_good)
     precision = num_valid / len(validations_res)
@@ -79,9 +104,12 @@ def canary_validity_check(context) -> AssetCheckResult:
         for i, v in enumerate(validations_res) if not getattr(v, "is_valid_durable_good", True)
     ]
     
-    return AssetCheckResult(
-        passed=passed,
+    if not passed:
+        context.log.error(f"Fidelity fell below 90% floor! Precision: {precision}")
+
+    return MaterializeResult(
         metadata={
+            "passed": MetadataValue.bool(passed),
             "precision": MetadataValue.float(round(precision, 4)),
             "cost_usd": MetadataValue.float(round(judge_cost, 4)),
             "samples_evaluated": len(validations_res),

@@ -1,0 +1,1 @@
+{"query": "mutation { launchPartitionBackfill(backfillParams: { selector: { repositoryName: \"__repository__\", repositoryLocationName: \"__repository__\" }, assetSelection: [{ path: [\"silver_entity_attributes\"] }], partitionNames: [\"2012-01-01\"] }) { __typename } }"}

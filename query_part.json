@@ -1,0 +1,1 @@
+{"query": "query { __type(name: \"PartitionsSelector\") { inputFields { name type { name kind } } } }"}

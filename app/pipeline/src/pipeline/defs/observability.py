@@ -8,32 +8,32 @@ def llm_cost_dashboard(context) -> MaterializeResult:
     Unpartitioned standalone asset. Queries the local duckdb Cost Ledger 
     to sum all API spend across various models and tasks without waiting for entire backfills.
     """
-    from ..utils.paths import get_ledger_path
-    ledger_path = get_ledger_path()
+    from ..utils.paths import get_read_path
     
-    if not os.path.exists(ledger_path):
-        context.log.warning("Cost ledger database does not exist yet. No data to report.")
-        return MaterializeResult(metadata={"status": "No ledger found"})
-        
-    with get_duckdb_connection(database=ledger_path, read_only=True) as con:
-        tables = con.execute("SHOW TABLES").fetchall()
-        if not any(t[0] == 'cost_ledger' for t in tables):
-            return MaterializeResult(metadata={"status": "Ledger table empty"})
+    silver_glob = str(get_read_path("silver/*_payloads_*.parquet"))
+    eval_glob = str(get_read_path("evaluations/*_payloads_*.parquet"))
+    
+    with get_duckdb_connection() as con:
+        try:
+            query = f"""
+                SELECT 
+                    split_part(split_part(filename, '/', -1), '_payloads', 1) as asset_name,
+                    model_used,
+                    COUNT(DISTINCT split_part(chunk_id, '_chunk_', 1)) as unique_submissions,
+                    SUM(input_tokens) as total_input_tokens,
+                    SUM(output_tokens) as total_output_tokens,
+                    SUM(cost_usd) as total_cost_usd
+                FROM read_parquet(['{silver_glob}', '{eval_glob}'], filename=true)
+                GROUP BY 1, 2
+                ORDER BY total_cost_usd DESC
+            """
+            df = con.execute(query).df()
             
-        query = """
-            SELECT 
-                asset_name,
-                model_used,
-                COUNT(DISTINCT partition_key) as partitions_run,
-                SUM(input_tokens) as total_input_tokens,
-                SUM(output_tokens) as total_output_tokens,
-                SUM(cost_usd) as total_cost_usd
-            FROM cost_ledger
-            GROUP BY asset_name, model_used
-            ORDER BY total_cost_usd DESC
-        """
-        df = con.execute(query).df()
-        
+        except Exception as e:
+            if "No files found" in str(e):
+                return MaterializeResult(metadata={"status": "No cost metrics found (No payload files yet)"})
+            raise e
+            
         if df.empty:
             return MaterializeResult(metadata={"status": "No cost metrics found"})
             
@@ -46,7 +46,7 @@ def llm_cost_dashboard(context) -> MaterializeResult:
         
     return MaterializeResult(
         metadata={
-            "grand_total_usd": MetadataValue.float(round(grand_total, 4)),
+            "grand_total_usd": MetadataValue.float(float(round(grand_total, 4))),
             "cost_breakdown": MetadataValue.md(df.to_markdown(index=False))
         }
     )

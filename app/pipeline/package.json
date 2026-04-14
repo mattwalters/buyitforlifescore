@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "dotenv -e ../../.env -- uv run dg dev",
-    "sample": "dotenv -e ../../.env -- uv run python scripts/sample.py",
+    "materialize:sample": "dotenv -e ../../.env -- uv run python scripts/materialize_sample.py",
     "start": "dotenv -e ../../.env -- ./run.sh",
     "build": "echo 'No build step required for local python dev.'",
     "lint": "echo 'Python linting uses ruff handled outside of npm.'"

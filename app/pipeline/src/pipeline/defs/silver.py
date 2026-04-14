@@ -122,36 +122,46 @@ Thread to analyze (JSON ContentBlocks):
             try:
                 response = await call_api()
                 
+                cost = 0.0
+                prompt_tokens = 0
+                candidates_tokens = 0
+                
                 # Aggregate costs
                 if response.usage_metadata:
                     usage = response.usage_metadata
                     # We pass the raw python SDK object into your ported pricing utility
                     cost = calculate_gemini_cost(model_name, usage)
                     total_cost += cost
-                    total_input += usage.prompt_token_count or 0
-                    total_output += usage.candidates_token_count or 0
+                    
+                    prompt_tokens = usage.prompt_token_count or 0
+                    candidates_tokens = usage.candidates_token_count or 0
+                    
+                    total_input += prompt_tokens
+                    total_output += candidates_tokens
                 
                 import json
-                if response.text:
-                    items = json.loads(response.text)
-                    for item in items:
-                        item['submission_id'] = submission_id
-                        
-                        # Enrich Payload for Phase 2
-                        matched_texts = []
-                        target_timestamp = None
-                        for bid in item.get('source_block_ids', []):
-                            matching_block = next((b for b in content_blocks if b['block_id'] == bid), None)
-                            if matching_block:
-                                matched_texts.append(matching_block['text'])
-                                if target_timestamp is None:
-                                    target_timestamp = matching_block.get('created_utc')
-                                    
-                        item['target_text'] = "\n\n---\n\n".join(matched_texts)
-                        item['target_authored_at'] = target_timestamp
-                        item['parent_text'] = title
+                raw_json = response.text if response.text else "[]"
+                # Sometimes gemini wraps in markdown blocks
+                if raw_json.startswith("```json"):
+                    raw_json = raw_json[7:-3]
+                    
+                chunk_id = f"{submission_id}_chunk_{chunk_index}"
+                
+                results.append({
+                    "chunk_id": chunk_id,
+                    "submission_id": submission_id,
+                    "chunk_index": chunk_index,
+                    "target_authored_at": created_utc,
+                    "model_used": model_name,
+                    "thinking_level": thinking,
+                    "input_tokens": prompt_tokens,
+                    "output_tokens": candidates_tokens,
+                    "cost_usd": cost,
+                    "raw_json_output": raw_json,
+                    "parent_text": title,
+                    "content_blocks_json": json.dumps(content_blocks)
+                })
 
-                        results.append(item)
             except Exception as e:
                 # In Dagster, we fail gracefully per-item or log warnings, but for simplicity we skip failing texts.
                 print(f"Skipping thread {submission_id} due to API Error: {e}")
@@ -179,15 +189,15 @@ Thread to analyze (JSON ContentBlocks):
     partitions_def=bifl_daily_partitions,
     code_version=SILVER_CODE_VERSION,
     deps=["raw_reddit_buyitforlife_comments", "raw_reddit_buyitforlife_submissions"],
-    description="Phase 1: Runs LLM inferences to discover entities in Bronze data."
+    description="Phase 1: Generates LLM JSON payload inferences identifying entities in Bronze data."
 )
-def silver_entity_discovery(context: AssetExecutionContext, config: SilverExtractionConfig) -> MaterializeResult:
+def silver_entity_discovery_payloads(context: AssetExecutionContext, config: SilverExtractionConfig) -> MaterializeResult:
     partition_date_str = context.partition_key
     
     bronze_comments_parquet = get_read_path("bronze/reddit_buyitforlife_comments.parquet")
     bronze_submissions_parquet = get_read_path("bronze/reddit_buyitforlife_submissions.parquet")
         
-    target_parquet = get_write_path(f"silver/entity_discovery_{partition_date_str}.parquet")
+    target_parquet = get_write_path(f"silver/entity_discovery_payloads_{partition_date_str}.parquet")
     
     limit_clause = f"LIMIT {config.limit}" if config.limit else ""
     
@@ -242,37 +252,18 @@ def silver_entity_discovery(context: AssetExecutionContext, config: SilverExtrac
         
         # Using DuckDB to save DataFrame directly to partitioned Parquet!
         with get_duckdb_connection() as con:
-                
             con.register('df_view', df)
             con.execute(f"COPY (SELECT * FROM df_view) TO '{str(target_parquet)}' (FORMAT PARQUET)")
-    
-    # 3.5. COST LEDGER PERSISTENCE
-    ledger_path = get_ledger_path()
-    with get_duckdb_connection(database=ledger_path) as ledger_con:
-        ledger_con.execute("""
-            CREATE TABLE IF NOT EXISTS cost_ledger (
-                run_timestamp TIMESTAMP,
-                partition_key VARCHAR,
-                asset_name VARCHAR,
-                model_used VARCHAR,
-                input_tokens BIGINT,
-                output_tokens BIGINT,
-                cost_usd DOUBLE
-            )
-        """)
-        ledger_con.execute("""
-            INSERT INTO cost_ledger VALUES (
-                current_timestamp, ?, ?, ?, ?, ?, ?
-            )
-        """, [partition_date_str, 'silver_entity_discovery', model_name, total_in, total_out, float(total_cost)])
+            
+    # Remove cost_ledger dual-write logic completely; telemetry is strictly saved in the row JSON payloads now!
         
     # 4. YIELD COST METADATA AND VIEWS!
     metadata = {
         "partition": partition_date_str,
         "threads_processed": len(rows),
-        "items_extracted": len(extracted_items),
+        "payloads_generated": len(extracted_items),
         "model_used": model_name,
-        "cost_usd": float(round(total_cost, 6)),
+        "cost_usd": MetadataValue.float(float(round(total_cost, 6))),
         "input_tokens": total_in,
         "output_tokens": total_out
     }
@@ -285,10 +276,99 @@ def silver_entity_discovery(context: AssetExecutionContext, config: SilverExtrac
 @asset(
     group_name="silver",
     partitions_def=bifl_daily_partitions,
+    code_version="1",
+    deps=["silver_entity_discovery_payloads"],
+    description="Phase 1b: Idempotently un-nests LLM discovery payloads into flattened distinct items."
+)
+def silver_entity_discovery(context: AssetExecutionContext) -> MaterializeResult:
+    partition_date_str = context.partition_key
+    payloads_parquet = get_read_path(f"silver/entity_discovery_payloads_{partition_date_str}.parquet")
+    target_parquet = get_write_path(f"silver/entity_discovery_{partition_date_str}.parquet")
+    
+    import os
+    if not os.path.exists(payloads_parquet):
+        context.log.info(f"No payloads found for {partition_date_str}. Skipping.")
+        return MaterializeResult()
+        
+    query = f"SELECT * FROM '{str(payloads_parquet)}'"
+    
+    with get_duckdb_connection() as con:
+        df = con.execute(query).df()
+        
+    extracted_items = []
+    import json
+    
+    for _, row in df.iterrows():
+        try:
+            items = json.loads(row['raw_json_output'])
+            blocks = json.loads(row['content_blocks_json'])
+            
+            for item in items:
+                # Core LLM Data Mapping
+                item['submission_id'] = row.get('submission_id')
+                item['llm_chunk_id'] = row.get('chunk_id')
+                item['llm_chunk_cost_usd'] = row.get('cost_usd')
+                item['llm_model'] = row.get('model_used')
+                item['llm_thinking'] = row.get('thinking_level')
+                item['llm_chunk_input_tokens'] = row.get('input_tokens')
+                item['llm_chunk_output_tokens'] = row.get('output_tokens')
+                item['llm_chunk_yield'] = len(items)
+                
+                # Contextual Data Mapping Idempotently
+                matched_texts = []
+                target_timestamp = None
+                for bid in item.get('source_block_ids', []):
+                    matching_block = next((b for b in blocks if b.get('block_id') == bid), None)
+                    if matching_block:
+                        matched_texts.append(matching_block.get('text', ''))
+                        if target_timestamp is None:
+                            target_timestamp = matching_block.get('created_utc')
+                            
+                item['target_text'] = "\n\n---\n\n".join(matched_texts)
+                item['target_authored_at'] = target_timestamp
+                item['parent_text'] = row.get('parent_text')
+                
+                extracted_items.append(item)
+                
+        except json.JSONDecodeError as e:
+            context.log.warning(f"Failed to unnest row due to invalid JSON: {row['raw_json_output'][:50]}... Error: {e}")
+            
+    if extracted_items:
+        out_df = pd.DataFrame(extracted_items)
+        out_df['prompt_version'] = PROMPT_VERSION
+        with get_duckdb_connection() as con:
+            con.register('df_view', out_df)
+            con.execute(f"COPY (SELECT * FROM df_view) TO '{str(target_parquet)}' (FORMAT PARQUET)")
+            
+    metadata = {
+        "partition": partition_date_str,
+        "payloads_processed": len(df),
+        "items_extracted": len(extracted_items)
+    }
+    
+    if extracted_items:
+        metadata["data_preview"] = MetadataValue.md(out_df.head(10).to_markdown())
+        
+    return MaterializeResult(metadata=metadata)
+
+@asset(
+    group_name="silver",
+    partitions_def=bifl_daily_partitions,
     code_version=SILVER_CODE_VERSION,
     deps=["silver_entity_discovery"],
-    description="Phase 2: Reads the mapped entities and uses Gemini 3.1 Pro to extract nuanced qualitative attributes, sentiment, and durability metrics."
+    description="Phase 2a: Submits extracted entities to Gemini for nuanced qualitative attribute and sentiment extraction. Saves raw LLM completions identically to discovery layer."
+)
+def silver_entity_attributes_payloads(context: AssetExecutionContext) -> MaterializeResult:
+    context.log.info("Phase 2a Entity Attributes is a stub. It will read entity_discovery parquet and yield raw unflattened chunk payloads.")
+    return MaterializeResult(metadata={"status": "stub"})
+
+@asset(
+    group_name="silver",
+    partitions_def=bifl_daily_partitions,
+    code_version="1",
+    deps=["silver_entity_attributes_payloads"],
+    description="Phase 2b: Idempotently un-nests Phase 2 JSON payloads into flattened attribute dimensions."
 )
 def silver_entity_attributes(context: AssetExecutionContext) -> MaterializeResult:
-    context.log.info("Phase 2 Entity Attributes is a stub. It will read entity_discovery parquet and fan out.")
+    context.log.info("Phase 2b Entity Attributes Unnester is a stub. It will read payloads parquet and explode them locally.")
     return MaterializeResult(metadata={"status": "stub"})
