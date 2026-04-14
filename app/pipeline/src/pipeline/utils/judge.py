@@ -68,7 +68,7 @@ Return a list of mappings bridging the matching indices."""
             result_dict = json.loads(response.text)
             return [AlignmentMapping(**m) for m in result_dict.get("mappings", [])], cost
     except Exception as e:
-        print(f"Skipping judge alignment due to API Error: {e}")
+        pass # Allow calling process to handle the empty extraction response gracefully.
         
     return [], 0.0
 
@@ -119,7 +119,7 @@ async def run_blind_canary_evaluation(
             result_dict = json.loads(response.text)
             return [CanaryValidation(**m) for m in result_dict.get("validations", [])], cost, input_tokens, output_tokens, response.text
     except Exception as e:
-        print(f"Skipping blind judge evaluation due to API Error: {e}")
+        pass # Allow calling process to handle the empty canary response gracefully.
         
     return [], 0.0, 0, 0, "[]"
 
@@ -167,6 +167,6 @@ async def run_extraction_blind_canary_evaluation(
             result_dict = json.loads(response.text)
             return [ExtractionCanaryValidation(**m) for m in result_dict.get("validations", [])], cost, input_tokens, output_tokens, response.text
     except Exception as e:
-        print(f"Skipping extraction blind judge evaluation due to API Error: {e}")
+        pass # Allow calling process to handle the empty extraction canary response gracefully.
         
     return [], 0.0, 0, 0, "[]"

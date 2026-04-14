@@ -65,7 +65,6 @@ async def evaluate_extraction(client, fixture, model_name: str, thinking: str | 
     expected = fixture.get("expected", {})
     target_authored_at = fixture.get("targetAuthoredAt", "2024-01-01")
 
-    prompt = f"""You are a product analyst studying "Buy It For Life" patterns on Reddit.
     prompt = get_extraction_prompt(brand, productName, target_authored_at, text, parent_text)
 
     gen_config = types.GenerateContentConfig(
@@ -92,8 +91,7 @@ async def evaluate_extraction(client, fixture, model_name: str, thinking: str | 
             
         actual = json.loads(response.text)
     except Exception as e:
-        print(f"Failed to parse LLM Response for {brand}: {e}")
-        return {}, {}, cost, 0.0
+        return {}, {}, cost, 0.0, f"Failed to parse LLM Response for {brand}: {e}"
         
     # SCORE THE RESULTS (Micro F1 Arrays)
     tps = []
@@ -169,7 +167,7 @@ async def evaluate_extraction(client, fixture, model_name: str, thinking: str | 
             actual_val = actual.get(key)
             mismatch_logs.append(f"❌ [MM-SEMANTIC] {key}: Expected <{expected_val}> | Got <{actual_val}>")
             
-    return {"tp": len(tps), "fp": len(fps), "fn": len(fns)}, mismatch_logs, cost, judge_cost
+    return {"tp": len(tps), "fp": len(fps), "fn": len(fns)}, mismatch_logs, cost, judge_cost, None
 
 async def run_evaluation(model_name: str, thinking_budget: str | None, verbose: bool):
     client = genai.Client()
@@ -190,14 +188,22 @@ async def run_evaluation(model_name: str, thinking_budget: str | None, verbose: 
     total_fn = 0
     total_cost = 0.0
     total_judge_cost = 0.0
+    all_errors = []
     
-    for i, (metrics, logs, cost, j_cost) in enumerate(results):
+    for i, (metrics, logs, cost, j_cost, err) in enumerate(results):
         total_tp += metrics.get("tp", 0)
         total_fp += metrics.get("fp", 0)
         total_fn += metrics.get("fn", 0)
         total_cost += cost
         total_judge_cost += j_cost
         
+        if err: all_errors.append(err)
+        
+    if verbose and all_errors:
+        print("\n--- Generation Errors ---")
+        for err in all_errors: print(err)
+        
+    for i, (metrics, logs, cost, j_cost, err) in enumerate(results):
         if verbose and logs:
             fixture = fixtures[i]
             print(f"\n--- Fixture {fixture['id']}: {fixture['brand']} {fixture.get('productName','')} ---")

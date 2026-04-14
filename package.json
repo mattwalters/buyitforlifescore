@@ -45,7 +45,8 @@
     "nuke_node_modules": "./scripts/nuke_node_modules.sh",
     "nuke": "npm run clean && npm run nuke_node_modules",
     "set-host": "./scripts/set-host.sh",
-    "materialize:sample": "npm run materialize:sample -w @mono/pipeline"
+    "materialize:sample": "npm run materialize:sample -w @mono/pipeline",
+    "eval": "npm run eval -w @mono/pipeline"
   },
   "engines": {
     "node": "22.22.2"

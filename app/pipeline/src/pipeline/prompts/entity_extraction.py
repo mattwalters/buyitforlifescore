@@ -8,19 +8,19 @@ class EntityExtraction(BaseModel):
     # Core Identification
     quote: str = Field(description="Extract exactly 1 phrase or continuous sentence from the text where the product opinion was explicitly named or heavily contextualized. Keep it short.")
     specificityLevel: Literal["EXACT_MODEL", "PRODUCT_LINE", "BRAND_ONLY"]
-    acquiredPrice: Optional[float] = Field(description="Extract the explicitly stated purchase price. Convert to a float.")
+    acquiredPrice: Optional[float] = Field(description="Extract the explicitly stated purchase price OR estimated retail price mentioned (e.g., 'heard they are like $200' -> 200). Convert to a float.")
     
     # Longevity & Survival
     status: Optional[Literal["ACTIVE_USE", "RETIRED", "BROKEN", "SOLD_OR_GIFTED"]] = Field(description="The current explicitly stated status of the item.")
     ownershipDurationMonths: Optional[int] = Field(description="Calculate the TOTAL age/lifespan of the individual unit, even if passed down. If relative time is used (e.g. 'for a decade'), estimate the months (10 years = 120).")
     
     # Usage Profile
-    usageFrequency: Optional[Literal["DAILY", "WEEKLY", "MONTHLY", "SEASONAL", "RARELY"]]
+    usageFrequency: Optional[Literal["DAILY", "WEEKLY", "MONTHLY", "SEASONAL", "RARELY"]] = Field(description="Frequency of use. DAILY (most days), WEEKLY (a few times/week), MONTHLY (a few times/month), SEASONAL (used for a season), RARELY (once/twice a year). If usage varies over time, extract the CURRENT or MOST RECENT frequency. If a range is given, err towards the baseline (e.g., choose WEEKLY over DAILY).")
     
     # Failures & Maintenance
-    primaryFlawOrFailure: Optional[str] = Field(description="The primary functional or physical failure that compromises the utility of the item. Do NOT extract purely cosmetic wear (e.g., scuffs, fading patina) or subjective stylistic preferences (e.g., 'too heavy', 'ugly').")
-    diyRepairability: Optional[Literal["EASY", "SPECIAL_TOOLS_REQUIRED", "IMPOSSIBLE_SEALED"]] = Field(description="Extract the explicitly stated difficulty of repairing the item, if mentioned in the text.")
-    warrantyExperience: Optional[Literal["SEAMLESS_REPLACEMENT", "HONORED_WITH_FRICTION", "REJECTED", "IGNORED"]]
+    primaryFlawOrFailure: Optional[str] = Field(description="The primary functional or physical failure that compromises the utility of the item. DO include material compromises (rust, chips, delamination) and accessory failures (laces, batteries, earpads) even if still used. Do NOT extract purely cosmetic wear (scuffs, fading).")
+    diyRepairability: Optional[Literal["EASY", "SPECIAL_TOOLS_REQUIRED", "IMPOSSIBLE_SEALED"]] = Field(description="Extract ONLY if the user explicitly describes the difficulty of a DIY (Do-It-Yourself) repair. Routine maintenance (oiling, cleaning) or professional repairs (taking to a cobbler, mechanic) do NOT count as DIY repair and MUST be null.")
+    warrantyExperience: Optional[Literal["SEAMLESS_REPLACEMENT", "HONORED_WITH_FRICTION", "REJECTED", "IGNORED"]] = Field(description="The warranty experience. If the user explicitly praises the warranty policy or considers it a massive positive (e.g., '100-year warranty'), extract as SEAMLESS_REPLACEMENT, even if they haven't personally used it.")
     
     # Sentiment
     sentiment: Literal["POSITIVE", "NEUTRAL", "NEGATIVE"] = Field(description="Overall sentiment about the product.")
@@ -39,6 +39,9 @@ CRITICAL EDGE CASES:
 1. ISOLATION: You are evaluating ONLY the Target Product. Do NOT attribute the failure modes, ownership duration, or sentiment of other products mentioned in the text to the Target Product.
 2. REVIEWS vs SARCASM: Bypass sarcasm. If the text says it broke immediately but is ironically called 'the best true BIFL', the sentiment is NEGATIVE. 
 3. CONTRADICTIONS: For contradictory reviews (e.g. 'indestructible but incredibly uncomfortable'), grade the sentiment as NEUTRAL unless the user explicitly praises it overall.
+4. SENTIMENT NOBLE DEATHS vs ABANDONMENT: If a product 'finally died' after a long well-used life, sentiment is POSITIVE because it served its purpose well. If they abandoned the product for a competitor due to a flaw, the sentiment is NEGATIVE.
+5. SENTIMENT REGRET & DECENT: If the user says a product is 'decent' or explicitly wishes they bought a competitor (regret) despite good durability, the sentiment is NEUTRAL at best, or NEGATIVE if critical flaws are present.
+6. DECADE MATH: If a decade is mentioned (e.g., 'made in the 50s' or 'from the 70s'), use the start of the decade (e.g., 1950, 1970) to calculate the lifespan relative to {target_authored_at}.
 
 Text to analyze:
 {text}

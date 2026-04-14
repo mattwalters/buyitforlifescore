@@ -59,9 +59,9 @@ async def _extract_candidate(doc_id: str, content_blocks: list[dict], model_name
                     results.append(item)
                     
         except Exception as e:
-            print(f"Skipping doc {doc_id} due to API Error: {e}")
+            return [], cost, f"Skipping doc {doc_id} due to API Error: {e}"
             
-    return results, cost
+    return results, cost, None
 
 
 async def run_evaluation(model_name: str, thinking_budget: str | None, verbose: bool):
@@ -92,15 +92,19 @@ async def run_evaluation(model_name: str, thinking_budget: str | None, verbose: 
     
     # Aggregate Extraction Results
     all_extracted_items = []
+    all_errors = []
     total_candidate_cost = 0.0
-    for items, cost in extraction_results:
+    for items, cost, err in extraction_results:
         all_extracted_items.extend(items)
         total_candidate_cost += cost
+        if err: all_errors.append(err)
 
     latency = time.time() - start_time
     print(f"Inference complete. Cost: ${total_candidate_cost:.5f}. Latency: {latency:.2f}s")
     
-    print(f"\nFiring {AiModel.GEMINI_3_FLASH.value} Judge Alignment...")
+    print(f"\nFiring Judge Alignment...")
+    print(f"  Model: {AiModel.GEMINI_3_FLASH.value}")
+    print(f"  Thinking: low")
     # 2. RUN JUDGE ALIGNMENT
     judge_semaphore = asyncio.Semaphore(10)
     
@@ -137,6 +141,10 @@ async def run_evaluation(model_name: str, thinking_budget: str | None, verbose: 
         fn += thread_fn
         total_judge_cost += judge_cost
         
+        if verbose and all_errors:
+            print("\n--- Generation Errors ---")
+            for err in all_errors: print(err)
+            
         if verbose:
             if thread_fp > 0 or thread_fn > 0:
                 print(f"\n--- Document {doc_id} Mismatches ---")
