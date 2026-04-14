@@ -14,35 +14,42 @@ def llm_cost_dashboard(context) -> MaterializeResult:
     eval_glob = str(get_read_path("evaluations/*_payloads_*.parquet"))
     
     with get_duckdb_connection() as con:
-        try:
-            query = f"""
-                SELECT 
-                    split_part(split_part(filename, '/', -1), '_payloads', 1) as asset_name,
-                    model_used,
-                    COUNT(chunk_id) as total_payloads,
-                    SUM(input_tokens) as total_input_tokens,
-                    SUM(output_tokens) as total_output_tokens,
-                    SUM(cost_usd) as total_cost_usd
-                FROM read_parquet(['{silver_glob}', '{eval_glob}'], filename=true)
-                GROUP BY 1, 2
-                ORDER BY total_cost_usd DESC
-            """
-            df = con.execute(query).df()
+        dfs = []
+        for g in [silver_glob, eval_glob]:
+            try:
+                query = f"""
+                    SELECT 
+                        split_part(split_part(filename, '/', -1), '_payloads', 1) as asset_name,
+                        model_used,
+                        COUNT(chunk_id) as total_payloads,
+                        SUM(input_tokens) as total_input_tokens,
+                        SUM(output_tokens) as total_output_tokens,
+                        SUM(cost_usd) as total_cost_usd
+                    FROM read_parquet('{g}', filename=true)
+                    GROUP BY 1, 2
+                """
+                dfs.append(con.execute(query).df())
+            except Exception as e:
+                if "No files found" in str(e):
+                    continue
+                raise e
+                
+        if not dfs:
+            return MaterializeResult(metadata={"status": "No cost metrics found (No payload files yet)"})
             
-        except Exception as e:
-            if "No files found" in str(e):
-                return MaterializeResult(metadata={"status": "No cost metrics found (No payload files yet)"})
-            raise e
-            
-        if df.empty:
-            return MaterializeResult(metadata={"status": "No cost metrics found"})
+        import pandas as pd
+        df = pd.concat(dfs, ignore_index=True)
+        
+        # Aggregate across the merged dataframes
+        df = df.groupby(['asset_name', 'model_used'], as_index=False).sum()
+        df = df.sort_values(by='total_cost_usd', ascending=False)
             
         grand_total = df['total_cost_usd'].sum()
         
         # Format the float explicitly for nicer markdown table rendering
-        df['total_cost_usd'] = df['total_cost_usd'].map(lambda x: f"${x:,.4f}")
-        df['total_input_tokens'] = df['total_input_tokens'].map(lambda x: f"{int(x):,}")
-        df['total_output_tokens'] = df['total_output_tokens'].map(lambda x: f"{int(x):,}")
+        df['total_cost_usd'] = df['total_cost_usd'].apply(lambda x: f"${float(x):,.4f}")
+        df['total_input_tokens'] = df['total_input_tokens'].apply(lambda x: f"{int(x):,}")
+        df['total_output_tokens'] = df['total_output_tokens'].apply(lambda x: f"{int(x):,}")
         
     return MaterializeResult(
         metadata={
