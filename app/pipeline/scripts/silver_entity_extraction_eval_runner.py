@@ -19,26 +19,7 @@ from datetime import datetime
 # Allow fallback defaults
 DEFAULT_MODEL = "gemini-2.5-flash-lite"
 
-class EntityAttributes(BaseModel):
-    # Core Identification
-    quote: str = Field(description="Extract exactly 1 phrase or continuous sentence from the text where the product opinion was explicitly named or heavily contextualized. Keep it short.")
-    specificityLevel: Literal["EXACT_MODEL", "PRODUCT_LINE", "BRAND_ONLY"]
-    acquiredPrice: Optional[float] = Field(description="Extract the explicitly stated purchase price. Convert to a float.")
-    
-    # Longevity & Survival
-    status: Optional[Literal["ACTIVE_USE", "RETIRED", "BROKEN", "SOLD_OR_GIFTED"]] = Field(description="The current explicitly stated status of the item.")
-    ownershipDurationMonths: Optional[int] = Field(description="Calculate the TOTAL age/lifespan of the individual unit, even if passed down. If relative time is used (e.g. 'for a decade'), estimate the months (10 years = 120).")
-    
-    # Usage Profile
-    usageFrequency: Optional[Literal["DAILY", "WEEKLY", "MONTHLY", "SEASONAL", "RARELY"]]
-    
-    # Failures & Maintenance
-    primaryFlawOrFailure: Optional[str] = Field(description="The primary functional or physical failure that compromises the utility of the item. Do NOT extract purely cosmetic wear (e.g., scuffs, fading patina) or subjective stylistic preferences (e.g., 'too heavy', 'ugly').")
-    diyRepairability: Optional[Literal["EASY", "SPECIAL_TOOLS_REQUIRED", "IMPOSSIBLE_SEALED"]] = Field(description="Extract the explicitly stated difficulty of repairing the item, if mentioned in the text.")
-    warrantyExperience: Optional[Literal["SEAMLESS_REPLACEMENT", "HONORED_WITH_FRICTION", "REJECTED", "IGNORED"]]
-    
-    # Sentiment
-    sentiment: Literal["POSITIVE", "NEUTRAL", "NEGATIVE"] = Field(description="Overall sentiment about the product.")
+from pipeline.prompts.entity_extraction import EntityExtraction, get_extraction_prompt
 
 async def semantically_equivalent(client, expected: str, actual: str, field: str, semaphore: asyncio.Semaphore) -> bool:
     """Uses a cheap LLM Judge to determine if an unstructured text matches the benchmark."""
@@ -76,7 +57,7 @@ Respond exactly with the word MATCH or MISMATCH. Do not output anything else."""
         except:
             return False, 0.0
 
-async def evaluate_attributes(client, fixture, model_name: str, thinking: str | None, judge_semaphore: asyncio.Semaphore):
+async def evaluate_extraction(client, fixture, model_name: str, thinking: str | None, judge_semaphore: asyncio.Semaphore):
     brand = fixture.get("brand")
     productName = fixture.get("productName", "")
     text = fixture.get("text")
@@ -85,29 +66,11 @@ async def evaluate_attributes(client, fixture, model_name: str, thinking: str | 
     target_authored_at = fixture.get("targetAuthoredAt", "2024-01-01")
 
     prompt = f"""You are a product analyst studying "Buy It For Life" patterns on Reddit.
-You are evaluating a specific product mentioned by a user.
-Target Product: {brand} {productName}
-
-Context: The specific text you are analyzing was written on {target_authored_at}. Use this exact date as the absolute "present day" for all relative time calculations. Any mention of "bought 10 years ago" or "bought in 1980" should be calculated strictly relative to {target_authored_at}. Do not calculate relative to your system's current year.
-
-Extract the exact nuanced opinions the user had regarding this specific product. 
-If a field is not explicitly mentioned or cannot be confidently inferred, map it to null. Do not hallucinate data.
-
-CRITICAL EDGE CASES:
-1. ISOLATION: You are evaluating ONLY the Target Product. Do NOT attribute the failure modes, ownership duration, or sentiment of other products mentioned in the text to the Target Product.
-2. REVIEWS vs SARCASM: Bypass sarcasm. If the text says it broke immediately but is ironically called 'the best true BIFL', the sentiment is NEGATIVE. 
-3. CONTRADICTIONS: For contradictory reviews (e.g. 'indestructible but incredibly uncomfortable'), grade the sentiment as NEUTRAL unless the user explicitly praises it overall.
-
-Text to analyze:
-{text}
-
-Parent Context (for reference):
-{parent_text}
-"""
+    prompt = get_extraction_prompt(brand, productName, target_authored_at, text, parent_text)
 
     gen_config = types.GenerateContentConfig(
         response_mime_type="application/json",
-        response_schema=EntityAttributes,
+        response_schema=EntityExtraction,
         temperature=0.1
     )
     
@@ -211,16 +174,16 @@ Parent Context (for reference):
 async def run_evaluation(model_name: str, thinking_budget: str | None, verbose: bool):
     client = genai.Client()
     
-    fixture_path = Path(__file__).parent.parent / "fixtures" / "silver_entity_attributes_benchmark.json"
+    fixture_path = Path(__file__).parent.parent / "fixtures" / "silver_entity_extraction_benchmark.json"
     with open(fixture_path, "r") as f:
         fixtures = json.load(f)
 
     print(f"Loaded {len(fixtures)} synthetic evaluation cases.")
-    print(f"--- Entity Attributes Phase 2 Eval: {model_name} (Thinking: {thinking_budget}) ---")
+    print(f"--- Entity Extraction Phase 2 Eval: {model_name} (Thinking: {thinking_budget}) ---")
     
     judge_semaphore = asyncio.Semaphore(5)
-    tasks = [evaluate_attributes(client, fix, model_name, thinking_budget, judge_semaphore) for fix in fixtures]
-    results = await tqdm.asyncio.tqdm.gather(*tasks, desc="Evaluating Attributes")
+    tasks = [evaluate_extraction(client, fix, model_name, thinking_budget, judge_semaphore) for fix in fixtures]
+    results = await tqdm.asyncio.tqdm.gather(*tasks, desc="Evaluating Extraction")
     
     total_tp = 0
     total_fp = 0
@@ -258,7 +221,7 @@ async def run_evaluation(model_name: str, thinking_budget: str | None, verbose: 
     print(f"=========================================")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Entity Attributes Phase 2 Eval")
+    parser = argparse.ArgumentParser(description="Entity Extraction Phase 2 Eval")
     parser.add_argument("-m", "--model", default="gemini-2.5-flash-lite", help="Candidate Model")
     parser.add_argument("-t", "--thinking", type=str, default=None, help="Thinking constraint")
     parser.add_argument("-v", "--verbose", action="store_true", help="Print mismatch details")

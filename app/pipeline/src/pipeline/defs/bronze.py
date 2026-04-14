@@ -6,7 +6,7 @@ from dagster import asset, MaterializeResult, AssetExecutionContext, MetadataVal
     group_name="bronze",
     description="Extract raw Reddit ZST dump and convert specifically the BuyItForLife subreddit into highly optimized columnar Parquet."
 )
-def raw_reddit_buyitforlife_comments(context: AssetExecutionContext) -> MaterializeResult:
+def bronze_reddit_buyitforlife_comments(context: AssetExecutionContext) -> MaterializeResult:
     source_zst = get_read_path("ore/reddit_buyitforlife_comments.zst")
     target_parquet = get_write_path("bronze/reddit_buyitforlife_comments.parquet")
     
@@ -47,7 +47,7 @@ def raw_reddit_buyitforlife_comments(context: AssetExecutionContext) -> Material
     group_name="bronze",
     description="Extract raw Reddit ZST dump for Submissions and convert it into highly optimized columnar Parquet."
 )
-def raw_reddit_buyitforlife_submissions(context: AssetExecutionContext) -> MaterializeResult:
+def bronze_reddit_buyitforlife_submissions(context: AssetExecutionContext) -> MaterializeResult:
     source_zst = get_read_path("ore/reddit_buyitforlife_submissions.zst")
     target_parquet = get_write_path("bronze/reddit_buyitforlife_submissions.parquet")
     

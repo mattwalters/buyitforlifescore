@@ -15,12 +15,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 from pipeline.utils.pricing import AiModel, calculate_gemini_cost
 from pipeline.utils.judge import run_judge_alignment
 
-# --- Candidate Schema (Matches Canonical Model) ---
-class MentionItem(BaseModel):
-    author_id: str = Field(description="The unique author identifier from the ContentBlock.")
-    brand: str = Field(description="The stated brand name. Normalize to canonical proper spelling.")
-    productName: str = Field(description="The specific marketed product line or model name. Leave as empty string if no specific model is mentioned.")
-    source_block_ids: list[int] = Field(description="The list of block_ids where this author explicitly mentioned this product.")
+from pipeline.prompts.entity_discovery import MentionItem, get_discovery_prompt
 
 async def _extract_candidate(doc_id: str, content_blocks: list[dict], model_name: str, thinking: str | None, semaphore: asyncio.Semaphore) -> tuple[list[dict], float]:
     """Runs Phase 1 LLM extraction on flat Canonical Data."""
@@ -28,24 +23,7 @@ async def _extract_candidate(doc_id: str, content_blocks: list[dict], model_name
     
     thread_text = json.dumps(content_blocks, indent=2)
 
-    prompt = f"""You are an Entity Discovery agent studying text blocks.
-Your task is to identify every durable product mentioned.
-
-CRITICAL INSTRUCTIONS:
-- Aggregate your extractions by Author. Output exactly ONE extraction per unique 'author_id' and product combination. List all 'block_id's where they discussed it.
-- Your goal is to identify explicit OPINIONS or REVIEWS of brands and products. 
-- Do NOT extract a product if the user is simply stating that they bought it, are considering buying it, or are asking a question about it. There MUST be a qualitative opinion, endorsement, or explicit statement of experience attached.
-- You can extract general brand mentions (e.g., "Georgia has dropped in quality") if an opinion is attached. Do not limit yourself strictly to "physical" models if the brand quality itself is being reviewed.
-- If a commenter refers to a specific model name but omits the brand (e.g., "The SL-1200 is a tank"), you MUST use the preceding conversation blocks to infer the correct brand name ("Technics").
-- CRITICAL BOUNDARY: You MUST be able to tie an opinion to a specific BRAND. If a user states an experience about a generic component (e.g. "side zippers fail") or a generic product (e.g. "I love my boots") but the BRAND is unknown and cannot be inferred from context, you MUST NOT extract it.
-- Validation Gate 1 (Metaphors): Check if the statement is a rhetorical analogy (e.g., "asking for a Cadillac at a Chevy price"). If it is a metaphor, ABORT the extraction.
-- Validation Gate 2 (Retailers): Check if the brand is actually a generic retailer (e.g., Costco, Home Depot, Amazon). Retailers are not product brands unless explicitly an in-house brand (e.g. Kirkland). If it is just a retailer, ABORT the extraction.
-- Validation Gate 3 (Raw Materials): Check if the brand is actually a raw material or generic noun (e.g., teak, wooden, plastic, memory foam, goretex). If it is a material, ABORT the extraction. A brand must represent a named manufacturer.
-- Validation Gate 4 (Unknown Identity): Check if the identity of the brand is vague or unnamed (e.g. "these showerheads"). If you cannot confidently identify the exact capitalized proper noun of the brand, YOU MUST ABORT the extraction. The brand field must always contain a specific, capitalized proper noun.
-- Do NOT extract generic product nouns (e.g., "mixer", "backpack", "pan").
-
-Thread to analyze (JSON ContentBlocks):
-{thread_text}"""
+    prompt = get_discovery_prompt(thread_text)
         
     gen_config = types.GenerateContentConfig(
         response_mime_type="application/json",
