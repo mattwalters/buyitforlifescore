@@ -27,6 +27,7 @@ class SilverExtractionConfig(Config):
     limit: Optional[int] = None
     model: str = "gemini-2.5-flash-lite"
     thinking: Optional[str] = None
+    concurrency_limit: int = 20
 
 # --- PYDANTIC SCHEMA MAPPING --- 
 # This exactly matches your TypeScript THREAD_EXTRACTION_SCHEMA so Gemini returns identical JSON.

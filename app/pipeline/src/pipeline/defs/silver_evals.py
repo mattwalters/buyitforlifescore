@@ -48,7 +48,7 @@ def silver_entity_discovery_eval(context, config: DiscoveryEvalConfig) -> Materi
             item, 
             judge_semaphore, 
             AiModel.GEMINI_3_FLASH.value, 
-            "high"
+            "low"
         )
         return res, cost, it, ot, raw_json, idx
 
@@ -162,7 +162,7 @@ def silver_entity_extraction_eval(context, config: ExtractionEvalConfig) -> Mate
             chunk, 
             judge_semaphore, 
             AiModel.GEMINI_3_FLASH.value, 
-            "high"
+            "low"
         )
         return res, cost, it, ot, raw_json
 
