@@ -1,0 +1,224 @@
+#!/usr/bin/env python3
+import asyncio
+import json
+import time
+import argparse
+from tqdm.asyncio import tqdm
+from pydantic import BaseModel
+
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+
+from google import genai
+from google.genai import types
+from pipeline.utils.pricing import calculate_gemini_cost
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+
+from pipeline.utils.db import get_duckdb_connection
+from pipeline.utils.paths import get_read_path
+
+from pipeline.prompts.entity_discovery import get_entity_discovery_prompt, MentionItem
+from pipeline.prompts.judge_online_discovery import get_blind_judge_discovery_prompt, JudgeDiscoveryResult
+
+def get_random_bronze_threads(count: int, seed: int = 42) -> list[dict]:
+    subs_path = get_read_path("bronze/reddit_buyitforlife_submissions.parquet")
+    coms_path = get_read_path("bronze/reddit_buyitforlife_comments.parquet")
+    
+    query = f"""
+        SELECT 
+            s.id as document_id, 
+            s.title, 
+            s.selftext as body, 
+            list({{'id': c.id, 'body': c.body, 'author': c.author}} ORDER BY c.created_utc ASC) as comments
+        FROM '{subs_path}' s
+        LEFT JOIN '{coms_path}' c ON c.link_id = 't3_' || s.id
+        WHERE s.score > 10
+        GROUP BY s.id, s.title, s.selftext
+        HAVING len(comments) > 5 AND len(comments) < 20
+        ORDER BY random()
+        LIMIT {count}
+    """
+    
+    with get_duckdb_connection() as con:
+        # Note: setting deterministic seed if needed, but random() is fine for raw shadow testing
+        if seed:
+            con.execute(f"SELECT setseed({seed/100.0})")
+        rows = con.execute(query).fetchall()
+        
+    fixtures = []
+    for row in rows:
+        doc_id, title, body, comments = row
+        blocks = []
+        blocks.append({
+            "block_id": 0,
+            "author_id": "op",
+            "text": f"Title: {title}\nBody: {body}"
+        })
+        
+        c_count = 1
+        for c in comments:
+            if c.get("body") and c.get("body") not in ("[deleted]", "[removed]"):
+                blocks.append({
+                    "block_id": c_count,
+                    "author_id": c.get("author", "commenter"),
+                    "text": c.get("body")
+                })
+                c_count += 1
+                if c_count > 10: break # Keep it somewhat bounded for rapid eval
+                
+        fixtures.append({
+            "document_id": doc_id,
+            "content_blocks": blocks
+        })
+    return fixtures
+
+async def fetch_extraction(doc: dict, model_name: str, thinking_tokens: int):
+    doc_id = doc['document_id']
+    blocks_json = json.dumps(doc['content_blocks'], indent=2)
+    prompt = get_entity_discovery_prompt(blocks_json)
+    
+    client = genai.Client()
+    gen_config = types.GenerateContentConfig(
+        response_mime_type="application/json",
+        response_schema=list[MentionItem],
+        temperature=0.1
+    )
+    if thinking_tokens:
+        gen_config.thinking_config = types.ThinkingConfig(thinking_budget=thinking_tokens)
+    accumulated_cost = 0.0
+    
+    def log_retry(rs):
+        print(f"\n[⚠️ RETRY] Extraction failed on {doc_id} (Attempt {rs.attempt_number}/3). Error: {rs.outcome.exception()}")
+        
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=2, min=2, max=10), retry=retry_if_exception_type(Exception), reraise=True, before_sleep=log_retry)
+    async def call_api():
+        nonlocal accumulated_cost
+        response = await client.aio.models.generate_content(model=model_name, contents=prompt, config=gen_config)
+        if response.usage_metadata:
+            accumulated_cost += calculate_gemini_cost(model_name, response.usage_metadata)
+            
+        items = json.loads(response.text) if response.text else []
+        raw_mentions = [item.get('raw_mention', '') for item in items if isinstance(item, dict)]
+        return raw_mentions
+    
+    try:
+        raw_mentions = await call_api()
+        return doc_id, blocks_json, raw_mentions, accumulated_cost
+    except Exception as e:
+        print(f"\n[🚨 FATAL] Extraction fully failed on {doc_id} after 3 attempts. Error: {e}")
+        return doc_id, blocks_json, [], accumulated_cost
+
+async def fetch_judgment(doc_id: str, blocks_json: str, extractions: list[str], model_name: str, thinking_tokens: int):
+    prompt = get_blind_judge_discovery_prompt(blocks_json, extractions)
+    
+    client = genai.Client()
+    gen_config = types.GenerateContentConfig(
+        response_mime_type="application/json",
+        response_schema=JudgeDiscoveryResult,
+        temperature=0.1
+    )
+    if thinking_tokens:
+        gen_config.thinking_config = types.ThinkingConfig(thinking_budget=thinking_tokens)
+    accumulated_cost = 0.0
+    
+    def log_retry(rs):
+        print(f"\n[⚠️ RETRY] Judge failed on {doc_id} (Attempt {rs.attempt_number}/3). Error: {rs.outcome.exception()}")
+        
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=2, min=2, max=10), retry=retry_if_exception_type(Exception), reraise=True, before_sleep=log_retry)
+    async def call_api():
+        nonlocal accumulated_cost
+        response = await client.aio.models.generate_content(model=model_name, contents=prompt, config=gen_config)
+        if response.usage_metadata:
+            accumulated_cost += calculate_gemini_cost(model_name, response.usage_metadata)
+            
+        data = None
+        if response.text:
+            js = json.loads(response.text)
+            data = JudgeDiscoveryResult(**js)
+        return data
+
+    try:
+        data = await call_api()
+        return doc_id, data, accumulated_cost, len(extractions)
+    except Exception as e:
+        print(f"\n[🚨 FATAL] Judge fully failed on {doc_id} after 3 attempts. Error: {e}")
+        return doc_id, None, accumulated_cost, len(extractions)
+
+async def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-n", "--count", type=int, default=100, help="Number of random bronze threads to sample")
+    parser.add_argument("-m1", "--extractor-model", type=str, default="gemini-2.5-flash-lite", help="Model for pipeline extraction")
+    parser.add_argument("-t1", "--extractor-think", type=int, default=1024, help="Thinking tokens for extraction")
+    parser.add_argument("-m2", "--judge-model", type=str, default="gemini-2.5-flash", help="Model for Blind Judge")
+    parser.add_argument("-t2", "--judge-think", type=int, default=1024, help="Thinking tokens for Judge")
+    parser.add_argument("-v", "--verbose", action="store_true", help="Print all judge reasoning")
+    args = parser.parse_args()
+
+    print(f"--- Entity Discovery Phase 1 [ONLINE/SHADOW] Eval ---")
+    print(f"Sampling {args.count} real-world threads from Bronze layer.")
+    fixtures = get_random_bronze_threads(args.count)
+    if not fixtures:
+        print("Could not load any bronze threads.")
+        return
+
+    # PHASE 1: EXTRACTION
+    print(f"Firing Pipeline Extractor: {args.extractor_model} (Thinking: {args.extractor_think})")
+    start_t1 = time.time()
+    ext_tasks = [fetch_extraction(f, args.extractor_model, args.extractor_think) for f in fixtures]
+    ext_results = await tqdm.gather(*ext_tasks, desc="Extracting Entities")
+    ext_latency = time.time() - start_t1
+    
+    total_ext_cost = 0.0
+    for res in ext_results:
+        total_ext_cost += res[3]
+            
+    print(f"Extraction Pipeline Complete. Cost: ${total_ext_cost:.5f}. Latency: {ext_latency:.2f}s")
+    
+    # PHASE 2: BLIND JUDGE
+    print(f"\nFiring Blind QA Judge: {args.judge_model} (Thinking: {args.judge_think})")
+    start_t2 = time.time()
+    judge_tasks = [fetch_judgment(res[0], res[1], res[2], args.judge_model, args.judge_think) for res in ext_results]
+    judge_results = await tqdm.gather(*judge_tasks, desc="Judging Quality")
+    judge_latency = time.time() - start_t2
+    
+    total_judge_cost = 0.0
+    global_tp = 0
+    global_fp = 0
+    global_fn = 0
+    
+    for j_res in judge_results:
+        doc_id, judge_data, cost, ext_count = j_res
+        total_judge_cost += cost
+            
+        if judge_data:
+            thread_fp = len(judge_data.hallucinations)
+            thread_fn = len(judge_data.missed_brands)
+            thread_tp = max(0, ext_count - thread_fp)
+            
+            global_fp += thread_fp
+            global_fn += thread_fn
+            global_tp += thread_tp
+            
+            if args.verbose and (thread_fp > 0 or thread_fn > 0):
+                print(f"\n--- Thread {doc_id} Quality Report ---")
+                if judge_data.missed_brands:
+                    print(f"[MISS (FN)]: {judge_data.missed_brands}")
+                if judge_data.hallucinations:
+                    print(f"[HALLUCINATION (FP)]: {judge_data.hallucinations}")
+                print(f"Judge Reasoning: {judge_data.reasoning}")
+
+    precision = global_tp / (global_tp + global_fp) if (global_tp + global_fp) > 0 else 0
+    recall = global_tp / (global_tp + global_fn) if (global_tp + global_fn) > 0 else 0
+    f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
+    
+    print("\n--- RESULTS ONLINE/SHADOW (Blind Evaluation) ---")
+    print(f"Total Sample Size:  {len(judge_results)} Threads")
+    print(f"Entity QA F1-Score: {f1*100:.1f}%")
+    print(f"  QA Precision:     {precision*100:.1f}% (TP: {global_tp}, FP: {global_fp})")
+    print(f"  QA Recall:        {recall*100:.1f}% (TP: {global_tp}, FN: {global_fn})")
+    print(f"Extraction Cost:    ${total_ext_cost:.5f}")
+    print(f"QA Judge Cost:      ${total_judge_cost:.5f}")
+
+if __name__ == "__main__":
+    asyncio.run(main())
