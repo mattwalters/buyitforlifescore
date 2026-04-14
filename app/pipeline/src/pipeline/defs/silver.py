@@ -27,7 +27,6 @@ class SilverExtractionConfig(Config):
     limit: Optional[int] = None
     model: str = "gemini-2.5-flash-lite"
     thinking: Optional[str] = None
-    concurrency_limit: int = 20
 
 # --- PYDANTIC SCHEMA MAPPING --- 
 # This exactly matches your TypeScript THREAD_EXTRACTION_SCHEMA so Gemini returns identical JSON.
@@ -463,7 +462,8 @@ def silver_entity_extraction_payloads(context: AssetExecutionContext, config: Si
     items = df.to_dict('records')
     context.log.info(f"Processing {len(items)} entity extractions natively.")
     
-    semaphore = asyncio.Semaphore(config.concurrency_limit)
+    # Restrict to 10 concurrent requests to respect rate limits
+    semaphore = asyncio.Semaphore(10)
     
     # We must explicitly define the event loop runtime behavior for Dagster compatibility
     try:
