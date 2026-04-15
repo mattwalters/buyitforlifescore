@@ -6,7 +6,10 @@ from pipeline.utils.paths import get_read_path, get_write_path
 
 @asset(
     group_name="bronze",
-    description=(\n        \"Extract raw Reddit ZST dump and convert specifically the BuyItForLife \"\n        \"subreddit into highly optimized columnar Parquet.\"\n    ),
+    description=(
+        "Extract raw Reddit ZST dump and convert specifically the BuyItForLife "
+        "subreddit into highly optimized columnar Parquet."
+    ),
 )
 def bronze_reddit_buyitforlife_comments(context: AssetExecutionContext) -> MaterializeResult:
     source_zst = get_read_path("ore/reddit_buyitforlife_comments.zst")
