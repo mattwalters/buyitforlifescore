@@ -15,83 +15,79 @@ from google.genai import types
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
 from pipeline.prompts.judge_online_discovery import JudgeDiscoveryResult, get_blind_judge_discovery_prompt
-from pipeline.utils.db import get_duckdb_connection
-from pipeline.utils.llm import run_entity_discovery
+from pipeline.utils.db import load_bronze_threads_with_comments
+from pipeline.utils.llm import process_thread_discovery
+from pipeline.utils.metrics import calculate_eval_metrics
 from pipeline.utils.paths import get_read_path
 from pipeline.utils.pricing import calculate_gemini_cost
-from pipeline.utils.tree import build_comment_tree, build_content_blocks, chunk_branches
-
-# Max content blocks sent to the LLM per thread during eval (OP post + this many comments)
-_EVAL_MAX_BLOCKS = 12
 
 _judge_client = genai.Client()
 
 
 def get_random_bronze_threads(count: int, seed: int = 42) -> list[dict]:
+    """Loads random Bronze threads with their raw comment lists for evaluation.
+
+    Returns thread dicts with document_id, title, body, and the raw comments
+    list — the same shape the production pipeline receives from DuckDB.
+    """
     subs_path = get_read_path("bronze/reddit_buyitforlife_submissions.parquet")
     coms_path = get_read_path("bronze/reddit_buyitforlife_comments.parquet")
 
-    query = f"""
-        SELECT
-            s.id as document_id,
-            s.title,
-            s.selftext as body,
-            list({{\n                'id': c.id, 'parent_id': c.parent_id, 'body': c.body,\n                'author': c.author, 'created_utc': c.created_utc\n            }} ORDER BY c.created_utc ASC) as comments
-        FROM '{subs_path}' s
-        LEFT JOIN '{coms_path}' c ON c.link_id = 't3_' || s.id
-        WHERE s.score > 10
-        GROUP BY s.id, s.title, s.selftext
-        HAVING len(comments) > 5 AND len(comments) < 20
-        ORDER BY random()
-        LIMIT {count}
-    """
-
-    with get_duckdb_connection() as con:
-        # Note: setting deterministic seed if needed, but random() is fine for raw shadow testing
-        if seed:
-            con.execute(f"SELECT setseed({seed / 100.0})")
-        rows = con.execute(query).fetchall()
+    rows = load_bronze_threads_with_comments(
+        submissions_path=str(subs_path),
+        comments_path=str(coms_path),
+        where_clause="s.score > 10",
+        having_clause="len(comments) > 5 AND len(comments) < 20",
+        order_clause="random()",
+        limit=count,
+        seed=seed / 100.0 if seed else None,
+    )
 
     threads = []
     for row in rows:
-        doc_id, title, body, comments = row
-
-        # Build depth-first branch-aware content blocks
-        tree = build_comment_tree(comments or [], doc_id)
-        branch_chunks = chunk_branches(tree, max_chunk_size=20)
-
-        # Flatten all chunks into a single ordered list for the eval (we send the whole thread)
-        ordered_comments = []
-        for chunk in branch_chunks:
-            ordered_comments.extend(chunk)
-
-        blocks = build_content_blocks(
-            title=title,
-            body=body,
-            comments=ordered_comments,
-            max_blocks=_EVAL_MAX_BLOCKS,
+        doc_id, title, body, _created_utc, comments = row
+        threads.append(
+            {
+                "document_id": doc_id,
+                "title": title,
+                "body": body,
+                "comments": comments or [],
+            }
         )
-
-        threads.append({"document_id": doc_id, "content_blocks": blocks})
     return threads
 
 
-async def run_entity_discovery_eval(doc: dict, model_name: str, thinking: str | None, semaphore: asyncio.Semaphore):
-    """Thin wrapper around the shared run_entity_discovery for eval context."""
-    doc_id = doc["document_id"]
-    blocks_json = json.dumps(doc["content_blocks"], indent=2)
+async def run_thread_extraction(thread: dict, model_name: str, thinking: str | None, semaphore: asyncio.Semaphore):
+    """Runs the shared process_thread_discovery — identical to production."""
+    doc_id = thread["document_id"]
 
     try:
-        result = await run_entity_discovery(
-            content_blocks_json=blocks_json,
+        result = await process_thread_discovery(
+            submission_id=doc_id,
+            title=thread["title"],
+            body=thread["body"],
+            comments=thread["comments"],
             model_name=model_name,
-            thinking=str(thinking) if thinking else None,
             semaphore=semaphore,
+            thinking=thinking,
         )
-        return doc_id, blocks_json, result.items, result.cost
+
+        # Build the content_blocks_json from the first chunk payload for the judge
+        # (the judge needs to see the actual text the LLM saw)
+        all_blocks_json = "[]"
+        if result.chunk_payloads:
+            # Merge content blocks from all chunks for the judge's full view
+            all_blocks = []
+            for payload in result.chunk_payloads:
+                chunk_blocks = json.loads(payload["content_blocks_json"])
+                all_blocks.extend(chunk_blocks)
+            all_blocks_json = json.dumps(all_blocks, indent=2)
+
+        return doc_id, all_blocks_json, result.all_items, result.total_cost
+
     except Exception as e:
         print(f"\n[🚨 FATAL] Extraction fully failed on {doc_id} after 3 attempts. Error: {e}")
-        return doc_id, blocks_json, [], 0.0
+        return doc_id, "[]", [], 0.0
 
 
 async def fetch_judgment(doc_id: str, blocks_json: str, extractions: list[dict], model_name: str, thinking_tokens: int):
@@ -153,12 +149,12 @@ async def main():
         print("Could not load any bronze threads.")
         return
 
-    # PHASE 1: EXTRACTION
+    # PHASE 1: EXTRACTION (via shared process_thread_discovery — identical to production)
     semaphore = asyncio.Semaphore(10)
     print(f"Firing Pipeline Extractor: {args.extractor_model} (Thinking: {args.extractor_think})")
     start_t1 = time.time()
     ext_tasks = [
-        run_entity_discovery_eval(
+        run_thread_extraction(
             t, args.extractor_model, str(args.extractor_think) if args.extractor_think else None, semaphore
         )
         for t in threads
@@ -205,15 +201,13 @@ async def main():
                     print(f"[HALLUCINATION (FP)]: {judge_data.hallucinations}")
                 print(f"Judge Reasoning: {judge_data.reasoning}")
 
-    precision = global_tp / (global_tp + global_fp) if (global_tp + global_fp) > 0 else 0
-    recall = global_tp / (global_tp + global_fn) if (global_tp + global_fn) > 0 else 0
-    f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
+    m = calculate_eval_metrics(tp=global_tp, fp=global_fp, fn=global_fn)
 
     print("\n--- RESULTS ONLINE/SHADOW (Blind Evaluation) ---")
     print(f"Total Sample Size:  {len(judge_results)} Threads")
-    print(f"Entity QA F1-Score: {f1 * 100:.1f}%")
-    print(f"  QA Precision:     {precision * 100:.1f}% (TP: {global_tp}, FP: {global_fp})")
-    print(f"  QA Recall:        {recall * 100:.1f}% (TP: {global_tp}, FN: {global_fn})")
+    print(f"Entity QA F1-Score: {m.f1 * 100:.1f}%")
+    print(f"  QA Precision:     {m.precision * 100:.1f}% (TP: {m.tp}, FP: {m.fp})")
+    print(f"  QA Recall:        {m.recall * 100:.1f}% (TP: {m.tp}, FN: {m.fn})")
     print(f"Extraction Latency: {ext_latency:.2f}s")
     print(f"Judge Latency:      {judge_latency:.2f}s")
     print(f"Extraction Cost:    ${total_ext_cost:.5f}")

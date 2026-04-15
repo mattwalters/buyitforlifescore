@@ -1,6 +1,6 @@
 """Tests for pipeline.utils.tree — comment tree building and branch-aware chunking."""
 
-from pipeline.utils.tree import build_comment_tree, chunk_branches
+from pipeline.utils.tree import build_comment_tree, build_content_blocks, chunk_branches
 
 # ---- Helpers ----
 
@@ -145,3 +145,76 @@ class TestChunkBranches:
         assert len(chunks) == 2
         assert len(chunks[0]) == 4  # c1 + c2 branch
         assert len(chunks[1]) == 1  # c3
+
+
+# ---- build_content_blocks ----
+
+
+class TestBuildContentBlocks:
+    def test_op_block_is_first(self):
+        blocks = build_content_blocks(title="Best boots?", body="Looking for BIFL boots", comments=[])
+        assert len(blocks) == 1
+        assert blocks[0]["block_id"] == 0
+        assert blocks[0]["author_id"] == "OP"
+        assert "Best boots?" in blocks[0]["text"]
+        assert "Looking for BIFL boots" in blocks[0]["text"]
+
+    def test_none_body_handled(self):
+        blocks = build_content_blocks(title="Title", body=None, comments=[])
+        assert "Title" in blocks[0]["text"]
+
+    def test_comments_get_sequential_block_ids(self):
+        comments = [
+            {"id": "c1", "body": "Get Red Wings", "author": "alice", "created_utc": "2024-01-02"},
+            {"id": "c2", "body": "I prefer Danner", "author": "bob", "created_utc": "2024-01-03"},
+        ]
+        blocks = build_content_blocks(title="T", body="B", comments=comments)
+        assert [b["block_id"] for b in blocks] == [0, 1, 2]
+
+    def test_real_author_id_used(self):
+        comments = [{"id": "c1", "body": "Get Red Wings", "author": "alice", "created_utc": "2024-01-02"}]
+        blocks = build_content_blocks(title="T", body="B", comments=comments)
+        assert blocks[1]["author_id"] == "alice"
+
+    def test_missing_author_falls_back(self):
+        comments = [{"id": "c1", "body": "Some comment", "created_utc": "2024-01-02"}]
+        blocks = build_content_blocks(title="T", body="B", comments=comments)
+        assert blocks[1]["author_id"] == "anon_1"
+
+    def test_deleted_comments_skipped(self):
+        comments = [
+            {"id": "c1", "body": "[deleted]", "author": "alice", "created_utc": "2024-01-02"},
+            {"id": "c2", "body": "[removed]", "author": "bob", "created_utc": "2024-01-02"},
+            {"id": "c3", "body": "Still here", "author": "carol", "created_utc": "2024-01-02"},
+        ]
+        blocks = build_content_blocks(title="T", body="B", comments=comments)
+        assert len(blocks) == 2  # OP + carol only
+        assert blocks[1]["author_id"] == "carol"
+
+    def test_empty_body_comment_skipped(self):
+        comments = [
+            {"id": "c1", "body": "", "author": "alice", "created_utc": "2024-01-02"},
+            {"id": "c2", "body": "Real comment", "author": "bob", "created_utc": "2024-01-02"},
+        ]
+        blocks = build_content_blocks(title="T", body="B", comments=comments)
+        assert len(blocks) == 2  # OP + bob only
+
+    def test_include_op_false_skips_op_block(self):
+        comments = [{"id": "c1", "body": "A comment", "author": "alice", "created_utc": "2024-01-02"}]
+        blocks = build_content_blocks(title="T", body="B", comments=comments, include_op=False)
+        assert len(blocks) == 1
+        assert blocks[0]["author_id"] == "alice"
+        assert blocks[0]["block_id"] == 0
+
+    def test_max_blocks_cap(self):
+        comments = [
+            {"id": f"c{i}", "body": f"Comment {i}", "author": f"user{i}", "created_utc": "2024-01-02"}
+            for i in range(10)
+        ]
+        blocks = build_content_blocks(title="T", body="B", comments=comments, max_blocks=4)
+        assert len(blocks) == 4  # OP + 3 comments
+
+    def test_none_and_invalid_comments_skipped(self):
+        comments = [None, "not a dict", {"id": "c1", "body": "Valid", "author": "alice", "created_utc": "2024-01-02"}]
+        blocks = build_content_blocks(title="T", body="B", comments=comments)
+        assert len(blocks) == 2  # OP + alice only

@@ -12,28 +12,59 @@ import tqdm.asyncio
 # Allow import of the pipeline package
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from pipeline.utils.llm import run_entity_discovery
+from pipeline.utils.llm import process_thread_discovery
+from pipeline.utils.metrics import calculate_eval_metrics
 
 
 async def _extract_candidate(
     doc_id: str, content_blocks: list[dict], model_name: str, thinking: str | None, semaphore: asyncio.Semaphore
-) -> tuple[list[dict], float]:
-    """Thin wrapper around the shared run_entity_discovery for offline eval context."""
-    thread_text = json.dumps(content_blocks, indent=2)
+) -> tuple[list[dict], float, str | None]:
+    """Wrapper around the shared process_thread_discovery for offline eval context."""
+    title = ""
+    body = ""
+    comments = []
+
+    for b in content_blocks:
+        author = b.get("author_id", "")
+        text = b.get("text", "")
+
+        # In offline benchmarks, the OP block manually combined Title and Body.
+        # We parse it apart so process_thread_discovery can rebuild the tree naturally.
+        if str(author).lower() == "op" or b.get("block_id") == 0:
+            if text.startswith("Title: "):
+                try:
+                    title_part, body_part = text.split("\nBody: ", 1)
+                    title = title_part.replace("Title: ", "")
+                    body = body_part
+                except ValueError:
+                    body = text
+            else:
+                body = text
+        else:
+            comments.append({
+                "id": str(b.get("block_id", "")),
+                "parent_id": f"t3_{doc_id}",
+                "author": author,
+                "body": text,
+            })
 
     try:
-        result = await run_entity_discovery(
-            content_blocks_json=thread_text,
+        result = await process_thread_discovery(
+            submission_id=doc_id,
+            title=title,
+            body=body,
+            comments=comments,
             model_name=model_name,
-            thinking=thinking,
             semaphore=semaphore,
+            thinking=thinking,
         )
 
-        items = result.items
+        items = result.all_items
         for item in items:
             item["document_id"] = doc_id
 
-        return items, result.cost, None
+        err = "\n".join(result.errors) if result.errors else None
+        return items, result.total_cost, err
 
     except Exception as e:
         return [], 0.0, f"Skipping doc {doc_id} due to API Error: {e}"
@@ -44,26 +75,29 @@ def _norm(text: str) -> str:
 
 
 def _evaluate_doc(doc_id: str, expected_benchmark: list[dict], raw_doc_extractions: list[dict]):
-    expected_set = set(
+    expected_tuples = [
         (_norm(g.get("raw_mention", "")), g.get("author_id"), tuple(sorted(g.get("source_block_ids", []))))
         for g in expected_benchmark
-    )
-    extracted_set = set(
+    ]
+    extracted_tuples = [
         (_norm(ex.get("raw_mention", "")), ex.get("author_id"), tuple(sorted(ex.get("source_block_ids", []))))
         for ex in raw_doc_extractions
-    )
+    ]
 
-    matched_expected = set()
-    matched_extracted = set()
+    # 1-to-1 greedy matching: each expected item can only be consumed once.
+    # This prevents multiple extracted items from inflating TP via substring overlap.
+    remaining_expected = list(expected_tuples)
+    matched_count = 0
 
-    for exp in expected_set:
-        exp_mention, exp_author, exp_blocks = exp
-        if not exp_mention:
+    for ext in extracted_tuples:
+        ext_mention, ext_author, ext_blocks = ext
+        if not ext_mention:
             continue
 
-        for ext in extracted_set:
-            ext_mention, ext_author, ext_blocks = ext
-            if not ext_mention:
+        best_match_idx = None
+        for i, exp in enumerate(remaining_expected):
+            exp_mention, exp_author, exp_blocks = exp
+            if not exp_mention:
                 continue
 
             # Strict matching: string must be a substring match, author and block array must be exact matches.
@@ -72,15 +106,41 @@ def _evaluate_doc(doc_id: str, expected_benchmark: list[dict], raw_doc_extractio
                 and (exp_author == ext_author)
                 and (exp_blocks == ext_blocks)
             ):
-                matched_expected.add(exp)
-                matched_extracted.add(ext)
+                best_match_idx = i
+                break
 
-    missed = expected_set - matched_expected
-    hallucinations = extracted_set - matched_extracted
+        if best_match_idx is not None:
+            remaining_expected.pop(best_match_idx)
+            matched_count += 1
 
-    thread_tp = len(matched_expected)
-    thread_fp = len(hallucinations)
-    thread_fn = len(missed)
+    thread_tp = matched_count
+    thread_fn = len(remaining_expected)
+    thread_fp = len(extracted_tuples) - matched_count
+
+    missed = set((e[0], e[1], e[2]) for e in remaining_expected)
+    # Hallucinations are any extracted items that didn't match
+    hallucinations_list = []
+    remaining_expected_for_fp = list(expected_tuples)
+    for ext in extracted_tuples:
+        ext_mention, ext_author, ext_blocks = ext
+        if not ext_mention:
+            hallucinations_list.append(ext)
+            continue
+        found = False
+        for i, exp in enumerate(remaining_expected_for_fp):
+            exp_mention, exp_author, exp_blocks = exp
+            if (
+                (exp_mention in ext_mention or ext_mention in exp_mention)
+                and (exp_author == ext_author)
+                and (exp_blocks == ext_blocks)
+            ):
+                remaining_expected_for_fp.pop(i)
+                found = True
+                break
+        if not found:
+            hallucinations_list.append(ext)
+
+    hallucinations = set(hallucinations_list)
 
     return doc_id, missed, hallucinations, thread_tp, thread_fp, thread_fn
 
@@ -149,13 +209,11 @@ async def run_evaluation(model_name: str, thinking_budget: str | None, verbose: 
 
     # 3. METRICS
     print("\n--- RESULTS PHASE 1 (Entity Discovery) ---")
-    precision = tp / (tp + fp) if (tp + fp) > 0 else 0
-    recall = tp / (tp + fn) if (tp + fn) > 0 else 0
-    f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
+    m = calculate_eval_metrics(tp=tp, fp=fp, fn=fn)
 
-    print(f"Entity F1-Score:    {f1 * 100:.1f}%")
-    print(f"  Precision:        {precision * 100:.1f}% (TP: {tp}, FP: {fp})")
-    print(f"  Recall:           {recall * 100:.1f}% (TP: {tp}, FN: {fn})")
+    print(f"Entity F1-Score:    {m.f1 * 100:.1f}%")
+    print(f"  Precision:        {m.precision * 100:.1f}% (TP: {m.tp}, FP: {m.fp})")
+    print(f"  Recall:           {m.recall * 100:.1f}% (TP: {m.tp}, FN: {m.fn})")
     print(f"Total API Cost:     ${total_candidate_cost:.5f}")
 
 

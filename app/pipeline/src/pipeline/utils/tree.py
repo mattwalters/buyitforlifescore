@@ -80,12 +80,14 @@ def build_content_blocks(
     blocks: list[dict] = []
 
     if include_op:
-        blocks.append({
-            "block_id": 0,
-            "author_id": "OP",
-            "text": f"Title: {title}\nBody: {body or ''}",
-            "created_utc": created_utc,
-        })
+        blocks.append(
+            {
+                "block_id": 0,
+                "author_id": "OP",
+                "text": f"Title: {title}\nBody: {body or ''}",
+                "created_utc": created_utc,
+            }
+        )
 
     for comment in comments:
         if not comment or not isinstance(comment, dict):
@@ -94,16 +96,49 @@ def build_content_blocks(
         if not text or text in ("[deleted]", "[removed]"):
             continue
         block_id = len(blocks)
-        blocks.append({
-            "block_id": block_id,
-            "author_id": comment.get("author") or f"anon_{block_id}",
-            "text": text,
-            "created_utc": comment.get("created_utc"),
-        })
+        blocks.append(
+            {
+                "block_id": block_id,
+                "author_id": comment.get("author") or f"anon_{block_id}",
+                "text": text,
+                "created_utc": comment.get("created_utc"),
+            }
+        )
         if max_blocks and len(blocks) >= max_blocks:
             break
 
     return blocks
+
+
+def build_mention_context(
+    title: str,
+    body: str | None,
+    source_block_ids: list[int],
+    content_blocks: list[dict],
+) -> tuple[str, str]:
+    """
+    Resolves a discovered entity mention into the canonical (text, parent_text) pair
+    used by downstream LLM phases (triage, extraction).
+
+    This is the single source of truth for what those phases receive as context.
+    Both the production unnesting asset and any eval or test that reconstructs
+    mention inputs should call this — not assemble the strings inline.
+
+    Args:
+        title: Submission title.
+        body: Submission body (selftext). May be None.
+        source_block_ids: The block IDs flagged by discovery for this entity.
+        content_blocks: The full list of ContentBlock dicts for the chunk.
+
+    Returns:
+        (text, parent_text) where:
+          - text is the joined text of the source blocks, separated by "---"
+          - parent_text is "Title: ...\nBody: ..." for use as submission context
+    """
+    matched_texts = [b["text"] for bid in source_block_ids for b in content_blocks if b.get("block_id") == bid]
+    text = "\n\n---\n\n".join(matched_texts)
+    parent_text = f"Title: {title}\nBody: {body or ''}"
+    return text, parent_text
 
 
 def chunk_branches(tree: dict[str, list[dict]], max_chunk_size: int = 20) -> list[list[dict]]:

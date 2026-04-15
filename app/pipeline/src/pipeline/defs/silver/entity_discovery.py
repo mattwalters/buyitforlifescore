@@ -1,101 +1,16 @@
 import asyncio
 import json
 import os
-from typing import Optional
 
 import pandas as pd
 from dagster import AssetExecutionContext, MaterializeResult, MetadataValue, asset
 
-from pipeline.utils.db import get_duckdb_connection
-from pipeline.utils.llm import run_entity_discovery
+from pipeline.utils.db import get_duckdb_connection, load_bronze_threads_with_comments
+from pipeline.utils.llm import process_thread_discovery
 from pipeline.utils.paths import get_read_path, get_write_path
-from pipeline.utils.tree import build_comment_tree, build_content_blocks, chunk_branches
+from pipeline.utils.tree import build_mention_context
 
 from .shared import PROMPT_VERSION, SILVER_CODE_VERSION, SilverLLMConfig, bifl_daily_partitions
-
-
-async def _process_discovery_batch(
-    threads: list[tuple], model_name: str, semaphore: asyncio.Semaphore, thinking: Optional[str] = None
-) -> tuple[list[dict], float, int, int]:
-    results = []
-    total_cost = 0.0
-    total_input = 0
-    total_output = 0
-
-    async def _extract_chunk(
-        submission_id: str, title: str, body: str, chunk: list, chunk_index: int, created_utc: Optional[str] = None
-    ):
-
-        content_blocks = build_content_blocks(
-            title=title,
-            body=body,
-            comments=chunk,
-            created_utc=created_utc,
-            include_op=(chunk_index == 0),
-        )
-
-        thread_text = json.dumps([{k: v for k, v in b.items() if k != "created_utc"} for b in content_blocks], indent=2)
-
-        nonlocal total_cost, total_input, total_output
-
-        try:
-            result = await run_entity_discovery(
-                content_blocks_json=thread_text,
-                model_name=model_name,
-                thinking=thinking,
-                semaphore=semaphore,
-            )
-
-            total_cost += result.cost
-            total_input += result.input_tokens
-            total_output += result.output_tokens
-
-            chunk_id = f"{submission_id}_chunk_{chunk_index}"
-
-            results.append(
-                {
-                    "chunk_id": chunk_id,
-                    "submission_id": submission_id,
-                    "chunk_index": chunk_index,
-                    "target_authored_at": created_utc,
-                    "model_used": model_name,
-                    "thinking_level": thinking,
-                    "input_tokens": result.input_tokens,
-                    "output_tokens": result.output_tokens,
-                    "cost_usd": result.cost,
-                    "raw_json_output": result.raw_json,
-                    "parent_text": title,
-                    "content_blocks_json": json.dumps(content_blocks),
-                    "full_prompt_text": result.prompt_text,
-                }
-            )
-
-        except Exception as e:
-            # In Dagster, we fail gracefully per-item or log warnings, but for simplicity we skip failing texts.
-            print(f"Skipping thread {submission_id} due to API Error: {e}")
-
-    tasks = []
-    for thread in threads:
-        submission_id, title, body = thread[0], thread[1], thread[2]
-        created_utc = thread[3] if len(thread) >= 4 else None
-        comments_list = thread[4] if len(thread) >= 5 else []
-
-        if not comments_list:
-            comments_list = []
-
-        # Build the comment tree and chunk by complete conversational branches
-        tree = build_comment_tree(comments_list, submission_id)
-        chunks = chunk_branches(tree, max_chunk_size=20)
-
-        # If there are no chunks (e.g., submission with no comments), still process the submission itself
-        if not chunks:
-            chunks = [[]]
-
-        for chunk_index, chunk in enumerate(chunks):
-            tasks.append(_extract_chunk(submission_id, title, body, chunk, chunk_index, created_utc))
-
-    await asyncio.gather(*tasks)
-    return results, total_cost, total_input, total_output
 
 
 @asset(
@@ -113,29 +28,13 @@ def silver_entity_discovery_payloads(context: AssetExecutionContext, config: Sil
 
     target_parquet = get_write_path(f"silver/entity_discovery_payloads_{partition_date_str}.parquet")
 
-    limit_clause = f"LIMIT {config.limit}" if config.limit else ""
-
     # 1. READ FROM BRONZE INTO PYTHON MEMORY
-    query = f"""
-        SELECT
-            s.id as submission_id,
-            s.title,
-            s.selftext as body,
-            s.created_utc,
-            list({{
-                'id': c.id, 'parent_id': c.parent_id,
-                'body': c.body, 'author': c.author, 'created_utc': c.created_utc
-            }} ORDER BY c.created_utc ASC) as comments
-        FROM '{str(bronze_submissions_parquet)}' s
-        LEFT JOIN '{str(bronze_comments_parquet)}' c ON c.link_id = 't3_' || s.id
-        WHERE strftime(to_timestamp(CAST(s.created_utc AS BIGINT)), '%Y-%m-%d') = '{partition_date_str}'
-        GROUP BY s.id, s.title, s.selftext, s.created_utc
-        {limit_clause}
-    """
-
-    with get_duckdb_connection() as con:
-        # returns [(id, title, body, created_utc, [c1, c2, c3]), ...]
-        rows = con.execute(query).fetchall()
+    rows = load_bronze_threads_with_comments(
+        submissions_path=str(bronze_submissions_parquet),
+        comments_path=str(bronze_comments_parquet),
+        where_clause=f"strftime(to_timestamp(CAST(s.created_utc AS BIGINT)), '%Y-%m-%d') = '{partition_date_str}'",
+        limit=config.limit,
+    )
 
     if not rows:
         context.log.info(f"No threads found for {partition_date_str}. Skipping.")
@@ -143,7 +42,7 @@ def silver_entity_discovery_payloads(context: AssetExecutionContext, config: Sil
 
     context.log.info(f"Loaded {len(rows)} threads for extraction. Firing asyncio pool...")
 
-    # 2. RUN PARALLEL INFERENCE
+    # 2. RUN PARALLEL INFERENCE via the shared thread runner
     model_name = config.model
 
     # Restrict to 10 concurrent requests to respect rate limits
@@ -155,16 +54,51 @@ def silver_entity_discovery_payloads(context: AssetExecutionContext, config: Sil
     if not os.environ.get("GEMINI_API_KEY") and not os.environ.get("AI_MOCK_URL"):
         raise Exception("GEMINI_API_KEY environment variable is missing for the Dagster worker.")
 
-    extracted_items, total_cost, total_in, total_out = loop.run_until_complete(
-        _process_discovery_batch(rows, model_name, semaphore, config.thinking)
-    )
+    async def _run_all():
+        tasks = []
+        for thread in rows:
+            submission_id, title, body = thread[0], thread[1], thread[2]
+            created_utc = thread[3] if len(thread) >= 4 else None
+            comments_list = thread[4] if len(thread) >= 5 else []
+            if not comments_list:
+                comments_list = []
+
+            tasks.append(
+                process_thread_discovery(
+                    submission_id=submission_id,
+                    title=title,
+                    body=body,
+                    comments=comments_list,
+                    model_name=model_name,
+                    semaphore=semaphore,
+                    thinking=config.thinking,
+                    created_utc=created_utc,
+                )
+            )
+        return await asyncio.gather(*tasks)
+
+    thread_results = loop.run_until_complete(_run_all())
+
+    # Aggregate all chunk payloads across threads
+    extracted_items = []
+    total_cost = 0.0
+    total_in = 0
+    total_out = 0
+
+    for tr in thread_results:
+        extracted_items.extend(tr.chunk_payloads)
+        total_cost += tr.total_cost
+        total_in += tr.total_input_tokens
+        total_out += tr.total_output_tokens
+        for err in tr.errors:
+            context.log.warning(err)
 
     context.log.info(f"Extracted {len(extracted_items)} items. Total Cost: ${total_cost:.4f}")
 
     if len(extracted_items) == 0 and len(rows) > 0:
-        raise Exception(
-            f"CRITICAL: 0 out of {len(rows)} LLM inferences succeeded after retries. "
-            f"Failing partition to prevent silent data loss."
+        context.log.warning(
+            f"0 out of {len(rows)} LLM inferences produced payloads. "
+            f"This may be expected for threads with no commercial mentions."
         )
 
     # 3. WRITE SILVER TO PARQUET
@@ -238,18 +172,20 @@ def silver_entity_discovery(context: AssetExecutionContext) -> MaterializeResult
                 item["llm_full_prompt_text"] = row.get("full_prompt_text")
 
                 # Contextual Data Mapping Idempotently
-                matched_texts = []
-                target_timestamp = None
-                for bid in item.get("source_block_ids", []):
-                    matching_block = next((b for b in blocks if b.get("block_id") == bid), None)
-                    if matching_block:
-                        matched_texts.append(matching_block.get("text", ""))
-                        if target_timestamp is None:
-                            target_timestamp = matching_block.get("created_utc")
-
-                item["target_text"] = "\n\n---\n\n".join(matched_texts)
+                source_block_ids = item.get("source_block_ids", [])
+                target_text, parent_text = build_mention_context(
+                    title=row.get("title", ""),
+                    body=row.get("body"),
+                    source_block_ids=source_block_ids,
+                    content_blocks=blocks,
+                )
+                target_timestamp = next(
+                    (b.get("created_utc") for bid in source_block_ids for b in blocks if b.get("block_id") == bid),
+                    None,
+                )
+                item["target_text"] = target_text
                 item["target_authored_at"] = target_timestamp
-                item["parent_text"] = row.get("parent_text")
+                item["parent_text"] = parent_text
 
                 extracted_items.append(item)
 

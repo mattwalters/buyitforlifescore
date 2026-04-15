@@ -45,14 +45,22 @@ Respond exactly with the word MATCH or MISMATCH. Do not output anything else."""
             response = await _get_client().aio.models.generate_content(
                 model=AiModel.GEMINI_3_FLASH.value, contents=prompt, config=gen_config
             )
-            cost = calculate_gemini_cost(AiModel.GEMINI_3_FLASH.value, response.usage_metadata) if response.usage_metadata else 0.0
+            cost = (
+                calculate_gemini_cost(AiModel.GEMINI_3_FLASH.value, response.usage_metadata)
+                if response.usage_metadata
+                else 0.0
+            )
             return "MATCH" in (response.text or "").upper(), cost
         except Exception:
             return False, 0.0
 
 
 async def evaluate_extraction(
-    fixture, model_name: str, thinking: str | None, extraction_semaphore: asyncio.Semaphore, judge_semaphore: asyncio.Semaphore
+    fixture,
+    model_name: str,
+    thinking: str | None,
+    extraction_semaphore: asyncio.Semaphore,
+    judge_semaphore: asyncio.Semaphore,
 ):
     brand = fixture.get("brand")
     expected = fixture.get("expected", {})
@@ -157,7 +165,9 @@ async def run_evaluation(model_name: str, thinking_budget: str | None, verbose: 
 
     extraction_semaphore = asyncio.Semaphore(10)
     judge_semaphore = asyncio.Semaphore(5)
-    tasks = [evaluate_extraction(fix, model_name, thinking_budget, extraction_semaphore, judge_semaphore) for fix in fixtures]
+    tasks = [
+        evaluate_extraction(fix, model_name, thinking_budget, extraction_semaphore, judge_semaphore) for fix in fixtures
+    ]
     results = await tqdm.asyncio.tqdm.gather(*tasks, desc="Evaluating Extraction")
 
     total_tp = 0

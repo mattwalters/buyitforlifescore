@@ -8,9 +8,7 @@ class MentionItem(BaseModel):
     raw_mention: str = Field(
         description="The exact continuous text string highlighting the brand and product. (e.g. 'Sony Playstation 5' or 'darn tough socks' or 'lodge cast iron')"
     )
-    source_block_ids: list[int] = Field(
-        description="The list of block_ids where this author mentioned this product."
-    )
+    source_block_ids: list[int] = Field(description="The list of block_ids where this author mentioned this product.")
 
 
 def get_entity_discovery_prompt(thread_text: str) -> str:
