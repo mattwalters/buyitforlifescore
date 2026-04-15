@@ -7,19 +7,20 @@ from dagster import (
     MaterializeResult,
     MetadataValue,
     MultiPartitionsDefinition,
-    StaticPartitionsDefinition,
     asset,
 )
 from pydantic import TypeAdapter
 
+from pipeline.defs.partitions import subreddit_partitions
 from pipeline.schemas.chains import SilverChain
 from pipeline.utils.db import get_duckdb_connection
 from pipeline.utils.paths import get_read_path, get_write_path
 
+
 class SilverRedditChainsConfig(Config):
     validation_sample_size: Optional[int] = None
 
-subreddit_partitions = StaticPartitionsDefinition(["BuyItForLife"])
+
 date_partitions = DailyPartitionsDefinition(start_date="2011-01-01")
 
 chains_partitions_def = MultiPartitionsDefinition(
@@ -41,11 +42,13 @@ def silver_reddit_chains(context: AssetExecutionContext, config: SilverRedditCha
     date_key = partition_keys_dict["date"]
     subreddit_key = partition_keys_dict["subreddit"]
 
-    # Generate partitioned write path using Hive-style partitions
-    target_parquet = get_write_path(f"silver/chains/subreddit={subreddit_key}/date={date_key}/chains.parquet")
+    sub_lower = subreddit_key.lower()
 
-    source_submissions = get_read_path("bronze/reddit_buyitforlife_submissions.parquet")
-    source_comments = get_read_path("bronze/reddit_buyitforlife_comments.parquet")
+    # Generate partitioned write path using Hive-style partitions
+    target_parquet = get_write_path(f"silver/chains/subreddit={sub_lower}/date={date_key}/chains.parquet")
+
+    source_submissions = get_read_path(f"bronze/reddit_{sub_lower}_submissions.parquet")
+    source_comments = get_read_path(f"bronze/reddit_{sub_lower}_comments.parquet")
 
     # We use CAST(s.created_utc AS BIGINT) and to_timestamp to safely parse the Unix timestamp.
     query = f"""
@@ -60,7 +63,7 @@ def silver_reddit_chains(context: AssetExecutionContext, config: SilverRedditCha
                 CAST(s.name AS VARCHAR) AS current_node,
                 1 AS depth
             FROM read_parquet('{source_submissions}') s
-            WHERE s.subreddit = '{subreddit_key}'
+            WHERE lower(CAST(s.subreddit AS VARCHAR)) = '{sub_lower}'
             AND CAST(to_timestamp(CAST(s.created_utc AS BIGINT)) AS DATE) = CAST('{date_key}' AS DATE)
 
             UNION ALL
@@ -113,19 +116,21 @@ def silver_reddit_chains(context: AssetExecutionContext, config: SilverRedditCha
 
     with get_duckdb_connection() as con:
         con.execute(query)
-        
+
         # Pydantic Validation Gate
         if config.validation_sample_size is not None:
             context.log.info(f"Validating sample of {config.validation_sample_size} rows")
-            validation_df = con.execute(f"SELECT * FROM '{target_parquet}' LIMIT {config.validation_sample_size}").fetchdf()
+            validation_df = con.execute(
+                f"SELECT * FROM '{target_parquet}' LIMIT {config.validation_sample_size}"
+            ).fetchdf()
         else:
             context.log.info("Validating 100% of generated rows")
             validation_df = con.execute(f"SELECT * FROM '{target_parquet}'").fetchdf()
-            
-        records = validation_df.to_dict('records')
+
+        records = validation_df.to_dict("records")
         TypeAdapter(list[SilverChain]).validate_python(records)
         context.log.info("Schema validation strictly passed!")
-        
+
         preview_df = con.execute(f"SELECT * FROM '{target_parquet}' LIMIT 10").fetchdf()
         preview_md = preview_df.to_markdown()
 

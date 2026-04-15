@@ -1,23 +1,22 @@
 from dagster import AssetExecutionContext, MaterializeResult, MetadataValue, asset
 
+from pipeline.defs.partitions import subreddit_partitions
 from pipeline.utils.db import get_duckdb_connection
 from pipeline.utils.paths import get_read_path, get_write_path
 
 
 @asset(
     group_name="bronze",
-    description=(
-        "Extract raw Reddit ZST dump and convert specifically the BuyItForLife "
-        "subreddit into highly optimized columnar Parquet."
-    ),
+    partitions_def=subreddit_partitions,
+    description="Extract raw Reddit ZST dump for Comments and convert it into highly optimized columnar Parquet.",
 )
-def bronze_reddit_buyitforlife_comments(context: AssetExecutionContext) -> MaterializeResult:
-    source_zst = get_read_path("ore/reddit_buyitforlife_comments.zst")
-    target_parquet = get_write_path("bronze/reddit_buyitforlife_comments.parquet")
+def bronze_reddit_comments(context: AssetExecutionContext) -> MaterializeResult:
+    subreddit_key = context.partition_key.lower()
+    source_zst = get_read_path(f"ore/reddit_{subreddit_key}_comments.zst")
+    target_parquet = get_write_path(f"bronze/reddit_{subreddit_key}_comments.parquet")
 
     context.log.info(f"Connecting to DuckDB and reading from {source_zst}")
 
-    # and write to Parquet. DuckDB natively handles the zst decompression buffer.
     # We use sample_size=-1 to force DuckDB to scan the whole file to build the schema,
     # which prevents crashes if new keys (like 'likes') appear 200,000 rows deep.
     query = f"""
@@ -26,9 +25,6 @@ def bronze_reddit_buyitforlife_comments(context: AssetExecutionContext) -> Mater
         FROM read_json_auto('{source_zst}', compression='zstd', sample_size=-1)
     ) TO '{target_parquet}' (FORMAT PARQUET);
     """
-
-    # NOTE: In production you would probably add: WHERE subreddit = 'BuyItForLife'
-    # But since the file is literally named BuyItForLife_comments.zst, it's likely pre-filtered!
 
     with get_duckdb_connection() as con:
         context.log.info("Executing DuckDB COPY command...")
@@ -51,11 +47,13 @@ def bronze_reddit_buyitforlife_comments(context: AssetExecutionContext) -> Mater
 
 @asset(
     group_name="bronze",
+    partitions_def=subreddit_partitions,
     description="Extract raw Reddit ZST dump for Submissions and convert it into highly optimized columnar Parquet.",
 )
-def bronze_reddit_buyitforlife_submissions(context: AssetExecutionContext) -> MaterializeResult:
-    source_zst = get_read_path("ore/reddit_buyitforlife_submissions.zst")
-    target_parquet = get_write_path("bronze/reddit_buyitforlife_submissions.parquet")
+def bronze_reddit_submissions(context: AssetExecutionContext) -> MaterializeResult:
+    subreddit_key = context.partition_key.lower()
+    source_zst = get_read_path(f"ore/reddit_{subreddit_key}_submissions.zst")
+    target_parquet = get_write_path(f"bronze/reddit_{subreddit_key}_submissions.parquet")
 
     context.log.info(f"Connecting to DuckDB and reading from {source_zst}")
 
