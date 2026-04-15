@@ -11,12 +11,12 @@ from dagster import asset, MaterializeResult, AssetExecutionContext, MetadataVal
 from pipeline.utils.pricing import calculate_gemini_cost
 from pipeline.utils.paths import get_read_path, get_write_path
 from pipeline.utils.db import get_duckdb_connection
+from pipeline.utils.tree import build_comment_tree, chunk_branches
 
 from .shared import bifl_daily_partitions, SILVER_CODE_VERSION, PROMPT_VERSION, SilverLLMConfig
 from pipeline.prompts.entity_discovery import MentionItem, get_entity_discovery_prompt
 
 async def _process_discovery_batch(threads: list[tuple], model_name: str, semaphore: asyncio.Semaphore, thinking: Optional[str] = None) -> tuple[list[dict], float, int, int]:
-    import datetime
     client = genai.Client()
     results = []
     total_cost = 0.0
@@ -36,16 +36,15 @@ async def _process_discovery_batch(threads: list[tuple], model_name: str, semaph
                 "created_utc": created_utc
             })
             
-        if chunk:
-            for idx, c_obj in enumerate(chunk):
-                if c_obj and isinstance(c_obj, dict) and c_obj.get('body'):
-                    true_idx = (chunk_index * 10) + idx + 1
-                    content_blocks.append({
-                        "block_id": true_idx,
-                        "author_id": f"Commenter_{true_idx}",
-                        "text": c_obj['body'],
-                        "created_utc": c_obj.get('created_utc')
-                    })
+        for idx, c_obj in enumerate(chunk):
+            if c_obj and isinstance(c_obj, dict) and c_obj.get('body'):
+                block_id = len(content_blocks)
+                content_blocks.append({
+                    "block_id": block_id,
+                    "author_id": f"Commenter_{block_id}",
+                    "text": c_obj['body'],
+                    "created_utc": c_obj.get('created_utc')
+                })
                     
         thread_text = json.dumps([{k: v for k, v in b.items() if k != 'created_utc'} for b in content_blocks], indent=2)
 
@@ -130,7 +129,6 @@ async def _process_discovery_batch(threads: list[tuple], model_name: str, semaph
                 print(f"Skipping thread {submission_id} due to API Error: {e}")
 
     tasks = []
-    chunk_size = 10
     for thread in threads:
         submission_id, title, body = thread[0], thread[1], thread[2]
         created_utc = thread[3] if len(thread) >= 4 else None
@@ -138,9 +136,15 @@ async def _process_discovery_batch(threads: list[tuple], model_name: str, semaph
         
         if not comments_list:
             comments_list = []
-            
-        chunks = [comments_list[i:i + chunk_size] for i in range(0, max(1, len(comments_list)), chunk_size)]
-        
+
+        # Build the comment tree and chunk by complete conversational branches
+        tree = build_comment_tree(comments_list, submission_id)
+        chunks = chunk_branches(tree, max_chunk_size=20)
+
+        # If there are no chunks (e.g., submission with no comments), still process the submission itself
+        if not chunks:
+            chunks = [[]]
+
         for chunk_index, chunk in enumerate(chunks):
             tasks.append(_extract_chunk(submission_id, title, body, chunk, chunk_index, created_utc))
             
@@ -171,7 +175,7 @@ def silver_entity_discovery_payloads(context: AssetExecutionContext, config: Sil
             s.title, 
             s.selftext as body, 
             s.created_utc,
-            list({{'body': c.body, 'created_utc': c.created_utc}} ORDER BY c.created_utc ASC) as comments
+            list({{'id': c.id, 'parent_id': c.parent_id, 'body': c.body, 'created_utc': c.created_utc}} ORDER BY c.created_utc ASC) as comments
         FROM '{str(bronze_submissions_parquet)}' s
         LEFT JOIN '{str(bronze_comments_parquet)}' c ON c.link_id = 't3_' || s.id
         WHERE strftime(to_timestamp(CAST(s.created_utc AS BIGINT)), '%Y-%m-%d') = '{partition_date_str}'

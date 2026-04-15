@@ -13,7 +13,10 @@
     "expected_benchmark": [
       {
         "author_id": "op",
-        "raw_mention": "Vitamix blender"
+        "raw_mention": "Vitamix blender",
+        "source_block_ids": [
+          0
+        ]
       }
     ]
   },
@@ -44,7 +47,10 @@
     "expected_benchmark": [
       {
         "author_id": "user3",
-        "raw_mention": "darn tough socks"
+        "raw_mention": "darn tough socks",
+        "source_block_ids": [
+          0
+        ]
       }
     ]
   },
@@ -75,7 +81,10 @@
     "expected_benchmark": [
       {
         "author_id": "user5",
-        "raw_mention": "JBL Charge 4"
+        "raw_mention": "JBL Charge 4",
+        "source_block_ids": [
+          0
+        ]
       }
     ]
   },
@@ -93,11 +102,17 @@
     "expected_benchmark": [
       {
         "author_id": "user6",
-        "raw_mention": "Kirkland shirt"
+        "raw_mention": "Kirkland shirt",
+        "source_block_ids": [
+          0
+        ]
       },
       {
         "author_id": "user6",
-        "raw_mention": "Costco"
+        "raw_mention": "Costco",
+        "source_block_ids": [
+          0
+        ]
       }
     ]
   },
@@ -128,7 +143,10 @@
     "expected_benchmark": [
       {
         "author_id": "user8",
-        "raw_mention": "cadillac"
+        "raw_mention": "cadillac",
+        "source_block_ids": [
+          0
+        ]
       }
     ]
   },
@@ -146,11 +164,17 @@
     "expected_benchmark": [
       {
         "author_id": "user9",
-        "raw_mention": "Sony playstation"
+        "raw_mention": "Sony playstation",
+        "source_block_ids": [
+          0
+        ]
       },
       {
         "author_id": "user9",
-        "raw_mention": "LG tv"
+        "raw_mention": "LG tv",
+        "source_block_ids": [
+          0
+        ]
       }
     ]
   },
@@ -168,7 +192,10 @@
     "expected_benchmark": [
       {
         "author_id": "user10",
-        "raw_mention": "Patagonia"
+        "raw_mention": "Patagonia",
+        "source_block_ids": [
+          0
+        ]
       }
     ]
   },
@@ -211,7 +238,10 @@
     "expected_benchmark": [
       {
         "author_id": "op",
-        "raw_mention": "Dr. Tung's Tongue Cleaner"
+        "raw_mention": "Dr. Tung's Tongue Cleaner",
+        "source_block_ids": [
+          0
+        ]
       }
     ]
   },
@@ -254,15 +284,25 @@
     "expected_benchmark": [
       {
         "author_id": "op",
-        "raw_mention": "Dickies jacket"
+        "raw_mention": "Dickies jacket",
+        "source_block_ids": [
+          0
+        ]
       },
       {
         "author_id": "VeggieRedneck",
-        "raw_mention": "Dickies"
+        "raw_mention": "Dickies",
+        "source_block_ids": [
+          5
+        ]
       },
       {
         "author_id": "VeggieRedneck",
-        "raw_mention": "Walmart"
+        "raw_mention": "Walmart",
+        "source_block_ids": [
+          3,
+          5
+        ]
       }
     ]
   },
@@ -305,27 +345,45 @@
     "expected_benchmark": [
       {
         "author_id": "aazav",
-        "raw_mention": "Chippewa's"
+        "raw_mention": "Chippewa's",
+        "source_block_ids": [
+          2
+        ]
       },
       {
         "author_id": "nickalltogether",
-        "raw_mention": "Chippewas"
+        "raw_mention": "Chippewas",
+        "source_block_ids": [
+          4
+        ]
       },
       {
         "author_id": "beepbeepitsajeep",
-        "raw_mention": "Iron Rangers"
+        "raw_mention": "Iron Rangers",
+        "source_block_ids": [
+          5
+        ]
       },
       {
         "author_id": "beepbeepitsajeep",
-        "raw_mention": "L.L. Bean Katahdin Engineer"
+        "raw_mention": "L.L. Bean Katahdin Engineer",
+        "source_block_ids": [
+          5
+        ]
       },
       {
         "author_id": "beepbeepitsajeep",
-        "raw_mention": "Red Wing Iron Ranger"
+        "raw_mention": "Red Wing Iron Ranger",
+        "source_block_ids": [
+          5
+        ]
       },
       {
         "author_id": "beepbeepitsajeep",
-        "raw_mention": "Red Wing Roughnecks"
+        "raw_mention": "Red Wing Roughnecks",
+        "source_block_ids": [
+          5
+        ]
       }
     ]
   },
@@ -368,35 +426,59 @@
     "expected_benchmark": [
       {
         "author_id": "BoilerButtSlut",
-        "raw_mention": "Bosch"
+        "raw_mention": "Bosch",
+        "source_block_ids": [
+          1
+        ]
       },
       {
         "author_id": "BoilerButtSlut",
-        "raw_mention": "Mieles"
+        "raw_mention": "Mieles",
+        "source_block_ids": [
+          1
+        ]
       },
       {
         "author_id": "MalagrugrousPatroon",
-        "raw_mention": "LG washers"
+        "raw_mention": "LG washers",
+        "source_block_ids": [
+          2
+        ]
       },
       {
         "author_id": "MalagrugrousPatroon",
-        "raw_mention": "LG driers"
+        "raw_mention": "LG driers",
+        "source_block_ids": [
+          2
+        ]
       },
       {
         "author_id": "MalagrugrousPatroon",
-        "raw_mention": "Samsung fridges"
+        "raw_mention": "Samsung fridges",
+        "source_block_ids": [
+          2
+        ]
       },
       {
         "author_id": "MalagrugrousPatroon",
-        "raw_mention": "Miele"
+        "raw_mention": "Miele",
+        "source_block_ids": [
+          2
+        ]
       },
       {
         "author_id": "MalagrugrousPatroon",
-        "raw_mention": "Sub-zero fridges"
+        "raw_mention": "Sub-zero fridges",
+        "source_block_ids": [
+          2
+        ]
       },
       {
         "author_id": "[deleted]",
-        "raw_mention": "Miele"
+        "raw_mention": "Miele",
+        "source_block_ids": [
+          5
+        ]
       }
     ]
   },
@@ -477,43 +559,73 @@
     "expected_benchmark": [
       {
         "author_id": "op",
-        "raw_mention": "Zeiss"
+        "raw_mention": "Zeiss",
+        "source_block_ids": [
+          0
+        ]
       },
       {
         "author_id": "WestTexasOilman",
-        "raw_mention": "Zeiss"
+        "raw_mention": "Zeiss",
+        "source_block_ids": [
+          1
+        ]
       },
       {
         "author_id": "WestTexasOilman",
-        "raw_mention": "Swarovski"
+        "raw_mention": "Swarovski",
+        "source_block_ids": [
+          1
+        ]
       },
       {
         "author_id": "WestTexasOilman",
-        "raw_mention": "Leica"
+        "raw_mention": "Leica",
+        "source_block_ids": [
+          1
+        ]
       },
       {
         "author_id": "Pms9691",
-        "raw_mention": "Nikon"
+        "raw_mention": "Nikon",
+        "source_block_ids": [
+          2
+        ]
       },
       {
         "author_id": "Pms9691",
-        "raw_mention": "Monarch 7's"
+        "raw_mention": "Monarch 7's",
+        "source_block_ids": [
+          2
+        ]
       },
       {
         "author_id": "oculus_dexter",
-        "raw_mention": "Zeiss"
+        "raw_mention": "Zeiss",
+        "source_block_ids": [
+          3
+        ]
       },
       {
         "author_id": "oculus_dexter",
-        "raw_mention": "Nikon"
+        "raw_mention": "Nikon",
+        "source_block_ids": [
+          3
+        ]
       },
       {
         "author_id": "bquinlan",
-        "raw_mention": "Zeiss"
+        "raw_mention": "Zeiss",
+        "source_block_ids": [
+          4
+        ]
       },
       {
         "author_id": "bquinlan",
-        "raw_mention": "MiniQuick monocular"
+        "raw_mention": "MiniQuick monocular",
+        "source_block_ids": [
+          4
+        ]
       }
     ]
   },
@@ -556,35 +668,59 @@
     "expected_benchmark": [
       {
         "author_id": "op",
-        "raw_mention": "Icebreaker"
+        "raw_mention": "Icebreaker",
+        "source_block_ids": [
+          0
+        ]
       },
       {
         "author_id": "vanslem6",
-        "raw_mention": "Meriwool"
+        "raw_mention": "Meriwool",
+        "source_block_ids": [
+          3
+        ]
       },
       {
         "author_id": "vanslem6",
-        "raw_mention": "Merinotech"
+        "raw_mention": "Merinotech",
+        "source_block_ids": [
+          3
+        ]
       },
       {
         "author_id": "vanslem6",
-        "raw_mention": "Minus33"
+        "raw_mention": "Minus33",
+        "source_block_ids": [
+          3
+        ]
       },
       {
         "author_id": "halifaxbc",
-        "raw_mention": "Icebreaker"
+        "raw_mention": "Icebreaker",
+        "source_block_ids": [
+          5
+        ]
       },
       {
         "author_id": "op",
-        "raw_mention": "Temu"
+        "raw_mention": "Temu",
+        "source_block_ids": [
+          0
+        ]
       },
       {
         "author_id": "godofpumpkins",
-        "raw_mention": "Zoneknit"
+        "raw_mention": "Zoneknit",
+        "source_block_ids": [
+          4
+        ]
       },
       {
         "author_id": "halifaxbc",
-        "raw_mention": "Costco"
+        "raw_mention": "Costco",
+        "source_block_ids": [
+          5
+        ]
       }
     ]
   },
@@ -627,23 +763,38 @@
     "expected_benchmark": [
       {
         "author_id": "op",
-        "raw_mention": "Doc Martens"
+        "raw_mention": "Doc Martens",
+        "source_block_ids": [
+          0
+        ]
       },
       {
         "author_id": "aka_wolfman",
-        "raw_mention": "Docs"
+        "raw_mention": "Docs",
+        "source_block_ids": [
+          2
+        ]
       },
       {
         "author_id": "darkestb4thedonald",
-        "raw_mention": "docs"
+        "raw_mention": "docs",
+        "source_block_ids": [
+          4
+        ]
       },
       {
         "author_id": "darkestb4thedonald",
-        "raw_mention": "solovair"
+        "raw_mention": "solovair",
+        "source_block_ids": [
+          4
+        ]
       },
       {
         "author_id": "alabama_batman",
-        "raw_mention": "Solovair"
+        "raw_mention": "Solovair",
+        "source_block_ids": [
+          5
+        ]
       }
     ]
   },
@@ -686,83 +837,143 @@
     "expected_benchmark": [
       {
         "author_id": "op",
-        "raw_mention": "Rickshaw bags"
+        "raw_mention": "Rickshaw bags",
+        "source_block_ids": [
+          0
+        ]
       },
       {
         "author_id": "op",
-        "raw_mention": "Mission Workshop bag"
+        "raw_mention": "Mission Workshop bag",
+        "source_block_ids": [
+          0
+        ]
       },
       {
         "author_id": "op",
-        "raw_mention": "GoRuck bag"
+        "raw_mention": "GoRuck bag",
+        "source_block_ids": [
+          0
+        ]
       },
       {
         "author_id": "AlwaysSmokeYourPush",
-        "raw_mention": "rickshaw"
+        "raw_mention": "rickshaw",
+        "source_block_ids": [
+          1
+        ]
       },
       {
         "author_id": "AlwaysSmokeYourPush",
-        "raw_mention": "Burro bags"
+        "raw_mention": "Burro bags",
+        "source_block_ids": [
+          1
+        ]
       },
       {
         "author_id": "Joe_poww",
-        "raw_mention": "Rickshaw"
+        "raw_mention": "Rickshaw",
+        "source_block_ids": [
+          2
+        ]
       },
       {
         "author_id": "Joe_poww",
-        "raw_mention": "mission workshop"
+        "raw_mention": "mission workshop",
+        "source_block_ids": [
+          2
+        ]
       },
       {
         "author_id": "Austinquick",
-        "raw_mention": "rickshaw bag"
+        "raw_mention": "rickshaw bag",
+        "source_block_ids": [
+          3
+        ]
       },
       {
         "author_id": "robscomputer",
-        "raw_mention": "Rickshaw"
+        "raw_mention": "Rickshaw",
+        "source_block_ids": [
+          4
+        ]
       },
       {
         "author_id": "robscomputer",
-        "raw_mention": "Chrome"
+        "raw_mention": "Chrome",
+        "source_block_ids": [
+          4
+        ]
       },
       {
         "author_id": "robscomputer",
-        "raw_mention": "Timbuk2"
+        "raw_mention": "Timbuk2",
+        "source_block_ids": [
+          4
+        ]
       },
       {
         "author_id": "timoni",
-        "raw_mention": "Rickshaw"
+        "raw_mention": "Rickshaw",
+        "source_block_ids": [
+          5
+        ]
       },
       {
         "author_id": "timoni",
-        "raw_mention": "Chrome"
+        "raw_mention": "Chrome",
+        "source_block_ids": [
+          5
+        ]
       },
       {
         "author_id": "timoni",
-        "raw_mention": "Crumpler"
+        "raw_mention": "Crumpler",
+        "source_block_ids": [
+          5
+        ]
       },
       {
         "author_id": "timoni",
-        "raw_mention": "Re:Load"
+        "raw_mention": "Re:Load",
+        "source_block_ids": [
+          5
+        ]
       },
       {
         "author_id": "timoni",
-        "raw_mention": "Vaya"
+        "raw_mention": "Vaya",
+        "source_block_ids": [
+          5
+        ]
       },
       {
         "author_id": "timoni",
-        "raw_mention": "Mission workshop bag"
+        "raw_mention": "Mission workshop bag",
+        "source_block_ids": [
+          5
+        ]
       },
       {
         "author_id": "timoni",
-        "raw_mention": "MW"
+        "raw_mention": "MW",
+        "source_block_ids": [
+          5
+        ]
       },
       {
         "author_id": "robscomputer",
-        "raw_mention": "YKK zippers"
+        "raw_mention": "YKK zippers",
+        "source_block_ids": [
+          4
+        ]
       },
       {
         "author_id": "robscomputer",
-        "raw_mention": "Commuter 2.0 bag"
+        "raw_mention": "Commuter 2.0 bag",
+        "source_block_ids": [
+          4
+        ]
       }
     ]
   },
@@ -805,27 +1016,112 @@
     "expected_benchmark": [
       {
         "author_id": "op",
-        "raw_mention": "NB"
+        "raw_mention": "NB",
+        "source_block_ids": [
+          0
+        ]
       },
       {
         "author_id": "op",
-        "raw_mention": "Merrell"
+        "raw_mention": "Merrell",
+        "source_block_ids": [
+          0
+        ]
       },
       {
         "author_id": "op",
-        "raw_mention": "Dansko"
+        "raw_mention": "Dansko",
+        "source_block_ids": [
+          0
+        ]
       },
       {
         "author_id": "op",
-        "raw_mention": "Brooks"
+        "raw_mention": "Brooks",
+        "source_block_ids": [
+          0
+        ]
       },
       {
         "author_id": "ROBWBEARD1",
-        "raw_mention": "Thorogood moccasin toed boots"
+        "raw_mention": "Thorogood moccasin toed boots",
+        "source_block_ids": [
+          1
+        ]
       },
       {
         "author_id": "zleuth",
-        "raw_mention": "Clarks"
+        "raw_mention": "Clarks",
+        "source_block_ids": [
+          4
+        ]
+      }
+    ]
+  },
+  {
+    "document": {
+      "document_id": "synth_trap_01",
+      "content_blocks": [
+        {
+          "block_id": 0,
+          "author_id": "op",
+          "text": "What do you all think of good winter socks?"
+        },
+        {
+          "block_id": 1,
+          "author_id": "user_a",
+          "text": "I really like my Smartwool."
+        },
+        {
+          "block_id": 2,
+          "author_id": "sneaky_user",
+          "text": "Honestly, I used to wear those, but Darn Tough is better."
+        },
+        {
+          "block_id": 3,
+          "author_id": "user_b",
+          "text": "Icebreaker makes good shirts, not sure about socks."
+        },
+        {
+          "block_id": 4,
+          "author_id": "sneaky_user",
+          "text": "Yeah, regarding Darn Tough, they have an amazing warranty."
+        },
+        {
+          "block_id": 5,
+          "author_id": "op",
+          "text": "Thanks!"
+        },
+        {
+          "block_id": 6,
+          "author_id": "sneaky_user",
+          "text": "No problem! I own 10 pairs of Darn Tough myself."
+        }
+      ]
+    },
+    "expected_benchmark": [
+      {
+        "author_id": "user_a",
+        "raw_mention": "Smartwool",
+        "source_block_ids": [
+          1
+        ]
+      },
+      {
+        "author_id": "sneaky_user",
+        "raw_mention": "Darn Tough",
+        "source_block_ids": [
+          2,
+          4,
+          6
+        ]
+      },
+      {
+        "author_id": "user_b",
+        "raw_mention": "Icebreaker",
+        "source_block_ids": [
+          3
+        ]
       }
     ]
   }

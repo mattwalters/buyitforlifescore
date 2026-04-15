@@ -117,18 +117,22 @@ async def run_evaluation(model_name: str, thinking_budget: str | None, verbose: 
         def norm(text):
             return re.sub(r'[^\w\s]', '', text.lower()).strip()
             
-        expected_set = set(norm(g.get('raw_mention', '')) for g in expected_benchmark)
-        extracted_set = set(norm(ex.get('raw_mention', '')) for ex in raw_doc_extractions)
-        
-        expected_set.discard('')
-        extracted_set.discard('')
+        expected_set = set((norm(g.get('raw_mention', '')), g.get('author_id'), tuple(sorted(g.get('source_block_ids', [])))) for g in expected_benchmark)
+        extracted_set = set((norm(ex.get('raw_mention', '')), ex.get('author_id'), tuple(sorted(ex.get('source_block_ids', [])))) for ex in raw_doc_extractions)
         
         matched_expected = set()
         matched_extracted = set()
         
         for exp in expected_set:
+            exp_mention, exp_author, exp_blocks = exp
+            if not exp_mention: continue
+            
             for ext in extracted_set:
-                if exp in ext or ext in exp:
+                ext_mention, ext_author, ext_blocks = ext
+                if not ext_mention: continue
+                
+                # Strict matching: String must be a substring match, author and block array must be EXCACA matches.
+                if (exp_mention in ext_mention or ext_mention in exp_mention) and (exp_author == ext_author) and (exp_blocks == ext_blocks):
                     matched_expected.add(exp)
                     matched_extracted.add(ext)
         
@@ -155,9 +159,9 @@ async def run_evaluation(model_name: str, thinking_budget: str | None, verbose: 
             if thread_fp > 0 or thread_fn > 0:
                 print(f"\n--- Document {doc_id} Mismatches ---")
             for h in hallucinations:
-                print(f"[HALLUCINATION (FP)]: {h}")
+                print(f"[HALLUCINATION (FP)]: Brand '{h[0]}' (Author: {h[1]}, Blocks: {list(h[2])})")
             for m in missed:
-                print(f"[MISS (FN)]: {m}")
+                print(f"[MISS (FN)]: Brand '{m[0]}' (Author: {m[1]}, Blocks: {list(m[2])})")
 
     # 3. METRICS
     print("\n--- RESULTS PHASE 1 (Entity Discovery) ---")

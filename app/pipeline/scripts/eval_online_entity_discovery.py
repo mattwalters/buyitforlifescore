@@ -17,6 +17,7 @@ from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_excep
 
 from pipeline.utils.db import get_duckdb_connection
 from pipeline.utils.paths import get_read_path
+from pipeline.utils.tree import build_comment_tree, chunk_branches
 
 from pipeline.prompts.entity_discovery import get_entity_discovery_prompt, MentionItem
 from pipeline.prompts.judge_online_discovery import get_blind_judge_discovery_prompt, JudgeDiscoveryResult
@@ -30,7 +31,7 @@ def get_random_bronze_threads(count: int, seed: int = 42) -> list[dict]:
             s.id as document_id, 
             s.title, 
             s.selftext as body, 
-            list({{'id': c.id, 'body': c.body, 'author': c.author}} ORDER BY c.created_utc ASC) as comments
+            list({{'id': c.id, 'parent_id': c.parent_id, 'body': c.body, 'author': c.author, 'created_utc': c.created_utc}} ORDER BY c.created_utc ASC) as comments
         FROM '{subs_path}' s
         LEFT JOIN '{coms_path}' c ON c.link_id = 't3_' || s.id
         WHERE s.score > 10
@@ -49,6 +50,16 @@ def get_random_bronze_threads(count: int, seed: int = 42) -> list[dict]:
     fixtures = []
     for row in rows:
         doc_id, title, body, comments = row
+        
+        # Build depth-first branch-aware content blocks
+        tree = build_comment_tree(comments or [], doc_id)
+        branch_chunks = chunk_branches(tree, max_chunk_size=20)
+        
+        # Flatten all chunks into a single ordered list for the eval (we send the whole thread)
+        ordered_comments = []
+        for chunk in branch_chunks:
+            ordered_comments.extend(chunk)
+        
         blocks = []
         blocks.append({
             "block_id": 0,
@@ -56,16 +67,15 @@ def get_random_bronze_threads(count: int, seed: int = 42) -> list[dict]:
             "text": f"Title: {title}\nBody: {body}"
         })
         
-        c_count = 1
-        for c in comments:
+        for c in ordered_comments:
             if c.get("body") and c.get("body") not in ("[deleted]", "[removed]"):
+                block_id = len(blocks)
                 blocks.append({
-                    "block_id": c_count,
+                    "block_id": block_id,
                     "author_id": c.get("author", "commenter"),
                     "text": c.get("body")
                 })
-                c_count += 1
-                if c_count > 10: break # Keep it somewhat bounded for rapid eval
+                if len(blocks) > 11: break  # Keep it somewhat bounded for rapid eval
                 
         fixtures.append({
             "document_id": doc_id,
@@ -99,8 +109,8 @@ async def fetch_extraction(doc: dict, model_name: str, thinking_tokens: int):
             accumulated_cost += calculate_gemini_cost(model_name, response.usage_metadata)
             
         items = json.loads(response.text) if response.text else []
-        raw_mentions = [item.get('raw_mention', '') for item in items if isinstance(item, dict)]
-        return raw_mentions
+        extracted_dicts = [item for item in items if isinstance(item, dict)]
+        return extracted_dicts
     
     try:
         raw_mentions = await call_api()
@@ -109,7 +119,7 @@ async def fetch_extraction(doc: dict, model_name: str, thinking_tokens: int):
         print(f"\n[🚨 FATAL] Extraction fully failed on {doc_id} after 3 attempts. Error: {e}")
         return doc_id, blocks_json, [], accumulated_cost
 
-async def fetch_judgment(doc_id: str, blocks_json: str, extractions: list[str], model_name: str, thinking_tokens: int):
+async def fetch_judgment(doc_id: str, blocks_json: str, extractions: list[dict], model_name: str, thinking_tokens: int):
     prompt = get_blind_judge_discovery_prompt(blocks_json, extractions)
     
     client = genai.Client()
