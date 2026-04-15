@@ -48,7 +48,7 @@ def silver_entity_extraction_eval(context, config: ExtractionEvalConfig) -> Mate
                 extractions_for_judge.extend(items)
             elif isinstance(items, dict) and items:
                 extractions_for_judge.append(items)
-        except:
+        except Exception:
             pass
 
     num_samples = len(extractions_for_judge)

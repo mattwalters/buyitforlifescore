@@ -33,7 +33,8 @@ async def semantically_equivalent(client, expected: str, actual: str, field: str
         return True, 0.0
 
     prompt = f"""You are a strict data-science judge.
-Determine if the 'Actual' unstructured string semantically means the exact same core concept as the 'Expected' benchmark for the field '{field}'.
+Determine if the 'Actual' unstructured string semantically means the exact same
+core concept as the 'Expected' benchmark for the field '{field}'.
 Ignore differences in capitalization, punctuation, trailing words, or grammatical tense.
 Focus strictly on the underlying subject matter.
 
@@ -52,7 +53,7 @@ Respond exactly with the word MATCH or MISMATCH. Do not output anything else."""
             if response.usage_metadata:
                 cost = calculate_gemini_cost(AiModel.GEMINI_3_FLASH.value, response.usage_metadata)
             return "MATCH" in (response.text or "").upper(), cost
-        except:
+        except Exception:
             return False, 0.0
 
 
