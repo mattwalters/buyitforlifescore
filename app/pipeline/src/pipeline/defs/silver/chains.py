@@ -1,7 +1,7 @@
 import hashlib
 from collections import defaultdict
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Any, Optional
 
 import pandas as pd
 from dagster import (
@@ -37,7 +37,9 @@ chains_partitions_def = MultiPartitionsDefinition(
 )
 
 
-def build_thread_chains(submissions: list[dict], comments: list[dict]) -> list[dict]:
+def build_thread_chains(
+    submissions: list[dict[str, Any]], comments: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
     # Group comments by link_id (submission)
     comments_by_sub = defaultdict(list)
     for c in comments:
@@ -56,23 +58,20 @@ def build_thread_chains(submissions: list[dict], comments: list[dict]) -> list[d
         for c in sub_comments:
             children_map[c["parent_id"]].append(c)
 
-        # Helper for DFS
-        def build_paths(current_node_id, current_path):
-            children = children_map.get(current_node_id, [])
+        # Use an iterative stack for DFS to prevent recursion limit errors on deep trees
+        stack = [(sub_node_id, [sub_node_id])]
+        while stack:
+            curr_node, curr_path = stack.pop()
+            children = children_map.get(curr_node, [])
             if not children:
                 # Leaf node, save the path
-                path_str = str(current_path)
+                path_str = ",".join(curr_path)
                 # Ensure a stable deterministic hash mimicking DuckDB's hash functionality
                 chain_id = str(int(hashlib.sha256(path_str.encode("utf-8")).hexdigest()[:15], 16))
-                all_chains.append({"submission_id": sub_id, "chain_id": chain_id, "path": list(current_path)})
+                all_chains.append({"submission_id": sub_id, "chain_id": chain_id, "path": curr_path})
             else:
                 for child in children:
-                    current_path.append(child["reddit_node_id"])
-                    build_paths(child["reddit_node_id"], current_path)
-                    current_path.pop()
-
-        # Start recursive path building from the submission root
-        build_paths(sub_node_id, [sub_node_id])
+                    stack.append((child["reddit_node_id"], curr_path + [child["reddit_node_id"]]))
 
     # Now flatten paths into sequence items to match schema and assign is_canonical
     silver_chain_records = []
@@ -186,7 +185,7 @@ def silver_reddit_chains(context: AssetExecutionContext, config: SilverRedditCha
     context.log.info("Schema validation strictly passed!")
 
     # Write back to Parquet via DuckDB
-    output_df = pd.DataFrame(records)  # noqa: F841
+    output_df = pd.DataFrame(records, columns=list(SilverChain.model_fields.keys()))  # noqa: F841
     with get_duckdb_connection() as con:
         # Load into duckdb and export to partitioned parquet file
         con.execute(f"COPY (SELECT * FROM output_df) TO '{target_parquet}' (FORMAT PARQUET)")
