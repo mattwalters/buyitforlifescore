@@ -18,7 +18,7 @@ from dagster import (
 from pydantic import TypeAdapter
 
 from pipeline.defs.partitions import subreddit_partitions
-from pipeline.schemas.chains import SilverChain
+from pipeline.schemas.chains import BronzeComment, BronzeSubmission, SilverChain
 from pipeline.utils.db import get_duckdb_connection
 from pipeline.utils.paths import get_read_path, get_write_path
 
@@ -139,6 +139,9 @@ def silver_reddit_chains(context: AssetExecutionContext, config: SilverRedditCha
     sub_query = f"""
         SELECT
             CAST(s.id AS VARCHAR) AS submission_id,
+            CAST(s.id AS VARCHAR) AS id,
+            COALESCE(CAST(s.name AS VARCHAR), 't3_' || CAST(s.id AS VARCHAR)) AS name,
+            CAST(s.created_utc AS BIGINT) AS created_utc,
             COALESCE(CAST(s.name AS VARCHAR), 't3_' || CAST(s.id AS VARCHAR)) AS reddit_node_id,
             CAST(s.subreddit AS VARCHAR) AS subreddit
         FROM read_parquet('{source_submissions}') s
@@ -153,6 +156,9 @@ def silver_reddit_chains(context: AssetExecutionContext, config: SilverRedditCha
         )
         SELECT
             CAST(c.id AS VARCHAR) AS comment_id,
+            CAST(c.id AS VARCHAR) AS id,
+            COALESCE(CAST(c.name AS VARCHAR), 't1_' || CAST(c.id AS VARCHAR)) AS name,
+            CAST(c.created_utc AS BIGINT) AS created_utc,
             COALESCE(CAST(c.name AS VARCHAR), 't1_' || CAST(c.id AS VARCHAR)) AS reddit_node_id,
             trim(CAST(c.parent_id AS VARCHAR), '"') AS parent_id,
             trim(CAST(c.link_id AS VARCHAR), '"') AS link_id,
@@ -172,6 +178,16 @@ def silver_reddit_chains(context: AssetExecutionContext, config: SilverRedditCha
 
     submissions = submissions_df.to_dict("records")
     comments = comments_df.to_dict("records")
+
+    # Bronze Payload Validation Gate
+    if config.validation_sample_size is not None:
+        context.log.info(f"Validating upstream sample of {config.validation_sample_size} rows")
+        TypeAdapter(list[BronzeSubmission]).validate_python(submissions[: config.validation_sample_size])
+        TypeAdapter(list[BronzeComment]).validate_python(comments[: config.validation_sample_size])
+    else:
+        context.log.info("Validating 100% of upstream rows")
+        TypeAdapter(list[BronzeSubmission]).validate_python(submissions)
+        TypeAdapter(list[BronzeComment]).validate_python(comments)
 
     records = build_thread_chains(submissions, comments)
 
