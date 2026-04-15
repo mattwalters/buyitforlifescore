@@ -10,28 +10,34 @@ def test_duckdb_recursive_chain_logic():
 
     con.execute("""
     CREATE TABLE submissions (id VARCHAR, name VARCHAR, subreddit VARCHAR, created_utc BIGINT);
-    CREATE TABLE comments (id VARCHAR, name VARCHAR, parent_id VARCHAR, subreddit VARCHAR, created_utc BIGINT);
+    CREATE TABLE comments (id VARCHAR, name VARCHAR, parent_id VARCHAR, link_id VARCHAR, subreddit VARCHAR, created_utc BIGINT);
 
     INSERT INTO submissions VALUES
     ('S1', 't3_S1', 'buyitforlife', 1600000000);
 
     INSERT INTO comments VALUES
-    ('C1', 't1_C1', '"t3_S1"', 'buyitforlife', 1600000010),
-    ('C2', 't1_C2', '"t1_C1"', 'buyitforlife', 1600000020),
-    ('C3', 't1_C3', '"t3_S1"', 'buyitforlife', 1600000030);
+    ('C1', 't1_C1', '"t3_S1"', '"t3_S1"', 'buyitforlife', 1600000010),
+    ('C2', 't1_C2', '"t1_C1"', '"t3_S1"', 'buyitforlife', 1600000020),
+    ('C3', 't1_C3', '"t3_S1"', '"t3_S1"', 'buyitforlife', 1600000030);
     """)
 
     query = """
-    WITH RECURSIVE chains AS (
+    WITH RECURSIVE target_submissions AS (
         SELECT s.id AS submission_id, COALESCE(s.name, 't3_' || s.id) AS reddit_node_id, s.subreddit,
                [COALESCE(s.name, 't3_' || s.id)] AS path_nodes, COALESCE(s.name, 't3_' || s.id) AS current_node, 1 AS depth
         FROM submissions s WHERE lower(s.subreddit) = 'buyitforlife'
+    ), target_comments AS (
+        SELECT c.* FROM comments c
+        SEMI JOIN target_submissions s ON trim(c.link_id, '"') = s.reddit_node_id
+    ), 
+    chains AS (
+        SELECT * FROM target_submissions
         UNION ALL
         SELECT p.submission_id, COALESCE(c.name, 't1_' || c.id) AS reddit_node_id, c.subreddit,
                list_append(p.path_nodes, COALESCE(c.name, 't1_' || c.id)) AS path_nodes, COALESCE(c.name, 't1_' || c.id) AS current_node, p.depth + 1 AS depth
-        FROM comments c JOIN chains p ON trim(c.parent_id, '"') = p.current_node
+        FROM target_comments c JOIN chains p ON trim(c.parent_id, '"') = p.current_node
     ), leaf_nodes AS (
-        SELECT c.* FROM chains c LEFT JOIN comments child ON trim(child.parent_id, '"') = c.current_node
+        SELECT c.* FROM chains c LEFT JOIN target_comments child ON trim(child.parent_id, '"') = c.current_node
         WHERE child.name IS NULL
     ), unnested_paths AS (
         SELECT
@@ -77,8 +83,8 @@ def test_silver_reddit_chains_execution(monkeypatch, tmp_path):
 
         COPY sub TO '{bronze_dir}/reddit_buyitforlife_submissions.parquet' (FORMAT PARQUET);
 
-        CREATE TABLE com (id VARCHAR, name VARCHAR, parent_id VARCHAR, subreddit VARCHAR, created_utc BIGINT);
-        INSERT INTO com VALUES ('mock_c1', 't1_mock', '"t3_mock"', 'buyitforlife', 1293840050);
+        CREATE TABLE com (id VARCHAR, name VARCHAR, parent_id VARCHAR, link_id VARCHAR, subreddit VARCHAR, created_utc BIGINT);
+        INSERT INTO com VALUES ('mock_c1', 't1_mock', '"t3_mock"', '"t3_mock"', 'buyitforlife', 1293840050);
 
         COPY com TO '{bronze_dir}/reddit_buyitforlife_comments.parquet' (FORMAT PARQUET);
     """)

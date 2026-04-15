@@ -53,8 +53,7 @@ def silver_reddit_chains(context: AssetExecutionContext, config: SilverRedditCha
     # We use CAST(s.created_utc AS BIGINT) and to_timestamp to safely parse the Unix timestamp.
     query = f"""
     COPY (
-        WITH RECURSIVE
-        chains AS (
+        WITH RECURSIVE target_submissions AS (
             SELECT
                 CAST(s.id AS VARCHAR) AS submission_id,
                 COALESCE(CAST(s.name AS VARCHAR), 't3_' || CAST(s.id AS VARCHAR)) AS reddit_node_id,
@@ -65,6 +64,15 @@ def silver_reddit_chains(context: AssetExecutionContext, config: SilverRedditCha
             FROM read_parquet('{source_submissions}') s
             WHERE lower(CAST(s.subreddit AS VARCHAR)) = '{sub_lower}'
             AND CAST(to_timestamp(CAST(s.created_utc AS BIGINT)) AS DATE) = CAST('{date_key}' AS DATE)
+        ),
+        target_comments AS (
+            SELECT c.*
+            FROM read_parquet('{source_comments}') c
+            SEMI JOIN target_submissions s 
+              ON trim(CAST(c.link_id AS VARCHAR), '"') = s.reddit_node_id
+        ),
+        chains AS (
+            SELECT * FROM target_submissions
 
             UNION ALL
 
@@ -75,13 +83,13 @@ def silver_reddit_chains(context: AssetExecutionContext, config: SilverRedditCha
                 list_append(p.path_nodes, COALESCE(CAST(c.name AS VARCHAR), 't1_' || CAST(c.id AS VARCHAR))) AS path_nodes,
                 COALESCE(CAST(c.name AS VARCHAR), 't1_' || CAST(c.id AS VARCHAR)) AS current_node,
                 p.depth + 1 AS depth
-            FROM read_parquet('{source_comments}') c
+            FROM target_comments c
             JOIN chains p ON trim(CAST(c.parent_id AS VARCHAR), '"') = p.current_node
         ),
         leaf_nodes AS (
             SELECT c.*
             FROM chains c
-            LEFT JOIN read_parquet('{source_comments}') child
+            LEFT JOIN target_comments child
               ON trim(CAST(child.parent_id AS VARCHAR), '"') = c.current_node
             WHERE child.name IS NULL
         ),
