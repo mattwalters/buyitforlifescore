@@ -1,12 +1,15 @@
+from datetime import datetime, timezone
 from typing import Optional
 
 from dagster import (
+    AssetDep,
     AssetExecutionContext,
     Config,
     DailyPartitionsDefinition,
     MaterializeResult,
     MetadataValue,
     MultiPartitionsDefinition,
+    MultiToSingleDimensionPartitionMapping,
     asset,
 )
 from pydantic import TypeAdapter
@@ -35,6 +38,16 @@ chains_partitions_def = MultiPartitionsDefinition(
     group_name="silver",
     partitions_def=chains_partitions_def,
     description="Extract isolated linear paths from the Reddit submission-comment trees.",
+    deps=[
+        AssetDep(
+            "bronze_reddit_submissions",
+            partition_mapping=MultiToSingleDimensionPartitionMapping(partition_dimension_name="subreddit"),
+        ),
+        AssetDep(
+            "bronze_reddit_comments",
+            partition_mapping=MultiToSingleDimensionPartitionMapping(partition_dimension_name="subreddit"),
+        ),
+    ],
 )
 def silver_reddit_chains(context: AssetExecutionContext, config: SilverRedditChainsConfig) -> MaterializeResult:
     # 1. Get partition keys
@@ -43,6 +56,12 @@ def silver_reddit_chains(context: AssetExecutionContext, config: SilverRedditCha
     subreddit_key = partition_keys_dict["subreddit"]
 
     sub_lower = subreddit_key.lower()
+
+    # Calculate partition boundaries for DuckDB Parquet metadata pushdown
+    dt = datetime.strptime(date_key, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+    start_utc = int(dt.timestamp())
+    end_utc = start_utc + 86400
+    cutoff_utc = start_utc + (45 * 86400) # 45 day comment window
 
     # Generate partitioned write path using Hive-style partitions
     target_parquet = get_write_path(f"silver/chains/subreddit={sub_lower}/date={date_key}/chains.parquet")
@@ -63,13 +82,16 @@ def silver_reddit_chains(context: AssetExecutionContext, config: SilverRedditCha
                 1 AS depth
             FROM read_parquet('{source_submissions}') s
             WHERE lower(CAST(s.subreddit AS VARCHAR)) = '{sub_lower}'
-            AND CAST(to_timestamp(CAST(s.created_utc AS BIGINT)) AS DATE) = CAST('{date_key}' AS DATE)
+            AND CAST(s.created_utc AS BIGINT) >= {start_utc}
+            AND CAST(s.created_utc AS BIGINT) < {end_utc}
         ),
         target_comments AS (
             SELECT c.*
             FROM read_parquet('{source_comments}') c
             SEMI JOIN target_submissions s 
               ON trim(CAST(c.link_id AS VARCHAR), '"') = s.reddit_node_id
+            WHERE CAST(c.created_utc AS BIGINT) >= {start_utc}
+            AND CAST(c.created_utc AS BIGINT) < {cutoff_utc}
         ),
         chains AS (
             SELECT * FROM target_submissions
