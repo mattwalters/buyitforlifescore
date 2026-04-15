@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 # --- Extraction Schema ---
 
 
-class MentionItem(BaseModel):
+class EntityDiscovery(BaseModel):
     author_id: str = Field(description="The unique author identifier from the ContentBlock.")
     raw_mention: str = Field(
         description="The exact continuous text string highlighting the brand and product. (e.g. 'Sony Playstation 5' or 'darn tough socks' or 'lodge cast iron')"

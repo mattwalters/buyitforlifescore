@@ -37,22 +37,19 @@ def test_silver_entity_extraction_payloads_success(mocker, tmp_path):
         ]
     )
 
-    # 4. Mock the LLM API (Google GenAI)
-    mock_genai_client = mocker.patch("pipeline.defs.silver.entity_extraction.genai.Client")
-    mock_api_call = mocker.AsyncMock()
-
-    fake_response = MagicMock()
-    fake_response.text = json.dumps(
-        {"sentiment": "positive", "lifespan_years": 10, "quality_attributes": ["warm", "durable"]}
+    # 4. Mock the LLM API call via the shared module
+    from pipeline.utils.llm import ExtractionResult
+    mock_run_extraction = mocker.patch("pipeline.defs.silver.entity_extraction.run_entity_extraction", new_callable=mocker.AsyncMock)
+    
+    fake_result = ExtractionResult(
+        payload={"sentiment": "positive", "lifespan_years": 10, "quality_attributes": ["warm", "durable"]},
+        raw_json='{"sentiment": "positive", "lifespan_years": 10, "quality_attributes": ["warm", "durable"]}',
+        cost=0.005,
+        input_tokens=150,
+        output_tokens=20,
+        prompt_text="fake prompt"
     )
-
-    # Use SimpleNamespace to support dot-notation logic
-    fake_response.usage_metadata = SimpleNamespace(
-        prompt_token_count=150, candidates_token_count=20, cached_content_token_count=0, thoughts_token_count=0
-    )
-
-    mock_api_call.return_value = fake_response
-    mock_genai_client.return_value.aio.models.generate_content = mock_api_call
+    mock_run_extraction.return_value = fake_result
 
     # 5. Build context & Config
     context = build_asset_context(partition_key="2024-01-01")
@@ -66,7 +63,7 @@ def test_silver_entity_extraction_payloads_success(mocker, tmp_path):
     assert mock_conn.execute.call_count >= 2
 
     # Verify the LLM was called exactly once for our one simulated row
-    assert mock_api_call.call_count == 1
+    assert mock_run_extraction.call_count == 1
 
     # Asset primitive metadata
     assert result.metadata["payloads_processed"] == 1

@@ -15,7 +15,7 @@ from google import genai
 from google.genai import types
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
-from pipeline.prompts.entity_discovery import MentionItem, get_entity_discovery_prompt
+from pipeline.prompts.entity_discovery import EntityDiscovery, get_entity_discovery_prompt
 from pipeline.prompts.entity_extraction import EntityExtraction, get_extraction_prompt
 from pipeline.prompts.entity_triage import TriageDecision, get_entity_triage_prompt
 from pipeline.utils.pricing import calculate_gemini_cost
@@ -222,7 +222,7 @@ async def run_entity_discovery(
 
     gen_config = types.GenerateContentConfig(
         response_mime_type="application/json",
-        response_schema=list[MentionItem],
+        response_schema=list[EntityDiscovery],
         temperature=0.1,
     )
     apply_thinking_config(gen_config, thinking)

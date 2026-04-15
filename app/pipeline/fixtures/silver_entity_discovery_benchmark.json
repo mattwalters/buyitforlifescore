@@ -2,17 +2,13 @@
   {
     "document": {
       "document_id": "synth_01",
-      "content_blocks": [
-        {
-          "block_id": 0,
-          "author_id": "op",
-          "text": "I bought a Vitamix blender yesterday."
-        }
-      ]
+      "title": "",
+      "body": "I bought a Vitamix blender yesterday.",
+      "comments": []
     },
     "expected_benchmark": [
       {
-        "author_id": "op",
+        "author_id": "OP",
         "raw_mention": "Vitamix blender",
         "source_block_ids": [
           0
@@ -23,30 +19,22 @@
   {
     "document": {
       "document_id": "synth_02",
-      "content_blocks": [
-        {
-          "block_id": 0,
-          "author_id": "user2",
-          "text": "Are BIFL wallets really worth it?"
-        }
-      ]
+      "title": "",
+      "body": "Are BIFL wallets really worth it?",
+      "comments": []
     },
     "expected_benchmark": []
   },
   {
     "document": {
       "document_id": "synth_03",
-      "content_blocks": [
-        {
-          "block_id": 0,
-          "author_id": "user3",
-          "text": "just got some darn tough socks"
-        }
-      ]
+      "title": "",
+      "body": "just got some darn tough socks",
+      "comments": []
     },
     "expected_benchmark": [
       {
-        "author_id": "user3",
+        "author_id": "OP",
         "raw_mention": "darn tough socks",
         "source_block_ids": [
           0
@@ -57,30 +45,22 @@
   {
     "document": {
       "document_id": "synth_04",
-      "content_blocks": [
-        {
-          "block_id": 0,
-          "author_id": "user4",
-          "text": "Looking for a solid teak desk for my office."
-        }
-      ]
+      "title": "",
+      "body": "Looking for a solid teak desk for my office.",
+      "comments": []
     },
     "expected_benchmark": []
   },
   {
     "document": {
       "document_id": "synth_05",
-      "content_blocks": [
-        {
-          "block_id": 0,
-          "author_id": "user5",
-          "text": "How do I replace the battery in my JBL Charge 4? It keeps dying after 10 minutes."
-        }
-      ]
+      "title": "",
+      "body": "How do I replace the battery in my JBL Charge 4? It keeps dying after 10 minutes.",
+      "comments": []
     },
     "expected_benchmark": [
       {
-        "author_id": "user5",
+        "author_id": "OP",
         "raw_mention": "JBL Charge 4",
         "source_block_ids": [
           0
@@ -91,24 +71,20 @@
   {
     "document": {
       "document_id": "synth_06",
-      "content_blocks": [
-        {
-          "block_id": 0,
-          "author_id": "user6",
-          "text": "Bought a Kirkland shirt at Costco today."
-        }
-      ]
+      "title": "",
+      "body": "Bought a Kirkland shirt at Costco today.",
+      "comments": []
     },
     "expected_benchmark": [
       {
-        "author_id": "user6",
+        "author_id": "OP",
         "raw_mention": "Kirkland shirt",
         "source_block_ids": [
           0
         ]
       },
       {
-        "author_id": "user6",
+        "author_id": "OP",
         "raw_mention": "Costco",
         "source_block_ids": [
           0
@@ -119,30 +95,22 @@
   {
     "document": {
       "document_id": "synth_07",
-      "content_blocks": [
-        {
-          "block_id": 0,
-          "author_id": "user7",
-          "text": "I need a car or maybe a reliable sedan."
-        }
-      ]
+      "title": "",
+      "body": "I need a car or maybe a reliable sedan.",
+      "comments": []
     },
     "expected_benchmark": []
   },
   {
     "document": {
       "document_id": "synth_08",
-      "content_blocks": [
-        {
-          "block_id": 0,
-          "author_id": "user8",
-          "text": "This pan is the cadillac of toasters."
-        }
-      ]
+      "title": "",
+      "body": "This pan is the cadillac of toasters.",
+      "comments": []
     },
     "expected_benchmark": [
       {
-        "author_id": "user8",
+        "author_id": "OP",
         "raw_mention": "cadillac",
         "source_block_ids": [
           0
@@ -153,24 +121,20 @@
   {
     "document": {
       "document_id": "synth_09",
-      "content_blocks": [
-        {
-          "block_id": 0,
-          "author_id": "user9",
-          "text": "Sony playstation versus LG tv"
-        }
-      ]
+      "title": "",
+      "body": "Sony playstation versus LG tv",
+      "comments": []
     },
     "expected_benchmark": [
       {
-        "author_id": "user9",
+        "author_id": "OP",
         "raw_mention": "Sony playstation",
         "source_block_ids": [
           0
         ]
       },
       {
-        "author_id": "user9",
+        "author_id": "OP",
         "raw_mention": "LG tv",
         "source_block_ids": [
           0
@@ -181,17 +145,13 @@
   {
     "document": {
       "document_id": "synth_10",
-      "content_blocks": [
-        {
-          "block_id": 0,
-          "author_id": "user10",
-          "text": "Just thinking about Patagonia."
-        }
-      ]
+      "title": "",
+      "body": "Just thinking about Patagonia.",
+      "comments": []
     },
     "expected_benchmark": [
       {
-        "author_id": "user10",
+        "author_id": "OP",
         "raw_mention": "Patagonia",
         "source_block_ids": [
           0
@@ -202,42 +162,44 @@
   {
     "document": {
       "document_id": "2czu3j",
-      "content_blocks": [
+      "title": "Dr. Tung's Tongue Cleaner, Stainless Steel",
+      "body": "",
+      "comments": [
         {
-          "block_id": 0,
-          "author_id": "op",
-          "text": "Title: Dr. Tung's Tongue Cleaner, Stainless Steel\nBody: "
+          "id": "1",
+          "parent_id": "t3_2czu3j",
+          "author": "TallahasseWaffleHous",
+          "body": "I've been using an over-sized zip-tie for a few years.  50 cents."
         },
         {
-          "block_id": 1,
-          "author_id": "TallahasseWaffleHous",
-          "text": "I've been using an over-sized zip-tie for a few years.  50 cents."
+          "id": "2",
+          "parent_id": "t3_2czu3j",
+          "author": "Onimal",
+          "body": "Now that's frugal."
         },
         {
-          "block_id": 2,
-          "author_id": "Onimal",
-          "text": "Now that's frugal."
+          "id": "3",
+          "parent_id": "t3_2czu3j",
+          "author": "dopperpod",
+          "body": "Nah. [Go with copper](http://goo.gl/9Jg8QW)."
         },
         {
-          "block_id": 3,
-          "author_id": "dopperpod",
-          "text": "Nah. [Go with copper](http://goo.gl/9Jg8QW)."
+          "id": "4",
+          "parent_id": "t3_2czu3j",
+          "author": "naltsta",
+          "body": "Can't you just brush it with your tooth brush?"
         },
         {
-          "block_id": 4,
-          "author_id": "naltsta",
-          "text": "Can't you just brush it with your tooth brush?"
-        },
-        {
-          "block_id": 5,
-          "author_id": "aazav",
-          "text": "Just use the bottom of your top front teeth.  \n\nStick your tongue out.  Push it up against the top of your teeth.  Pull back.\n\nWipe the slime off with your forefinger.\n\nWash your forefinger.\n\nHow is this  so hard that a special device is needed?"
+          "id": "5",
+          "parent_id": "t3_2czu3j",
+          "author": "aazav",
+          "body": "Just use the bottom of your top front teeth.  \n\nStick your tongue out.  Push it up against the top of your teeth.  Pull back.\n\nWipe the slime off with your forefinger.\n\nWash your forefinger.\n\nHow is this  so hard that a special device is needed?"
         }
       ]
     },
     "expected_benchmark": [
       {
-        "author_id": "op",
+        "author_id": "OP",
         "raw_mention": "Dr. Tung's Tongue Cleaner",
         "source_block_ids": [
           0
@@ -248,42 +210,44 @@
   {
     "document": {
       "document_id": "ah45g1",
-      "content_blocks": [
+      "title": "Dickies jacket I bought about 15 years ago. Been scorched, ripped, wet, dirty, washed, dried several times. The snap buttons still all works perfectly and it will still keep you warn in negative temperatures.",
+      "body": "",
+      "comments": [
         {
-          "block_id": 0,
-          "author_id": "op",
-          "text": "Title: Dickies jacket I bought about 15 years ago. Been scorched, ripped, wet, dirty, washed, dried several times. The snap buttons still all works perfectly and it will still keep you warn in negative temperatures.\nBody: "
+          "id": "1",
+          "parent_id": "t3_ah45g1",
+          "author": "Nothivemindedatall",
+          "body": "Thank you for posting this. \n\nI have bought cheap ass jackets like this from walmart for years. (I personally hate a lightweight jacket that does not have the slippy inner liner) They quit selling them. So, your my timely hero! I dont have to google “slippery jacket liners.” \n\nEdit: just went shopping. There are reviews about the pockets being too far back and uncomfortable. Thats is the same issue with my current old walmart jacket. No way am i going to pay twice as much for less quality. I use my pockets daily and i ahve a bad collar bone. So sad. Im off to google more ....if i dont find comprable, i may settle tho. They look nice."
         },
         {
-          "block_id": 1,
-          "author_id": "Nothivemindedatall",
-          "text": "Thank you for posting this. \n\nI have bought cheap ass jackets like this from walmart for years. (I personally hate a lightweight jacket that does not have the slippy inner liner) They quit selling them. So, your my timely hero! I dont have to google \u201cslippery jacket liners.\u201d \n\nEdit: just went shopping. There are reviews about the pockets being too far back and uncomfortable. Thats is the same issue with my current old walmart jacket. No way am i going to pay twice as much for less quality. I use my pockets daily and i ahve a bad collar bone. So sad. Im off to google more ....if i dont find comprable, i may settle tho. They look nice."
+          "id": "2",
+          "parent_id": "t3_ah45g1",
+          "author": "highpass21",
+          "body": "This thing with a good sweater is all I use year-round, they're super cheap too.\n\nDon't buy the one with zippers there not quite the same and there's something I really like about ripping my jacket off when I'm in a hurry. "
         },
         {
-          "block_id": 2,
-          "author_id": "highpass21",
-          "text": "This thing with a good sweater is all I use year-round, they're super cheap too.\n\nDon't buy the one with zippers there not quite the same and there's something I really like about ripping my jacket off when I'm in a hurry. "
+          "id": "3",
+          "parent_id": "t3_ah45g1",
+          "author": "VeggieRedneck",
+          "body": "I go through a couple of these a year, but wear them every day.  They certainly aren't buy it for life, and I'm convinced they sell inferior versions to Walmart.  The snaps aren't the same and don't last as long. "
         },
         {
-          "block_id": 3,
-          "author_id": "VeggieRedneck",
-          "text": "I go through a couple of these a year, but wear them every day.  They certainly aren't buy it for life, and I'm convinced they sell inferior versions to Walmart.  The snaps aren't the same and don't last as long. "
+          "id": "4",
+          "parent_id": "t3_ah45g1",
+          "author": "highpass21",
+          "body": "It is possible the quality went way down in the last 15 years.. "
         },
         {
-          "block_id": 4,
-          "author_id": "highpass21",
-          "text": "It is possible the quality went way down in the last 15 years.. "
-        },
-        {
-          "block_id": 5,
-          "author_id": "VeggieRedneck",
-          "text": "I've been wearing these for over 20 years, and yes the quality has gone down.  However, I was gifted one from Walmart at the same time I bought one from the Dickies store, and the snaps were different.  That sweater is already wearing out and the buttons don't stay closed, but the the one from the Dickie's store is fine.\n\nTo be fair, I'm very hard on these jackets.  The collars and cuffs usually wear out first.  "
+          "id": "5",
+          "parent_id": "t3_ah45g1",
+          "author": "VeggieRedneck",
+          "body": "I've been wearing these for over 20 years, and yes the quality has gone down.  However, I was gifted one from Walmart at the same time I bought one from the Dickies store, and the snaps were different.  That sweater is already wearing out and the buttons don't stay closed, but the the one from the Dickie's store is fine.\n\nTo be fair, I'm very hard on these jackets.  The collars and cuffs usually wear out first.  "
         }
       ]
     },
     "expected_benchmark": [
       {
-        "author_id": "op",
+        "author_id": "OP",
         "raw_mention": "Dickies jacket",
         "source_block_ids": [
           0
@@ -309,36 +273,38 @@
   {
     "document": {
       "document_id": "7edpwl",
-      "content_blocks": [
+      "title": "Boots built right.",
+      "body": "",
+      "comments": [
         {
-          "block_id": 0,
-          "author_id": "op",
-          "text": "Title: Boots built right.\nBody: "
+          "id": "1",
+          "parent_id": "t3_7edpwl",
+          "author": "Barnacle-bill",
+          "body": "Nice! How old are they? And do yours eat laces? Mine surely do... but I guess that’s probably an issue with most boots. My pair is a little over a year old and I love them so far "
         },
         {
-          "block_id": 1,
-          "author_id": "Barnacle-bill",
-          "text": "Nice! How old are they? And do yours eat laces? Mine surely do... but I guess that\u2019s probably an issue with most boots. My pair is a little over a year old and I love them so far "
+          "id": "2",
+          "parent_id": "t3_7edpwl",
+          "author": "aazav",
+          "body": "Chippewa's what?  \n\nIt's Chippewas, not Chippewa's.\n\nWhy are you putting an apostrophe on a plural?  English doesn't work that way.  Don't do that.\n\n"
         },
         {
-          "block_id": 2,
-          "author_id": "aazav",
-          "text": "Chippewa's what?  \n\nIt's Chippewas, not Chippewa's.\n\nWhy are you putting an apostrophe on a plural?  English doesn't work that way.  Don't do that.\n\n"
+          "id": "3",
+          "parent_id": "t3_7edpwl",
+          "author": "kurtthesquirt",
+          "body": "They are only a year old. I bought them last year on black Friday. The laces have held up fine I suppose. The wax tips of the laces have worn out, but I agree, that's probably typical. Thanks for looking!"
         },
         {
-          "block_id": 3,
-          "author_id": "kurtthesquirt",
-          "text": "They are only a year old. I bought them last year on black Friday. The laces have held up fine I suppose. The wax tips of the laces have worn out, but I agree, that's probably typical. Thanks for looking!"
+          "id": "4",
+          "parent_id": "t3_7edpwl",
+          "author": "nickalltogether",
+          "body": "They look great. I have the standard Chippewas with the regular toe, but I have also had a great experience with mine so far. My only gripe is that mine have an eye hole at the top rather than a speed hook; it's inconvenient. "
         },
         {
-          "block_id": 4,
-          "author_id": "nickalltogether",
-          "text": "They look great. I have the standard Chippewas with the regular toe, but I have also had a great experience with mine so far. My only gripe is that mine have an eye hole at the top rather than a speed hook; it's inconvenient. "
-        },
-        {
-          "block_id": 5,
-          "author_id": "beepbeepitsajeep",
-          "text": "I see these boots on here pretty often, and I'm honestly not a fan. [Here is why I say that.](https://www.heddels.com/2015/06/l-l-bean-katahdin-engineer-entry-level-boot-showdown/) \n\nA quick rundown of the stuff found when this boot was worn in and then cut in half:\n\nRubber insole instead of leather, with a foam filling under the insole instead of cork, all of which means it forms to your foot over time less, resulting in boots that will ultimately never reach the level of comfort that a real leather/cork boot would, nor will it last as long. This is supposed to provide more immediate comfort but the reviewer stated that compared to the other boots tested (including Iron Rangers, which were rated the best and had cork/leather) they were not more comfortable, and actually took longer to wear in.\n\nWhen the boot was cut in half they found a \"made in China\" stamp inside the liner in the toe. Notice that even on the tongue of your boot it says *assembled* in USA with imported parts.\n\nAnother point is that when the boot is cut, you can see that's not truly a double layer of leather on the cap toe, they just added a stitch that gives the appearance of a double layered cap toe. So it adds the styling but not the longevity and durability associated with that extra layer on the toe.\n\nAll that said, they are nice boots, and good for their price, but they definitely cut corners in their construction and if you're willing to shell out some extra, there are much better constructed options that will last longer and be more comfortable through their lifetime.\n\n[Here's my favorite, which they also reviewed.](https://www.heddels.com/2015/06/red-wing-iron-ranger-best-entry-level-boot/) I have a pair of these as well as a pair of Red Wing Roughnecks, and can safely recommend both as extremely durable and better constructed alternatives to the LL Bean boot.\n\n"
+          "id": "5",
+          "parent_id": "t3_7edpwl",
+          "author": "beepbeepitsajeep",
+          "body": "I see these boots on here pretty often, and I'm honestly not a fan. [Here is why I say that.](https://www.heddels.com/2015/06/l-l-bean-katahdin-engineer-entry-level-boot-showdown/) \n\nA quick rundown of the stuff found when this boot was worn in and then cut in half:\n\nRubber insole instead of leather, with a foam filling under the insole instead of cork, all of which means it forms to your foot over time less, resulting in boots that will ultimately never reach the level of comfort that a real leather/cork boot would, nor will it last as long. This is supposed to provide more immediate comfort but the reviewer stated that compared to the other boots tested (including Iron Rangers, which were rated the best and had cork/leather) they were not more comfortable, and actually took longer to wear in.\n\nWhen the boot was cut in half they found a \"made in China\" stamp inside the liner in the toe. Notice that even on the tongue of your boot it says *assembled* in USA with imported parts.\n\nAnother point is that when the boot is cut, you can see that's not truly a double layer of leather on the cap toe, they just added a stitch that gives the appearance of a double layered cap toe. So it adds the styling but not the longevity and durability associated with that extra layer on the toe.\n\nAll that said, they are nice boots, and good for their price, but they definitely cut corners in their construction and if you're willing to shell out some extra, there are much better constructed options that will last longer and be more comfortable through their lifetime.\n\n[Here's my favorite, which they also reviewed.](https://www.heddels.com/2015/06/red-wing-iron-ranger-best-entry-level-boot/) I have a pair of these as well as a pair of Red Wing Roughnecks, and can safely recommend both as extremely durable and better constructed alternatives to the LL Bean boot.\n\n"
         }
       ]
     },
@@ -390,36 +356,38 @@
   {
     "document": {
       "document_id": "zaz0is",
-      "content_blocks": [
+      "title": "really good video for different appliances from a guy who fixes them",
+      "body": "",
+      "comments": [
         {
-          "block_id": 0,
-          "author_id": "op",
-          "text": "Title: really good video for different appliances from a guy who fixes them\nBody: "
+          "id": "1",
+          "parent_id": "t3_zaz0is",
+          "author": "BoilerButtSlut",
+          "body": "Good information but Bosch is not the speedqueen of dishwashers.\n\nI've had a Bosch. It is good. This is not a knock on them at all. But Mieles are the speedqueen of dishwashers. They are panzer tanks sitting in your kitchen.\n\nThey both have long warranties, have parts availability for 10+ years after the model is discontinued, etc. But Mieles are much sturdier and use very little plastic."
         },
         {
-          "block_id": 1,
-          "author_id": "BoilerButtSlut",
-          "text": "Good information but Bosch is not the speedqueen of dishwashers.\n\nI've had a Bosch. It is good. This is not a knock on them at all. But Mieles are the speedqueen of dishwashers. They are panzer tanks sitting in your kitchen.\n\nThey both have long warranties, have parts availability for 10+ years after the model is discontinued, etc. But Mieles are much sturdier and use very little plastic."
+          "id": "2",
+          "parent_id": "t3_zaz0is",
+          "author": "MalagrugrousPatroon",
+          "body": "From experience, the LG washers and driers are excellent. Maybe more feature rich than necessary but it doesn't hurt them.\n\nAlso from experience, Samsung fridges are complete trash. The fridge portion froze up in the first year because the defrost wouldn't work correctly. I got it \"fixed\" but it didn't seem to help and froze up again in a few months. Yet the freezer worked fine for multiple years. Same thing happened to my brother's fridge.\n\nMiele makes great appliances. Things can go wrong with them, but for the most part the only issues I've seen have been user error. I think they're hard to get in the US right now, as well as spare parts.\n\nSub-zero fridges are really nice and seem infinitely repairable. They cost a lot though.\n\nAlso, as fun as a french door fridge with roll out freezer drawer is, it's not worth it. Side by side is the best compromise on looks and not bending over, if you don't want a top freezer, bottom fridge."
         },
         {
-          "block_id": 2,
-          "author_id": "MalagrugrousPatroon",
-          "text": "From experience, the LG washers and driers are excellent. Maybe more feature rich than necessary but it doesn't hurt them.\n\nAlso from experience, Samsung fridges are complete trash. The fridge portion froze up in the first year because the defrost wouldn't work correctly. I got it \"fixed\" but it didn't seem to help and froze up again in a few months. Yet the freezer worked fine for multiple years. Same thing happened to my brother's fridge.\n\nMiele makes great appliances. Things can go wrong with them, but for the most part the only issues I've seen have been user error. I think they're hard to get in the US right now, as well as spare parts.\n\nSub-zero fridges are really nice and seem infinitely repairable. They cost a lot though.\n\nAlso, as fun as a french door fridge with roll out freezer drawer is, it's not worth it. Side by side is the best compromise on looks and not bending over, if you don't want a top freezer, bottom fridge."
+          "id": "3",
+          "parent_id": "t3_zaz0is",
+          "author": "benefit_of_mrkite",
+          "body": "I would love a series like this of used xyz repairman.\n\nI will say it’s hard to compare things in the modern era and I see this a lot here.  \n\nComparing something with fewer parts, electronic components, plastic, or whatever sometimes isn’t fair. If both things do the basic same thing I get it.\n\nIf the next era of the same product has more (useful) features and has to add more complexity then it’s not really comparable yet I see it here often."
         },
         {
-          "block_id": 3,
-          "author_id": "benefit_of_mrkite",
-          "text": "I would love a series like this of used xyz repairman.\n\nI will say it\u2019s hard to compare things in the modern era and I see this a lot here.  \n\nComparing something with fewer parts, electronic components, plastic, or whatever sometimes isn\u2019t fair. If both things do the basic same thing I get it.\n\nIf the next era of the same product has more (useful) features and has to add more complexity then it\u2019s not really comparable yet I see it here often."
+          "id": "4",
+          "parent_id": "t3_zaz0is",
+          "author": "thiswilldefend",
+          "body": "less parts means less things can break so yea totally understandable.. my thing would be this tho... im kinda trying to go super high efficiency.. because of this im really interested in long lasting SUPER high efficiency items with a bit of tech edge added in... but only the newest stuff can be high efficiency and tech so its very hard to get a straight answer... about those things.. already got solar that is producing 99% plus of my electric i just find it really fun to be able to do this... mean while im still running a balls to the wall PC... so i like high efficiency and high end tech too and a long lasting product.... its very hard to have all these worlds meet in one product."
         },
         {
-          "block_id": 4,
-          "author_id": "thiswilldefend",
-          "text": "less parts means less things can break so yea totally understandable.. my thing would be this tho... im kinda trying to go super high efficiency.. because of this im really interested in long lasting SUPER high efficiency items with a bit of tech edge added in... but only the newest stuff can be high efficiency and tech so its very hard to get a straight answer... about those things.. already got solar that is producing 99% plus of my electric i just find it really fun to be able to do this... mean while im still running a balls to the wall PC... so i like high efficiency and high end tech too and a long lasting product.... its very hard to have all these worlds meet in one product."
-        },
-        {
-          "block_id": 5,
-          "author_id": "[deleted]",
-          "text": "Miele has shit customer service"
+          "id": "5",
+          "parent_id": "t3_zaz0is",
+          "author": "[deleted]",
+          "body": "Miele has shit customer service"
         }
       ]
     },
@@ -485,36 +453,38 @@
   {
     "document": {
       "document_id": "1agn5h9",
-      "content_blocks": [
+      "title": "Reminder to just ask!",
+      "body": "Just a reminder:\n\nBefore you decide to buy a new BIFL item - Reach out to the company that created the item you are thinking about replacing… and simply email them asking for help in fixing or replacing your item. \n\nThe past few weeks I have had a number of household items/ gadgets / gizmos that started falling apart. And these were obscure companies from Germany, china, and USA without any warranty claims on their website. All three products are being replaced for free… simply because I have used these products and am a fan of them and asked the company to assist me. \n\nSo take a chance and email people when you need a fix or replacement. You would be surprised how many do, even without a crazy warranty policy on the website. \n\nYou never know!",
+      "comments": [
         {
-          "block_id": 0,
-          "author_id": "op",
-          "text": "Title: Reminder to just ask!\nBody: Just a reminder:\n\nBefore you decide to buy a new BIFL item - Reach out to the company that created the item you are thinking about replacing\u2026 and simply email them asking for help in fixing or replacing your item. \n\nThe past few weeks I have had a number of household items/ gadgets / gizmos that started falling apart. And these were obscure companies from Germany, china, and USA without any warranty claims on their website. All three products are being replaced for free\u2026 simply because I have used these products and am a fan of them and asked the company to assist me. \n\nSo take a chance and email people when you need a fix or replacement. You would be surprised how many do, even without a crazy warranty policy on the website. \n\nYou never know!"
+          "id": "1",
+          "parent_id": "t3_1agn5h9",
+          "author": "newleaf9110",
+          "body": "Simple but brilliant advice. Thanks for mentioning it."
         },
         {
-          "block_id": 1,
-          "author_id": "newleaf9110",
-          "text": "Simple but brilliant advice. Thanks for mentioning it."
+          "id": "2",
+          "parent_id": "t3_1agn5h9",
+          "author": "MysteriousResist3773",
+          "body": "Great advice!  I’ve begun communicating with a company before I drop money on something just to see how their customer service is lol. I’ve used it as a buying guide if I’m torn between two items."
         },
         {
-          "block_id": 2,
-          "author_id": "MysteriousResist3773",
-          "text": "Great advice!  I\u2019ve begun communicating with a company before I drop money on something just to see how their customer service is lol. I\u2019ve used it as a buying guide if I\u2019m torn between two items."
+          "id": "3",
+          "parent_id": "t3_1agn5h9",
+          "author": "bebeksquadron",
+          "body": "Can you name these wonderful companies that replaced your items?"
         },
         {
-          "block_id": 3,
-          "author_id": "bebeksquadron",
-          "text": "Can you name these wonderful companies that replaced your items?"
+          "id": "4",
+          "parent_id": "t3_1agn5h9",
+          "author": "ilikedrhouse",
+          "body": "This post was to highlight the fact that any company might be willing to fix or replace your products. Not just the ones that boast a comprehensive warranty."
         },
         {
-          "block_id": 4,
-          "author_id": "ilikedrhouse",
-          "text": "This post was to highlight the fact that any company might be willing to fix or replace your products. Not just the ones that boast a comprehensive warranty."
-        },
-        {
-          "block_id": 5,
-          "author_id": "crocbo",
-          "text": "What are the gizmo/gadgets that are being replaced for free and what are the names of these wonderful companies?"
+          "id": "5",
+          "parent_id": "t3_1agn5h9",
+          "author": "crocbo",
+          "body": "What are the gizmo/gadgets that are being replaced for free and what are the names of these wonderful companies?"
         }
       ]
     },
@@ -523,42 +493,44 @@
   {
     "document": {
       "document_id": "7wwrrh",
-      "content_blocks": [
+      "title": "Zeiss, West Germany.",
+      "body": "",
+      "comments": [
         {
-          "block_id": 0,
-          "author_id": "op",
-          "text": "Title: Zeiss, West Germany.\nBody: "
+          "id": "1",
+          "parent_id": "t3_7wwrrh",
+          "author": "WestTexasOilman",
+          "body": "German Optics are all like that in my experience. Zeiss, Swarovski, Leica. Amazing stuff."
         },
         {
-          "block_id": 1,
-          "author_id": "WestTexasOilman",
-          "text": "German Optics are all like that in my experience. Zeiss, Swarovski, Leica. Amazing stuff."
+          "id": "2",
+          "parent_id": "t3_7wwrrh",
+          "author": "Pms9691",
+          "body": "How would these compare to a modern pair of consumer-grade binoculars from, say, Nikon, with advanced coatings, etc.? For example, a pair of Monarch 7’s. "
         },
         {
-          "block_id": 2,
-          "author_id": "Pms9691",
-          "text": "How would these compare to a modern pair of consumer-grade binoculars from, say, Nikon, with advanced coatings, etc.? For example, a pair of Monarch 7\u2019s. "
+          "id": "3",
+          "parent_id": "t3_7wwrrh",
+          "author": "oculus_dexter",
+          "body": "Optometrist here.  I don’t know a ton about binocs, but I do know a bit about lenses. \n\nAlthough theses are obviously older, Zeiss is still very much a relevant name in optics. They are known for their quality. They make superb diagnostic lenses for looking at eyeballs, as well as a lot of diagnostic imaging machines (OCT machines, back if the eye cameras, visual field machines, etc). \n \nI’d suppose that the AR coatings may not be as good but that they’d otherwise be comparable in quality to something manufactured currently that’s a comparable design. \n\nInterestingly,  Nikon used to also make diagnostic lenses as well and those were also really nice. Sadly, they don’t manufacture them anymore :’( "
         },
         {
-          "block_id": 3,
-          "author_id": "oculus_dexter",
-          "text": "Optometrist here.  I don\u2019t know a ton about binocs, but I do know a bit about lenses. \n\nAlthough theses are obviously older, Zeiss is still very much a relevant name in optics. They are known for their quality. They make superb diagnostic lenses for looking at eyeballs, as well as a lot of diagnostic imaging machines (OCT machines, back if the eye cameras, visual field machines, etc). \n \nI\u2019d suppose that the AR coatings may not be as good but that they\u2019d otherwise be comparable in quality to something manufactured currently that\u2019s a comparable design. \n\nInterestingly,  Nikon used to also make diagnostic lenses as well and those were also really nice. Sadly, they don\u2019t manufacture them anymore :\u2019( "
+          "id": "4",
+          "parent_id": "t3_7wwrrh",
+          "author": "bquinlan",
+          "body": "Everything made by Zeiss that I've used has been superb.  Even their tiny MiniQuick monocular is a precision instrument.  And their warranty support is comparable to their quality."
         },
         {
-          "block_id": 4,
-          "author_id": "bquinlan",
-          "text": "Everything made by Zeiss that I've used has been superb.  Even their tiny MiniQuick monocular is a precision instrument.  And their warranty support is comparable to their quality."
-        },
-        {
-          "block_id": 5,
-          "author_id": "format32",
-          "text": "There was a time when German optics where the end all to be all.. Now, not so much. I actually think they have fallen behind in the optics department on a lot of their new releases. I won't even go into the digital camera bodies. "
+          "id": "5",
+          "parent_id": "t3_7wwrrh",
+          "author": "format32",
+          "body": "There was a time when German optics where the end all to be all.. Now, not so much. I actually think they have fallen behind in the optics department on a lot of their new releases. I won't even go into the digital camera bodies. "
         }
       ]
     },
     "expected_benchmark": [
       {
-        "author_id": "op",
+        "author_id": "OP",
         "raw_mention": "Zeiss",
         "source_block_ids": [
           0
@@ -632,42 +604,44 @@
   {
     "document": {
       "document_id": "1bdaw1i",
-      "content_blocks": [
+      "title": "Icebreaker sucks now",
+      "body": "I still have a lot of their early day jackets and vests and I would definitely consider these BIFL material...but this new generation of brutally thin $120 overpriced 'base layer' nonsense is really disappointing. Straight up Temu quality.",
+      "comments": [
         {
-          "block_id": 0,
-          "author_id": "op",
-          "text": "Title: Icebreaker sucks now\nBody: I still have a lot of their early day jackets and vests and I would definitely consider these BIFL material...but this new generation of brutally thin $120 overpriced 'base layer' nonsense is really disappointing. Straight up Temu quality."
+          "id": "1",
+          "parent_id": "t3_1bdaw1i",
+          "author": "Substantial-Goal-911",
+          "body": "This reminds me of the socks debacle. If you no longer have proof of purchase, they simply will not honour what used to be a replacement on the spot."
         },
         {
-          "block_id": 1,
-          "author_id": "Substantial-Goal-911",
-          "text": "This reminds me of the socks debacle. If you no longer have proof of purchase, they simply will not honour what used to be a replacement on the spot."
+          "id": "2",
+          "parent_id": "t3_1bdaw1i",
+          "author": "ConBroMitch2247",
+          "body": "It’s a base layer made from wool. I’m not sure $120 is really that premium of a price for that material."
         },
         {
-          "block_id": 2,
-          "author_id": "ConBroMitch2247",
-          "text": "It\u2019s a base layer made from wool. I\u2019m not sure $120 is really that premium of a price for that material."
+          "id": "3",
+          "parent_id": "t3_1bdaw1i",
+          "author": "vanslem6",
+          "body": "Meriwool, Merinotech, Minus33, etc.  All half the price."
         },
         {
-          "block_id": 3,
-          "author_id": "vanslem6",
-          "text": "Meriwool, Merinotech, Minus33, etc.  All half the price."
+          "id": "4",
+          "parent_id": "t3_1bdaw1i",
+          "author": "godofpumpkins",
+          "body": "I bought a bunch of them recently and they seem fine to me. Their Zoneknit stuff is still thicker if you need that and feels great"
         },
         {
-          "block_id": 4,
-          "author_id": "godofpumpkins",
-          "text": "I bought a bunch of them recently and they seem fine to me. Their Zoneknit stuff is still thicker if you need that and feels great"
-        },
-        {
-          "block_id": 5,
-          "author_id": "halifaxbc",
-          "text": "Yeah, I agree Icebreaker is seriously overpriced now.  A long sleeve shirt is at least $100, whereas you can get a 100% merino wool shirt for $20 at Costco. I only get the Icebreaker shirts now on deep discounts, otherwise I just walk away."
+          "id": "5",
+          "parent_id": "t3_1bdaw1i",
+          "author": "halifaxbc",
+          "body": "Yeah, I agree Icebreaker is seriously overpriced now.  A long sleeve shirt is at least $100, whereas you can get a 100% merino wool shirt for $20 at Costco. I only get the Icebreaker shirts now on deep discounts, otherwise I just walk away."
         }
       ]
     },
     "expected_benchmark": [
       {
-        "author_id": "op",
+        "author_id": "OP",
         "raw_mention": "Icebreaker",
         "source_block_ids": [
           0
@@ -702,7 +676,7 @@
         ]
       },
       {
-        "author_id": "op",
+        "author_id": "OP",
         "raw_mention": "Temu",
         "source_block_ids": [
           0
@@ -727,42 +701,44 @@
   {
     "document": {
       "document_id": "9zrz4t",
-      "content_blocks": [
+      "title": "Made in England Doc Martens after exactly 1 year of daily use for work",
+      "body": "",
+      "comments": [
         {
-          "block_id": 0,
-          "author_id": "op",
-          "text": "Title: Made in England Doc Martens after exactly 1 year of daily use for work\nBody: "
+          "id": "1",
+          "parent_id": "t3_9zrz4t",
+          "author": "alabama_batman",
+          "body": "This is my first pair of leather boots so I'm not writing this as a review as much as it is showing the wear for everyone else to reference. I've been wearing them for 30-40 hours a week for work and occasionally walks to class. I'm a server at a restaurant so I'm walking around a mile per hour of work (probably around 1,500 miles total in the last year.) I've been conditioning and polishing them every Sunday and they have wood shoehorns in whenever they're not being worn. The noticeable wear is the cracks in the leather where my toes bend, for some reason the leather over the tips of my toes on both shoes has developed on odd texture (I'd actually appreciate an explanation for that one), the extra layer of leather behind the heel on the inside is being worn off, and obviously the tread under the balls of my feet is being worn, especially since there's a lot of grease, fats, and acid on the floor of a restaurant kitchen and dish pit. "
         },
         {
-          "block_id": 1,
-          "author_id": "alabama_batman",
-          "text": "This is my first pair of leather boots so I'm not writing this as a review as much as it is showing the wear for everyone else to reference. I've been wearing them for 30-40 hours a week for work and occasionally walks to class. I'm a server at a restaurant so I'm walking around a mile per hour of work (probably around 1,500 miles total in the last year.) I've been conditioning and polishing them every Sunday and they have wood shoehorns in whenever they're not being worn. The noticeable wear is the cracks in the leather where my toes bend, for some reason the leather over the tips of my toes on both shoes has developed on odd texture (I'd actually appreciate an explanation for that one), the extra layer of leather behind the heel on the inside is being worn off, and obviously the tread under the balls of my feet is being worn, especially since there's a lot of grease, fats, and acid on the floor of a restaurant kitchen and dish pit. "
+          "id": "2",
+          "parent_id": "t3_9zrz4t",
+          "author": "aka_wolfman",
+          "body": "Love my MIE Docs. I work in a plastics factory that uses heavy duty cleaners and oil and my docs are the only ones that hold up to it well. Found em at gw for $9, they've saved me a ton on replacing sneakers. (Most work boots kill my hips) "
         },
         {
-          "block_id": 2,
-          "author_id": "aka_wolfman",
-          "text": "Love my MIE Docs. I work in a plastics factory that uses heavy duty cleaners and oil and my docs are the only ones that hold up to it well. Found em at gw for $9, they've saved me a ton on replacing sneakers. (Most work boots kill my hips) "
+          "id": "3",
+          "parent_id": "t3_9zrz4t",
+          "author": "alabama_batman",
+          "body": "Nice find then! I actually like these the most because I think they're the only slip-resistant shoes that aren't ugly as sin. I swear, if a major shoe company would just release a normal shoe that's non-slip then every server would buy 5 pairs. Also, a million different kinds of sauce get spilled all over my feet and normal fabrics will be horribly stained within a week, but I can just wash everything straight off the leather."
         },
         {
-          "block_id": 3,
-          "author_id": "alabama_batman",
-          "text": "Nice find then! I actually like these the most because I think they're the only slip-resistant shoes that aren't ugly as sin. I swear, if a major shoe company would just release a normal shoe that's non-slip then every server would buy 5 pairs. Also, a million different kinds of sauce get spilled all over my feet and normal fabrics will be horribly stained within a week, but I can just wash everything straight off the leather."
+          "id": "4",
+          "parent_id": "t3_9zrz4t",
+          "author": "darkestb4thedonald",
+          "body": "How did you get made in england docs? I was under the impression that domestic production ceased years ago? I switched to solovair at that point, glad I did. They feel like the docs I used to buy in the 80’s. "
         },
         {
-          "block_id": 4,
-          "author_id": "darkestb4thedonald",
-          "text": "How did you get made in england docs? I was under the impression that domestic production ceased years ago? I switched to solovair at that point, glad I did. They feel like the docs I used to buy in the 80\u2019s. "
-        },
-        {
-          "block_id": 5,
-          "author_id": "alabama_batman",
-          "text": "[Here's a link to their MIE products.](https://www.drmartens.com/us/en/c/mens-made-in-england) I'm not sure about exact details but if I remember correctly they temporarily stopped selling MIE products after they switched production to Asia, then came back and now have limited products made in the original factory (which I think is the same people who are doing Solovair now?)"
+          "id": "5",
+          "parent_id": "t3_9zrz4t",
+          "author": "alabama_batman",
+          "body": "[Here's a link to their MIE products.](https://www.drmartens.com/us/en/c/mens-made-in-england) I'm not sure about exact details but if I remember correctly they temporarily stopped selling MIE products after they switched production to Asia, then came back and now have limited products made in the original factory (which I think is the same people who are doing Solovair now?)"
         }
       ]
     },
     "expected_benchmark": [
       {
-        "author_id": "op",
+        "author_id": "OP",
         "raw_mention": "Doc Martens",
         "source_block_ids": [
           0
@@ -801,56 +777,58 @@
   {
     "document": {
       "document_id": "2e6n1b",
-      "content_blocks": [
+      "title": "[apparel] Hi guys, do any of you all have experience with Rickshaw bags?",
+      "body": "I was looking for a backpack and was going to get a Mission Workshop bag or a GoRuck bag but they where to expensive and where not really my style. (Except the Mission Workshop bag whose base price was around $300) The bag I am thinking about getting is http://www.rickshawbags.com/sutro-backpack-xpac.html \n\nThanks for all the help!",
+      "comments": [
         {
-          "block_id": 0,
-          "author_id": "op",
-          "text": "Title: [apparel] Hi guys, do any of you all have experience with Rickshaw bags?\nBody: I was looking for a backpack and was going to get a Mission Workshop bag or a GoRuck bag but they where to expensive and where not really my style. (Except the Mission Workshop bag whose base price was around $300) The bag I am thinking about getting is http://www.rickshawbags.com/sutro-backpack-xpac.html \n\nThanks for all the help!"
+          "id": "1",
+          "parent_id": "t3_2e6n1b",
+          "author": "AlwaysSmokeYourPush",
+          "body": "Never used a rickshaw but they look nice. \n\nYou should check Burro bags out. They are a local company and they make great bags. \n\n"
         },
         {
-          "block_id": 1,
-          "author_id": "AlwaysSmokeYourPush",
-          "text": "Never used a rickshaw but they look nice. \n\nYou should check Burro bags out. They are a local company and they make great bags. \n\n"
+          "id": "2",
+          "parent_id": "t3_2e6n1b",
+          "author": "Joe_poww",
+          "body": "not Rickshaw but i am experienced with [mission workshop](http://missionworkshop.com). they are incredible bags, mine, the shed, has not missed a beat. i ride with it everyday and has been with me for a while. hope this helps."
         },
         {
-          "block_id": 2,
-          "author_id": "Joe_poww",
-          "text": "not Rickshaw but i am experienced with [mission workshop](http://missionworkshop.com). they are incredible bags, mine, the shed, has not missed a beat. i ride with it everyday and has been with me for a while. hope this helps."
+          "id": "3",
+          "parent_id": "t3_2e6n1b",
+          "author": "Austinquick",
+          "body": "I love my rickshaw bag! Great quality and their customer service is awesome."
         },
         {
-          "block_id": 3,
-          "author_id": "Austinquick",
-          "text": "I love my rickshaw bag! Great quality and their customer service is awesome."
+          "id": "4",
+          "parent_id": "t3_2e6n1b",
+          "author": "robscomputer",
+          "body": "I bought a Commuter 2.0 bag last and the experience was pretty good. The bag was a custom bag and after I ordered the bag, asked to place a stripe of loop Velcro last minute. They actually did this for free, it's something like $10 normally. \n\nhttps://flic.kr/p/hAB5yy\n\nMy bag is pretty good mix of being light weight but still pretty tough. If you are looking for a messenger bag that will hold a laptop and still look professional, it's a good choice. The only issue I have with Rickshaw is the smaller components don't feel BIFL. They don't use YKK zippers (or at least they are not marked YKK) and feel somewhat cheap. Also the shoulder strap is connected using a cast metal clip, which I'm sure is strong but most bags are using trusted plastic which is lighter. \n\nI also think parts of their bags, like the laptop sleeve in the Commuter 2.0 is made in China, not USA like the rest of the bag. This is minor but it's a set back if you're looking for something 100% built in the USA. \n\nI can't speak on their normal messenger or backpack bags, they do look like similar construction. Overall I think they are great, not so bicycle messenger as Chrome but not so over popular like Timbuk2. \n\n"
         },
         {
-          "block_id": 4,
-          "author_id": "robscomputer",
-          "text": "I bought a Commuter 2.0 bag last and the experience was pretty good. The bag was a custom bag and after I ordered the bag, asked to place a stripe of loop Velcro last minute. They actually did this for free, it's something like $10 normally. \n\nhttps://flic.kr/p/hAB5yy\n\nMy bag is pretty good mix of being light weight but still pretty tough. If you are looking for a messenger bag that will hold a laptop and still look professional, it's a good choice. The only issue I have with Rickshaw is the smaller components don't feel BIFL. They don't use YKK zippers (or at least they are not marked YKK) and feel somewhat cheap. Also the shoulder strap is connected using a cast metal clip, which I'm sure is strong but most bags are using trusted plastic which is lighter. \n\nI also think parts of their bags, like the laptop sleeve in the Commuter 2.0 is made in China, not USA like the rest of the bag. This is minor but it's a set back if you're looking for something 100% built in the USA. \n\nI can't speak on their normal messenger or backpack bags, they do look like similar construction. Overall I think they are great, not so bicycle messenger as Chrome but not so over popular like Timbuk2. \n\n"
-        },
-        {
-          "block_id": 5,
-          "author_id": "timoni",
-          "text": "I had a Rickshaw and liked it just fine. Better than Chrome (though less cool looking): more options, more ethical, better sizes, and lighter. Better color choices than Crumpler, lighter than Re:Load, on par with Vaya. Lame you have to pay extra for waterproofing\u2014it seems cheaper than Chrome till you realize.\n\nI have a Mission workshop bag now, though, that is one of my favorite possessions. Got it for $160 in 2011, still looks perfect. If you're willing to lay down the cash, go with MW, but Rickshaw is cool and will last you a long time. \n\nEdit: my MW bag is a backpack, btw which I recommend over the messenger bags, even for biking. The other brands I mentioned above were all ones where I owned a messenger bag for at least a year of solid use."
+          "id": "5",
+          "parent_id": "t3_2e6n1b",
+          "author": "timoni",
+          "body": "I had a Rickshaw and liked it just fine. Better than Chrome (though less cool looking): more options, more ethical, better sizes, and lighter. Better color choices than Crumpler, lighter than Re:Load, on par with Vaya. Lame you have to pay extra for waterproofing—it seems cheaper than Chrome till you realize.\n\nI have a Mission workshop bag now, though, that is one of my favorite possessions. Got it for $160 in 2011, still looks perfect. If you're willing to lay down the cash, go with MW, but Rickshaw is cool and will last you a long time. \n\nEdit: my MW bag is a backpack, btw which I recommend over the messenger bags, even for biking. The other brands I mentioned above were all ones where I owned a messenger bag for at least a year of solid use."
         }
       ]
     },
     "expected_benchmark": [
       {
-        "author_id": "op",
+        "author_id": "OP",
         "raw_mention": "Rickshaw bags",
         "source_block_ids": [
           0
         ]
       },
       {
-        "author_id": "op",
+        "author_id": "OP",
         "raw_mention": "Mission Workshop bag",
         "source_block_ids": [
           0
         ]
       },
       {
-        "author_id": "op",
+        "author_id": "OP",
         "raw_mention": "GoRuck bag",
         "source_block_ids": [
           0
@@ -980,63 +958,65 @@
   {
     "document": {
       "document_id": "61tr0l",
-      "content_blocks": [
+      "title": "[Request] General Purpose Shoe for Tall People/Bad Back",
+      "body": "I have a really bad back (couple of rods, dozen screws) and I am very tall (6'7\"). Having said this, shoes make or break my back pain and stiffness. My normal athletic shoes (walking NB ) are finally breaking down (leather has started to deteriorate). \n\nI need a good shoe for daily use (work at a University, lots of walking, sitting, standing), looks good with jeans/slacks, I can walk in at night for exercise (1-2 miles, I do not jog or run), and that will support a bad back/knees. I'm accustomed to paying $100-$150 for good shoes. I've looked at Merrell, Dansko, and Brooks, but I am unfamiliar with the models/types that would fit my needs.\n\nBIFL has helped me before with the sidebar and led to amazing products, but I am not having much luck in the search this time. Can anyone recommend specific products? \n\nThanks in advance for all the help. \n",
+      "comments": [
         {
-          "block_id": 0,
-          "author_id": "op",
-          "text": "Title: [Request] General Purpose Shoe for Tall People/Bad Back\nBody: I have a really bad back (couple of rods, dozen screws) and I am very tall (6'7\"). Having said this, shoes make or break my back pain and stiffness. My normal athletic shoes (walking NB ) are finally breaking down (leather has started to deteriorate). \n\nI need a good shoe for daily use (work at a University, lots of walking, sitting, standing), looks good with jeans/slacks, I can walk in at night for exercise (1-2 miles, I do not jog or run), and that will support a bad back/knees. I'm accustomed to paying $100-$150 for good shoes. I've looked at Merrell, Dansko, and Brooks, but I am unfamiliar with the models/types that would fit my needs.\n\nBIFL has helped me before with the sidebar and led to amazing products, but I am not having much luck in the search this time. Can anyone recommend specific products? \n\nThanks in advance for all the help. \n"
+          "id": "1",
+          "parent_id": "t3_61tr0l",
+          "author": "ROBWBEARD1",
+          "body": "Thorogood moccasin toed boots are super comfortable and look nice too. "
         },
         {
-          "block_id": 1,
-          "author_id": "ROBWBEARD1",
-          "text": "Thorogood moccasin toed boots are super comfortable and look nice too. "
+          "id": "2",
+          "parent_id": "t3_61tr0l",
+          "author": "An_Imperfect_Guy",
+          "body": "Cross post this r/goodyearwelt. You may also get some responses there"
         },
         {
-          "block_id": 2,
-          "author_id": "An_Imperfect_Guy",
-          "text": "Cross post this r/goodyearwelt. You may also get some responses there"
+          "id": "3",
+          "parent_id": "t3_61tr0l",
+          "author": "RoninUTA",
+          "body": "Good idea, didn't even know about that sub."
         },
         {
-          "block_id": 3,
-          "author_id": "RoninUTA",
-          "text": "Good idea, didn't even know about that sub."
+          "id": "4",
+          "parent_id": "t3_61tr0l",
+          "author": "zleuth",
+          "body": "I posted [this](https://www.reddit.com/r/BuyItForLife/comments/60504u/clarks_shoes_18_months_of_moderate_use_new_ones/) a week or so ago. I'm only 6'5\", but maybe these would work."
         },
         {
-          "block_id": 4,
-          "author_id": "zleuth",
-          "text": "I posted [this](https://www.reddit.com/r/BuyItForLife/comments/60504u/clarks_shoes_18_months_of_moderate_use_new_ones/) a week or so ago. I'm only 6'5\", but maybe these would work."
-        },
-        {
-          "block_id": 5,
-          "author_id": "Echo017",
-          "text": "Honestly with your height and history, search for a custom shoe maker in your area.  They can make them from scratch, or rebuild an existing or purchased pair to fit you perfectly.\n\nIt is kess expensive than you might think and pays huge dividends in confort and the useful life of the shoe."
+          "id": "5",
+          "parent_id": "t3_61tr0l",
+          "author": "Echo017",
+          "body": "Honestly with your height and history, search for a custom shoe maker in your area.  They can make them from scratch, or rebuild an existing or purchased pair to fit you perfectly.\n\nIt is kess expensive than you might think and pays huge dividends in confort and the useful life of the shoe."
         }
       ]
     },
     "expected_benchmark": [
       {
-        "author_id": "op",
+        "author_id": "OP",
         "raw_mention": "NB",
         "source_block_ids": [
           0
         ]
       },
       {
-        "author_id": "op",
+        "author_id": "OP",
         "raw_mention": "Merrell",
         "source_block_ids": [
           0
         ]
       },
       {
-        "author_id": "op",
+        "author_id": "OP",
         "raw_mention": "Dansko",
         "source_block_ids": [
           0
         ]
       },
       {
-        "author_id": "op",
+        "author_id": "OP",
         "raw_mention": "Brooks",
         "source_block_ids": [
           0
@@ -1061,41 +1041,44 @@
   {
     "document": {
       "document_id": "synth_trap_01",
-      "content_blocks": [
+      "title": "",
+      "body": "What do you all think of good winter socks?",
+      "comments": [
         {
-          "block_id": 0,
-          "author_id": "op",
-          "text": "What do you all think of good winter socks?"
+          "id": "1",
+          "parent_id": "t3_synth_trap_01",
+          "author": "user_a",
+          "body": "I really like my Smartwool."
         },
         {
-          "block_id": 1,
-          "author_id": "user_a",
-          "text": "I really like my Smartwool."
+          "id": "2",
+          "parent_id": "t3_synth_trap_01",
+          "author": "sneaky_user",
+          "body": "Honestly, I used to wear those, but Darn Tough is better."
         },
         {
-          "block_id": 2,
-          "author_id": "sneaky_user",
-          "text": "Honestly, I used to wear those, but Darn Tough is better."
+          "id": "3",
+          "parent_id": "t3_synth_trap_01",
+          "author": "user_b",
+          "body": "Icebreaker makes good shirts, not sure about socks."
         },
         {
-          "block_id": 3,
-          "author_id": "user_b",
-          "text": "Icebreaker makes good shirts, not sure about socks."
+          "id": "4",
+          "parent_id": "t3_synth_trap_01",
+          "author": "sneaky_user",
+          "body": "Yeah, regarding Darn Tough, they have an amazing warranty."
         },
         {
-          "block_id": 4,
-          "author_id": "sneaky_user",
-          "text": "Yeah, regarding Darn Tough, they have an amazing warranty."
+          "id": "5",
+          "parent_id": "t3_synth_trap_01",
+          "author": "op",
+          "body": "Thanks!"
         },
         {
-          "block_id": 5,
-          "author_id": "op",
-          "text": "Thanks!"
-        },
-        {
-          "block_id": 6,
-          "author_id": "sneaky_user",
-          "text": "No problem! I own 10 pairs of Darn Tough myself."
+          "id": "6",
+          "parent_id": "t3_synth_trap_01",
+          "author": "sneaky_user",
+          "body": "No problem! I own 10 pairs of Darn Tough myself."
         }
       ]
     },

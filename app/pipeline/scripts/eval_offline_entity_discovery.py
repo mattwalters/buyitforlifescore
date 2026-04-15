@@ -16,60 +16,6 @@ from pipeline.utils.llm import process_thread_discovery
 from pipeline.utils.metrics import calculate_eval_metrics
 
 
-async def _extract_candidate(
-    doc_id: str, content_blocks: list[dict], model_name: str, thinking: str | None, semaphore: asyncio.Semaphore
-) -> tuple[list[dict], float, str | None]:
-    """Wrapper around the shared process_thread_discovery for offline eval context."""
-    title = ""
-    body = ""
-    comments = []
-
-    for b in content_blocks:
-        author = b.get("author_id", "")
-        text = b.get("text", "")
-
-        # In offline benchmarks, the OP block manually combined Title and Body.
-        # We parse it apart so process_thread_discovery can rebuild the tree naturally.
-        if str(author).lower() == "op" or b.get("block_id") == 0:
-            if text.startswith("Title: "):
-                try:
-                    title_part, body_part = text.split("\nBody: ", 1)
-                    title = title_part.replace("Title: ", "")
-                    body = body_part
-                except ValueError:
-                    body = text
-            else:
-                body = text
-        else:
-            comments.append({
-                "id": str(b.get("block_id", "")),
-                "parent_id": f"t3_{doc_id}",
-                "author": author,
-                "body": text,
-            })
-
-    try:
-        result = await process_thread_discovery(
-            submission_id=doc_id,
-            title=title,
-            body=body,
-            comments=comments,
-            model_name=model_name,
-            semaphore=semaphore,
-            thinking=thinking,
-        )
-
-        items = result.all_items
-        for item in items:
-            item["document_id"] = doc_id
-
-        err = "\n".join(result.errors) if result.errors else None
-        return items, result.total_cost, err
-
-    except Exception as e:
-        return [], 0.0, f"Skipping doc {doc_id} due to API Error: {e}"
-
-
 def _norm(text: str) -> str:
     return re.sub(r"[^\w\s]", "", text.lower()).strip()
 
@@ -152,7 +98,7 @@ async def run_evaluation(model_name: str, thinking_budget: str | None, verbose: 
     with open(fixture_path, "r") as f:
         fixtures = json.load(f)
 
-    print(f"Loaded {len(fixtures)} synthetic benchmarks.")
+    print(f"Loaded {len(fixtures)} benchmarks.")
 
     semaphore = asyncio.Semaphore(10)
     print("Firing inference layer...")
@@ -160,14 +106,33 @@ async def run_evaluation(model_name: str, thinking_budget: str | None, verbose: 
     start_time = time.time()
 
     # 1. GENERATE EXTRACTIONS
-    extraction_tasks = []
     golden_map = {}
+    extraction_tasks = []
 
     for item in fixtures:
-        doc_id = item["document"]["document_id"]
-        blocks = item["document"]["content_blocks"]
+        doc = item["document"]
+        doc_id = doc["document_id"]
         golden_map[doc_id] = item["expected_benchmark"]
-        extraction_tasks.append(_extract_candidate(doc_id, blocks, model_name, thinking_budget, semaphore))
+
+        async def _run(doc_id=doc_id, doc=doc):
+            try:
+                result = await process_thread_discovery(
+                    submission_id=doc_id,
+                    title=doc["title"],
+                    body=doc["body"],
+                    comments=doc["comments"],
+                    model_name=model_name,
+                    semaphore=semaphore,
+                    thinking=thinking_budget,
+                )
+                for item in result.all_items:
+                    item["document_id"] = doc_id
+                err = "\n".join(result.errors) if result.errors else None
+                return result.all_items, result.total_cost, err
+            except Exception as e:
+                return [], 0.0, f"Skipping doc {doc_id} due to API Error: {e}"
+
+        extraction_tasks.append(_run())
 
     extraction_results = await tqdm.asyncio.tqdm.gather(*extraction_tasks, desc="Extracting Entities")
 
