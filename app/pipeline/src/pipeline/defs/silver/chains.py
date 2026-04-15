@@ -1,5 +1,8 @@
+from typing import Optional
+
 from dagster import (
     AssetExecutionContext,
+    Config,
     DailyPartitionsDefinition,
     MaterializeResult,
     MetadataValue,
@@ -7,9 +10,14 @@ from dagster import (
     StaticPartitionsDefinition,
     asset,
 )
+from pydantic import TypeAdapter
 
+from pipeline.schemas.chains import SilverChain
 from pipeline.utils.db import get_duckdb_connection
 from pipeline.utils.paths import get_read_path, get_write_path
+
+class SilverRedditChainsConfig(Config):
+    validation_sample_size: Optional[int] = None
 
 subreddit_partitions = StaticPartitionsDefinition(["BuyItForLife"])
 date_partitions = DailyPartitionsDefinition(start_date="2011-01-01")
@@ -27,7 +35,7 @@ chains_partitions_def = MultiPartitionsDefinition(
     partitions_def=chains_partitions_def,
     description="Extract isolated linear paths from the Reddit submission-comment trees.",
 )
-def silver_reddit_chains(context: AssetExecutionContext) -> MaterializeResult:
+def silver_reddit_chains(context: AssetExecutionContext, config: SilverRedditChainsConfig) -> MaterializeResult:
     # 1. Get partition keys
     partition_keys_dict = context.partition_key.keys_by_dimension
     date_key = partition_keys_dict["date"]
@@ -105,6 +113,19 @@ def silver_reddit_chains(context: AssetExecutionContext) -> MaterializeResult:
 
     with get_duckdb_connection() as con:
         con.execute(query)
+        
+        # Pydantic Validation Gate
+        if config.validation_sample_size is not None:
+            context.log.info(f"Validating sample of {config.validation_sample_size} rows")
+            validation_df = con.execute(f"SELECT * FROM '{target_parquet}' LIMIT {config.validation_sample_size}").fetchdf()
+        else:
+            context.log.info("Validating 100% of generated rows")
+            validation_df = con.execute(f"SELECT * FROM '{target_parquet}'").fetchdf()
+            
+        records = validation_df.to_dict('records')
+        TypeAdapter(list[SilverChain]).validate_python(records)
+        context.log.info("Schema validation strictly passed!")
+        
         preview_df = con.execute(f"SELECT * FROM '{target_parquet}' LIMIT 10").fetchdf()
         preview_md = preview_df.to_markdown()
 
