@@ -224,8 +224,6 @@ def silver_entity_discovery(context: AssetExecutionContext) -> MaterializeResult
     payloads_parquet = get_read_path(f"silver/entity_discovery_payloads_{partition_date_str}.parquet")
     target_parquet = get_write_path(f"silver/entity_discovery_{partition_date_str}.parquet")
 
-    import os
-
     if not os.path.exists(payloads_parquet):
         context.log.info(f"No payloads found for {partition_date_str}. Skipping.")
         return MaterializeResult()
@@ -236,7 +234,6 @@ def silver_entity_discovery(context: AssetExecutionContext) -> MaterializeResult
         df = con.execute(query).df()
 
     extracted_items = []
-    import json
 
     for _, row in df.iterrows():
         try:

@@ -9,7 +9,7 @@ class MentionItem(BaseModel):
         description="The exact continuous text string highlighting the brand and product. (e.g. 'Sony Playstation 5' or 'darn tough socks' or 'lodge cast iron')"
     )
     source_block_ids: list[int] = Field(
-        description="The list of block_ids where this author explicitly mentioned this product."
+        description="The list of block_ids where this author mentioned this product."
     )
 
 

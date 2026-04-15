@@ -1,12 +1,13 @@
 import argparse
 import asyncio
 import json
+import os
+import re
 import sys
 import time
 from pathlib import Path
 
 import tqdm.asyncio
-from tqdm import tqdm
 
 # Allow import of the pipeline package
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
@@ -36,6 +37,52 @@ async def _extract_candidate(
 
     except Exception as e:
         return [], 0.0, f"Skipping doc {doc_id} due to API Error: {e}"
+
+
+def _norm(text: str) -> str:
+    return re.sub(r"[^\w\s]", "", text.lower()).strip()
+
+
+def _evaluate_doc(doc_id: str, expected_benchmark: list[dict], raw_doc_extractions: list[dict]):
+    expected_set = set(
+        (_norm(g.get("raw_mention", "")), g.get("author_id"), tuple(sorted(g.get("source_block_ids", []))))
+        for g in expected_benchmark
+    )
+    extracted_set = set(
+        (_norm(ex.get("raw_mention", "")), ex.get("author_id"), tuple(sorted(ex.get("source_block_ids", []))))
+        for ex in raw_doc_extractions
+    )
+
+    matched_expected = set()
+    matched_extracted = set()
+
+    for exp in expected_set:
+        exp_mention, exp_author, exp_blocks = exp
+        if not exp_mention:
+            continue
+
+        for ext in extracted_set:
+            ext_mention, ext_author, ext_blocks = ext
+            if not ext_mention:
+                continue
+
+            # Strict matching: string must be a substring match, author and block array must be exact matches.
+            if (
+                (exp_mention in ext_mention or ext_mention in exp_mention)
+                and (exp_author == ext_author)
+                and (exp_blocks == ext_blocks)
+            ):
+                matched_expected.add(exp)
+                matched_extracted.add(ext)
+
+    missed = expected_set - matched_expected
+    hallucinations = extracted_set - matched_extracted
+
+    thread_tp = len(matched_expected)
+    thread_fp = len(hallucinations)
+    thread_fn = len(missed)
+
+    return doc_id, missed, hallucinations, thread_tp, thread_fp, thread_fn
 
 
 async def run_evaluation(model_name: str, thinking_budget: str | None, verbose: bool):
@@ -79,52 +126,6 @@ async def run_evaluation(model_name: str, thinking_budget: str | None, verbose: 
 
     print("\nFiring Deterministic Evaluation...")
 
-    def _evaluate_doc(doc_id, expected_benchmark, raw_doc_extractions):
-        import re
-
-        def norm(text):
-            return re.sub(r"[^\w\s]", "", text.lower()).strip()
-
-        expected_set = set(
-            (norm(g.get("raw_mention", "")), g.get("author_id"), tuple(sorted(g.get("source_block_ids", []))))
-            for g in expected_benchmark
-        )
-        extracted_set = set(
-            (norm(ex.get("raw_mention", "")), ex.get("author_id"), tuple(sorted(ex.get("source_block_ids", []))))
-            for ex in raw_doc_extractions
-        )
-
-        matched_expected = set()
-        matched_extracted = set()
-
-        for exp in expected_set:
-            exp_mention, exp_author, exp_blocks = exp
-            if not exp_mention:
-                continue
-
-            for ext in extracted_set:
-                ext_mention, ext_author, ext_blocks = ext
-                if not ext_mention:
-                    continue
-
-                # Strict matching: String must be a substring match, author and block array must be EXCACA matches.
-                if (
-                    (exp_mention in ext_mention or ext_mention in exp_mention)
-                    and (exp_author == ext_author)
-                    and (exp_blocks == ext_blocks)
-                ):
-                    matched_expected.add(exp)
-                    matched_extracted.add(ext)
-
-        missed = expected_set - matched_expected
-        hallucinations = extracted_set - matched_extracted
-
-        thread_tp = len(matched_expected)
-        thread_fp = len(hallucinations)
-        thread_fn = len(missed)
-
-        return doc_id, missed, hallucinations, thread_tp, thread_fp, thread_fn
-
     judge_results = [
         _evaluate_doc(doc_id, ec, [e for e in all_extracted_items if e.get("document_id") == doc_id])
         for doc_id, ec in golden_map.items()
@@ -164,8 +165,6 @@ if __name__ == "__main__":
     parser.add_argument("-t", "--thinking", type=str, default=None, help="Thinking constraint")
     parser.add_argument("-v", "--verbose", action="store_true", help="Print mismatch details")
     args = parser.parse_args()
-
-    import os
 
     if not os.environ.get("GEMINI_API_KEY"):
         print("ERROR: GEMINI_API_KEY is missing.")

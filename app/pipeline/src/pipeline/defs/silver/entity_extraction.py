@@ -10,8 +10,11 @@ from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_ex
 
 from pipeline.prompts.entity_extraction import EntityExtraction, get_extraction_prompt
 from pipeline.utils.db import get_duckdb_connection
+from pipeline.utils.llm import apply_thinking_config
 from pipeline.utils.paths import get_read_path, get_write_path
 from pipeline.utils.pricing import calculate_gemini_cost
+
+_client = genai.Client()
 
 from .shared import PROMPT_VERSION, SILVER_CODE_VERSION, SilverLLMConfig, bifl_daily_partitions
 
@@ -19,7 +22,6 @@ from .shared import PROMPT_VERSION, SILVER_CODE_VERSION, SilverLLMConfig, bifl_d
 async def _process_extraction_batch(
     items: list[dict], model_name: str, semaphore: asyncio.Semaphore, thinking: Optional[str] = None
 ) -> tuple[list[dict], float, int, int]:
-    client = genai.Client()
     results = []
     total_cost = 0.0
     total_input = 0
@@ -39,11 +41,7 @@ async def _process_extraction_batch(
         gen_config = types.GenerateContentConfig(
             response_mime_type="application/json", response_schema=EntityExtraction, temperature=0.1
         )
-        if thinking:
-            if thinking.lstrip("-").isdigit():
-                gen_config.thinking_config = types.ThinkingConfig(thinking_budget=int(thinking))
-            else:
-                gen_config.thinking_config = types.ThinkingConfig(thinking_level=thinking)
+        apply_thinking_config(gen_config, thinking)
 
         @retry(
             stop=stop_after_attempt(3),

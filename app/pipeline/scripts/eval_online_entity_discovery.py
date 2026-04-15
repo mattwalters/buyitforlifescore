@@ -21,6 +21,11 @@ from pipeline.utils.paths import get_read_path
 from pipeline.utils.pricing import calculate_gemini_cost
 from pipeline.utils.tree import build_comment_tree, chunk_branches
 
+# Max content blocks sent to the LLM per thread during eval (OP post + this many comments)
+_EVAL_MAX_BLOCKS = 12
+
+_judge_client = genai.Client()
+
 
 def get_random_bronze_threads(count: int, seed: int = 42) -> list[dict]:
     subs_path = get_read_path("bronze/reddit_buyitforlife_submissions.parquet")
@@ -67,8 +72,8 @@ def get_random_bronze_threads(count: int, seed: int = 42) -> list[dict]:
             if c.get("body") and c.get("body") not in ("[deleted]", "[removed]"):
                 block_id = len(blocks)
                 blocks.append({"block_id": block_id, "author_id": c.get("author", "commenter"), "text": c.get("body")})
-                if len(blocks) > 11:
-                    break  # Keep it somewhat bounded for rapid eval
+                if len(blocks) >= _EVAL_MAX_BLOCKS:
+                    break
 
         threads.append({"document_id": doc_id, "content_blocks": blocks})
     return threads
@@ -95,12 +100,14 @@ async def run_entity_discovery_eval(doc: dict, model_name: str, thinking: str | 
 async def fetch_judgment(doc_id: str, blocks_json: str, extractions: list[dict], model_name: str, thinking_tokens: int):
     prompt = get_blind_judge_discovery_prompt(blocks_json, extractions)
 
-    client = genai.Client()
     gen_config = types.GenerateContentConfig(
         response_mime_type="application/json", response_schema=JudgeDiscoveryResult, temperature=0.1
     )
     if thinking_tokens:
         gen_config.thinking_config = types.ThinkingConfig(thinking_budget=thinking_tokens)
+
+    # Accumulated across all attempts — if Google returned a response, we were charged,
+    # regardless of whether our parsing succeeded.
     accumulated_cost = 0.0
 
     def log_retry(rs):
@@ -115,14 +122,11 @@ async def fetch_judgment(doc_id: str, blocks_json: str, extractions: list[dict],
     )
     async def call_api():
         nonlocal accumulated_cost
-        response = await client.aio.models.generate_content(model=model_name, contents=prompt, config=gen_config)
+        response = await _judge_client.aio.models.generate_content(model=model_name, contents=prompt, config=gen_config)
+        # Capture cost before parsing — a response was received, so Google charged us.
         if response.usage_metadata:
             accumulated_cost += calculate_gemini_cost(model_name, response.usage_metadata)
-
-        data = None
-        if response.text:
-            js = json.loads(response.text)
-            data = JudgeDiscoveryResult(**js)
+        data = JudgeDiscoveryResult(**json.loads(response.text)) if response.text else None
         return data
 
     try:
@@ -176,7 +180,7 @@ async def main():
     start_t2 = time.time()
     judge_tasks = [fetch_judgment(res[0], res[1], res[2], args.judge_model, args.judge_think) for res in ext_results]
     judge_results = await tqdm.gather(*judge_tasks, desc="Judging Quality")
-    time.time() - start_t2
+    judge_latency = time.time() - start_t2
 
     total_judge_cost = 0.0
     global_tp = 0
@@ -213,6 +217,8 @@ async def main():
     print(f"Entity QA F1-Score: {f1 * 100:.1f}%")
     print(f"  QA Precision:     {precision * 100:.1f}% (TP: {global_tp}, FP: {global_fp})")
     print(f"  QA Recall:        {recall * 100:.1f}% (TP: {global_tp}, FN: {global_fn})")
+    print(f"Extraction Latency: {ext_latency:.2f}s")
+    print(f"Judge Latency:      {judge_latency:.2f}s")
     print(f"Extraction Cost:    ${total_ext_cost:.5f}")
     print(f"QA Judge Cost:      ${total_judge_cost:.5f}")
 

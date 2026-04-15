@@ -13,6 +13,7 @@ from google.genai import types
 # Allow import of the pipeline package
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
+from pipeline.utils.llm import apply_thinking_config
 from pipeline.utils.pricing import AiModel, calculate_gemini_cost
 
 # Allow fallback defaults
@@ -72,12 +73,7 @@ async def evaluate_extraction(
     gen_config = types.GenerateContentConfig(
         response_mime_type="application/json", response_schema=EntityExtraction, temperature=0.1
     )
-
-    if thinking:
-        if thinking.lstrip("-").isdigit():
-            gen_config.thinking_config = types.ThinkingConfig(thinking_budget=int(thinking))
-        else:
-            gen_config.thinking_config = types.ThinkingConfig(thinking_level=thinking)
+    apply_thinking_config(gen_config, thinking)
 
     cost = 0.0
     try:

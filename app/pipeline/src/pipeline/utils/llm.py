@@ -18,6 +18,29 @@ from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_ex
 from pipeline.prompts.entity_discovery import MentionItem, get_entity_discovery_prompt
 from pipeline.utils.pricing import calculate_gemini_cost
 
+_client: Optional[genai.Client] = None
+
+
+def _get_client() -> genai.Client:
+    global _client
+    if _client is None:
+        _client = genai.Client()
+    return _client
+
+
+def apply_thinking_config(gen_config: types.GenerateContentConfig, thinking: Optional[str]) -> None:
+    """Applies the appropriate ThinkingConfig to gen_config in-place.
+
+    Accepts either a numeric string (thinking_budget) or a level string
+    like "low", "medium", or "high" (thinking_level).
+    """
+    if not thinking:
+        return
+    if thinking.lstrip("-").isdigit():
+        gen_config.thinking_config = types.ThinkingConfig(thinking_budget=int(thinking))
+    else:
+        gen_config.thinking_config = types.ThinkingConfig(thinking_level=thinking)
+
 
 @dataclass
 class DiscoveryResult:
@@ -54,7 +77,7 @@ async def run_entity_discovery(
     Returns:
         A DiscoveryResult containing parsed items, raw JSON, cost, and token counts.
     """
-    client = genai.Client()
+    client = _get_client()
     prompt = get_entity_discovery_prompt(content_blocks_json)
 
     gen_config = types.GenerateContentConfig(
@@ -62,12 +85,7 @@ async def run_entity_discovery(
         response_schema=list[MentionItem],
         temperature=0.1,
     )
-
-    if thinking:
-        if thinking.lstrip("-").isdigit():
-            gen_config.thinking_config = types.ThinkingConfig(thinking_budget=int(thinking))
-        else:
-            gen_config.thinking_config = types.ThinkingConfig(thinking_level=thinking)
+    apply_thinking_config(gen_config, thinking)
 
     @retry(
         stop=stop_after_attempt(3),
