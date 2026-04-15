@@ -1,30 +1,25 @@
 import os
+import json
 import asyncio
 import pandas as pd
 from typing import Optional
 
-from google import genai
-from google.genai import types
-from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 from dagster import asset, MaterializeResult, AssetExecutionContext, MetadataValue
 
-from pipeline.utils.pricing import calculate_gemini_cost
 from pipeline.utils.paths import get_read_path, get_write_path
 from pipeline.utils.db import get_duckdb_connection
 from pipeline.utils.tree import build_comment_tree, chunk_branches
+from pipeline.utils.llm import run_entity_discovery
 
 from .shared import bifl_daily_partitions, SILVER_CODE_VERSION, PROMPT_VERSION, SilverLLMConfig
-from pipeline.prompts.entity_discovery import MentionItem, get_entity_discovery_prompt
 
 async def _process_discovery_batch(threads: list[tuple], model_name: str, semaphore: asyncio.Semaphore, thinking: Optional[str] = None) -> tuple[list[dict], float, int, int]:
-    client = genai.Client()
     results = []
     total_cost = 0.0
     total_input = 0
     total_output = 0
     
     async def _extract_chunk(submission_id: str, title: str, body: str, chunk: list, chunk_index: int, created_utc: Optional[str] = None):
-        import json
         
         # Build Canonical ContentBlocks array
         content_blocks = []
@@ -48,85 +43,41 @@ async def _process_discovery_batch(threads: list[tuple], model_name: str, semaph
                     
         thread_text = json.dumps([{k: v for k, v in b.items() if k != 'created_utc'} for b in content_blocks], indent=2)
 
-        prompt = get_entity_discovery_prompt(thread_text)
-        
         nonlocal total_cost, total_input, total_output
-        gen_config = types.GenerateContentConfig(
-            response_mime_type="application/json",
-            response_schema=list[MentionItem],
-            temperature=0.1
-        )
-        if thinking:
-            if thinking.lstrip('-').isdigit():
-                gen_config.thinking_config = types.ThinkingConfig(
-                    thinking_budget=int(thinking)
-                )
-            else:
-                gen_config.thinking_config = types.ThinkingConfig(
-                    thinking_level=thinking
-                )
-            
-        @retry(
-            stop=stop_after_attempt(3),
-            wait=wait_exponential(multiplier=2, min=4, max=10),
-            retry=retry_if_exception_type(Exception),
-            reraise=True
-        )
-        async def call_api():
-            return await client.aio.models.generate_content(
-                model=model_name,
-                contents=prompt,
-                config=gen_config,
+
+        try:
+            result = await run_entity_discovery(
+                content_blocks_json=thread_text,
+                model_name=model_name,
+                thinking=thinking,
+                semaphore=semaphore,
             )
+                    
+            total_cost += result.cost
+            total_input += result.input_tokens
+            total_output += result.output_tokens
+                    
+            chunk_id = f"{submission_id}_chunk_{chunk_index}"
+            
+            results.append({
+                "chunk_id": chunk_id,
+                "submission_id": submission_id,
+                "chunk_index": chunk_index,
+                "target_authored_at": created_utc,
+                "model_used": model_name,
+                "thinking_level": thinking,
+                "input_tokens": result.input_tokens,
+                "output_tokens": result.output_tokens,
+                "cost_usd": result.cost,
+                "raw_json_output": result.raw_json,
+                "parent_text": title,
+                "content_blocks_json": json.dumps(content_blocks),
+                "full_prompt_text": result.prompt_text
+            })
 
-        async with semaphore:
-            try:
-                response = await call_api()
-                
-                cost = 0.0
-                prompt_tokens = 0
-                candidates_tokens = 0
-                
-                # Aggregate costs
-                if response.usage_metadata:
-                    usage = response.usage_metadata
-                    # We pass the raw python SDK object into your ported pricing utility
-                    cost = calculate_gemini_cost(model_name, usage)
-                    total_cost += cost
-                    
-                    prompt_tokens = usage.prompt_token_count or 0
-                    candidates_tokens = usage.candidates_token_count or 0
-                    
-                    total_input += prompt_tokens
-                    total_output += candidates_tokens
-                
-                import json
-                raw_json = response.text if response.text else "[]"
-                # Sometimes gemini wraps in markdown blocks
-                if raw_json.startswith("```json"):
-                    raw_json = raw_json[7:-3]
-                    
-                chunk_id = f"{submission_id}_chunk_{chunk_index}"
-                
-                results.append({
-                    "chunk_id": chunk_id,
-                    "submission_id": submission_id,
-                    "chunk_index": chunk_index,
-                    "target_authored_at": created_utc,
-                    "model_used": model_name,
-                    "thinking_level": thinking,
-                    "input_tokens": prompt_tokens,
-                    "output_tokens": candidates_tokens,
-                    "cost_usd": cost,
-                    "raw_json_output": raw_json,
-                    "parent_text": title,
-                    "content_blocks_json": json.dumps(content_blocks),
-                    "full_prompt_text": prompt
-                })
-
-            except Exception as e:
-                # In Dagster, we fail gracefully per-item or log warnings, but for simplicity we skip failing texts.
-                print(f"Skipping thread {submission_id} due to API Error: {e}")
+        except Exception as e:
+            # In Dagster, we fail gracefully per-item or log warnings, but for simplicity we skip failing texts.
+            print(f"Skipping thread {submission_id} due to API Error: {e}")
 
     tasks = []
     for thread in threads:

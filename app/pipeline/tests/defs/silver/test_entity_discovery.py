@@ -2,10 +2,10 @@ import pytest
 import json
 from unittest.mock import MagicMock
 from dagster import build_asset_context
-from google.genai import types
 
 from pipeline.defs.silver.shared import SilverLLMConfig
 from pipeline.defs.silver.entity_discovery import silver_entity_discovery_payloads
+from pipeline.utils.llm import DiscoveryResult
 
 def test_silver_entity_discovery_payloads_success(mocker, monkeypatch, tmp_path):
     # Overwrite the environment keys natively so the test avoids the API safety catch
@@ -24,35 +24,29 @@ def test_silver_entity_discovery_payloads_success(mocker, monkeypatch, tmp_path)
     # The first call to conn.execute().fetchall() is the core data load
     mock_conn.execute.return_value.fetchall.return_value = [
         # (submission_id, title, body, created_utc, comments_list)
-        ("t3_123", "Best Boots?", "I need BIFL boots", "2024-01-01", [{"body": "Get Red Wings", "created_utc": "2024-01-02"}])
+        ("t3_123", "Best Boots?", "I need BIFL boots", "2024-01-01", [{"id": "c1", "parent_id": "t3_t3_123", "body": "Get Red Wings", "created_utc": "2024-01-02"}])
     ]
     
-    # 3. Mock the LLM API (Google GenAI)
-    # We mock the client instantiation inside _process_discovery_batch
-    mock_genai_client = mocker.patch("pipeline.defs.silver.entity_discovery.genai.Client")
-    
-    # Set up the AsyncMock for the API call
-    mock_api_call = mocker.AsyncMock()
-    
-    # Construct a valid fake response
-    fake_response = MagicMock()
-    fake_response.text = json.dumps([
-        {"brand": "Red Wing", "productName": "Iron Ranger"}
-    ])
-    
-    # Construct fake token usage to ensure your cost calculation triggers nicely!
-    # By using a SimpleNamespace, we provide an object that supports standard dot-notation
-    # (which the loop uses) and avoids MagicMock's nested mock returning issues.
-    from types import SimpleNamespace
-    fake_response.usage_metadata = SimpleNamespace(
-        prompt_token_count=100,
-        candidates_token_count=50,
-        cached_content_token_count=0,
-        thoughts_token_count=0
+    # 3. Mock the shared LLM function (run_entity_discovery)
+    mock_llm = mocker.patch("pipeline.defs.silver.entity_discovery.run_entity_discovery")
+    mock_llm.return_value = DiscoveryResult(
+        items=[{"brand": "Red Wing", "productName": "Iron Ranger"}],
+        raw_json=json.dumps([{"brand": "Red Wing", "productName": "Iron Ranger"}]),
+        cost=0.001,
+        input_tokens=100,
+        output_tokens=50,
+        prompt_text="mock prompt",
     )
-    
-    mock_api_call.return_value = fake_response
-    mock_genai_client.return_value.aio.models.generate_content = mock_api_call
+    # Make the mock awaitable
+    mock_llm = mocker.patch("pipeline.defs.silver.entity_discovery.run_entity_discovery", new_callable=mocker.AsyncMock)
+    mock_llm.return_value = DiscoveryResult(
+        items=[{"brand": "Red Wing", "productName": "Iron Ranger"}],
+        raw_json=json.dumps([{"brand": "Red Wing", "productName": "Iron Ranger"}]),
+        cost=0.001,
+        input_tokens=100,
+        output_tokens=50,
+        prompt_text="mock prompt",
+    )
     
     # 4. Rig the Dagster Context & Config
     # Partitions match our expected daily partitions in Dagster
@@ -66,8 +60,8 @@ def test_silver_entity_discovery_payloads_success(mocker, monkeypatch, tmp_path)
     # Verify the DuckDB pipeline was queried successfully
     assert mock_conn.execute.call_count >= 1
     
-    # Verify the Google GenAI Endpoint was hit for prediction
-    assert mock_api_call.call_count == 1
+    # Verify the shared LLM function was called for entity discovery
+    assert mock_llm.call_count == 1
     
     # Verify Dagster properly yielded its Metadata
     # (Dagster passes primitives natively, but wraps explicit MetadataValue types)

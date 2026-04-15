@@ -4,72 +4,34 @@ import asyncio
 import time
 import argparse
 from pathlib import Path
-from pydantic import BaseModel, Field
-from google import genai
-from google.genai import types
 from tqdm import tqdm
 import tqdm.asyncio
 
 # Allow import of the pipeline package
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
-from pipeline.utils.pricing import calculate_gemini_cost
-from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
-from pipeline.prompts.entity_discovery import MentionItem, get_entity_discovery_prompt
+from pipeline.utils.llm import run_entity_discovery
 
 async def _extract_candidate(doc_id: str, content_blocks: list[dict], model_name: str, thinking: str | None, semaphore: asyncio.Semaphore) -> tuple[list[dict], float]:
-    """Runs Phase 1 LLM extraction on flat Canonical Data."""
-    client = genai.Client()
-    
+    """Thin wrapper around the shared run_entity_discovery for offline eval context."""
     thread_text = json.dumps(content_blocks, indent=2)
-
-    prompt = get_entity_discovery_prompt(thread_text)
-        
-    gen_config = types.GenerateContentConfig(
-        response_mime_type="application/json",
-        response_schema=list[MentionItem],
-        temperature=0.1
-    )
     
-    if thinking:
-        if thinking.lstrip('-').isdigit():
-            gen_config.thinking_config = types.ThinkingConfig(thinking_budget=int(thinking))
-        else:
-            gen_config.thinking_config = types.ThinkingConfig(thinking_level=thinking)
-            
-    cost = 0.0
-    results = []
-    
-    async with semaphore:
-        @retry(
-            stop=stop_after_attempt(4),
-            wait=wait_exponential(multiplier=2, min=2, max=10),
-            retry=retry_if_exception_type(Exception),
-            reraise=True
+    try:
+        result = await run_entity_discovery(
+            content_blocks_json=thread_text,
+            model_name=model_name,
+            thinking=thinking,
+            semaphore=semaphore,
         )
-        async def call_api():
-            return await client.aio.models.generate_content(
-                model=model_name,
-                contents=prompt,
-                config=gen_config,
-            )
+        
+        items = result.items
+        for item in items:
+            item['document_id'] = doc_id
             
-        try:
-            response = await call_api()
-            
-            if response.usage_metadata:
-                cost = calculate_gemini_cost(model_name, response.usage_metadata)
-            
-            if response.text:
-                items = json.loads(response.text)
-                for item in items:
-                    item['document_id'] = doc_id
-                    results.append(item)
-                    
-        except Exception as e:
-            return [], cost, f"Skipping doc {doc_id} due to API Error: {e}"
-            
-    return results, cost, None
+        return items, result.cost, None
+        
+    except Exception as e:
+        return [], 0.0, f"Skipping doc {doc_id} due to API Error: {e}"
 
 
 async def run_evaluation(model_name: str, thinking_budget: str | None, verbose: bool):

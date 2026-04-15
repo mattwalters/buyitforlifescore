@@ -4,7 +4,6 @@ import json
 import time
 import argparse
 from tqdm.asyncio import tqdm
-from pydantic import BaseModel
 
 import sys
 from pathlib import Path
@@ -18,6 +17,7 @@ from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_excep
 from pipeline.utils.db import get_duckdb_connection
 from pipeline.utils.paths import get_read_path
 from pipeline.utils.tree import build_comment_tree, chunk_branches
+from pipeline.utils.llm import run_entity_discovery
 
 from pipeline.prompts.entity_discovery import get_entity_discovery_prompt, MentionItem
 from pipeline.prompts.judge_online_discovery import get_blind_judge_discovery_prompt, JudgeDiscoveryResult
@@ -47,7 +47,7 @@ def get_random_bronze_threads(count: int, seed: int = 42) -> list[dict]:
             con.execute(f"SELECT setseed({seed/100.0})")
         rows = con.execute(query).fetchall()
         
-    fixtures = []
+    threads = []
     for row in rows:
         doc_id, title, body, comments = row
         
@@ -77,47 +77,28 @@ def get_random_bronze_threads(count: int, seed: int = 42) -> list[dict]:
                 })
                 if len(blocks) > 11: break  # Keep it somewhat bounded for rapid eval
                 
-        fixtures.append({
+        threads.append({
             "document_id": doc_id,
             "content_blocks": blocks
         })
-    return fixtures
+    return threads
 
-async def fetch_extraction(doc: dict, model_name: str, thinking_tokens: int):
+async def run_entity_discovery_eval(doc: dict, model_name: str, thinking: str | None, semaphore: asyncio.Semaphore):
+    """Thin wrapper around the shared run_entity_discovery for eval context."""
     doc_id = doc['document_id']
     blocks_json = json.dumps(doc['content_blocks'], indent=2)
-    prompt = get_entity_discovery_prompt(blocks_json)
-    
-    client = genai.Client()
-    gen_config = types.GenerateContentConfig(
-        response_mime_type="application/json",
-        response_schema=list[MentionItem],
-        temperature=0.1
-    )
-    if thinking_tokens:
-        gen_config.thinking_config = types.ThinkingConfig(thinking_budget=thinking_tokens)
-    accumulated_cost = 0.0
-    
-    def log_retry(rs):
-        print(f"\n[⚠️ RETRY] Extraction failed on {doc_id} (Attempt {rs.attempt_number}/3). Error: {rs.outcome.exception()}")
-        
-    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=2, min=2, max=10), retry=retry_if_exception_type(Exception), reraise=True, before_sleep=log_retry)
-    async def call_api():
-        nonlocal accumulated_cost
-        response = await client.aio.models.generate_content(model=model_name, contents=prompt, config=gen_config)
-        if response.usage_metadata:
-            accumulated_cost += calculate_gemini_cost(model_name, response.usage_metadata)
-            
-        items = json.loads(response.text) if response.text else []
-        extracted_dicts = [item for item in items if isinstance(item, dict)]
-        return extracted_dicts
     
     try:
-        raw_mentions = await call_api()
-        return doc_id, blocks_json, raw_mentions, accumulated_cost
+        result = await run_entity_discovery(
+            content_blocks_json=blocks_json,
+            model_name=model_name,
+            thinking=str(thinking) if thinking else None,
+            semaphore=semaphore,
+        )
+        return doc_id, blocks_json, result.items, result.cost
     except Exception as e:
         print(f"\n[🚨 FATAL] Extraction fully failed on {doc_id} after 3 attempts. Error: {e}")
-        return doc_id, blocks_json, [], accumulated_cost
+        return doc_id, blocks_json, [], 0.0
 
 async def fetch_judgment(doc_id: str, blocks_json: str, extractions: list[dict], model_name: str, thinking_tokens: int):
     prompt = get_blind_judge_discovery_prompt(blocks_json, extractions)
@@ -167,15 +148,16 @@ async def main():
 
     print(f"--- Entity Discovery Phase 1 [ONLINE/SHADOW] Eval ---")
     print(f"Sampling {args.count} real-world threads from Bronze layer.")
-    fixtures = get_random_bronze_threads(args.count)
-    if not fixtures:
+    threads = get_random_bronze_threads(args.count)
+    if not threads:
         print("Could not load any bronze threads.")
         return
 
     # PHASE 1: EXTRACTION
+    semaphore = asyncio.Semaphore(10)
     print(f"Firing Pipeline Extractor: {args.extractor_model} (Thinking: {args.extractor_think})")
     start_t1 = time.time()
-    ext_tasks = [fetch_extraction(f, args.extractor_model, args.extractor_think) for f in fixtures]
+    ext_tasks = [run_entity_discovery_eval(t, args.extractor_model, str(args.extractor_think) if args.extractor_think else None, semaphore) for t in threads]
     ext_results = await tqdm.gather(*ext_tasks, desc="Extracting Entities")
     ext_latency = time.time() - start_t1
     
