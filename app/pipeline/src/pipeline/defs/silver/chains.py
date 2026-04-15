@@ -1,6 +1,9 @@
+import hashlib
+from collections import defaultdict
 from datetime import datetime, timezone
 from typing import Optional
 
+import pandas as pd
 from dagster import (
     AssetDep,
     AssetExecutionContext,
@@ -34,6 +37,71 @@ chains_partitions_def = MultiPartitionsDefinition(
 )
 
 
+def build_thread_chains(submissions: list[dict], comments: list[dict]) -> list[dict]:
+    # Group comments by link_id (submission)
+    comments_by_sub = defaultdict(list)
+    for c in comments:
+        comments_by_sub[c["link_id"]].append(c)
+
+    all_chains = []
+    seen_nodes = set()
+
+    for sub in submissions:
+        sub_id = sub["submission_id"]
+        sub_node_id = sub["reddit_node_id"]
+        sub_comments = comments_by_sub.get(sub_node_id, [])
+
+        # Build adjacency dictionary for this submission's comments
+        children_map = defaultdict(list)
+        for c in sub_comments:
+            children_map[c["parent_id"]].append(c)
+
+        # Helper for DFS
+        def build_paths(current_node_id, current_path):
+            children = children_map.get(current_node_id, [])
+            if not children:
+                # Leaf node, save the path
+                path_str = str(current_path)
+                # Ensure a stable deterministic hash mimicking DuckDB's hash functionality
+                chain_id = str(int(hashlib.sha256(path_str.encode("utf-8")).hexdigest()[:15], 16))
+                all_chains.append({"submission_id": sub_id, "chain_id": chain_id, "path": list(current_path)})
+            else:
+                for child in children:
+                    current_path.append(child["reddit_node_id"])
+                    build_paths(child["reddit_node_id"], current_path)
+                    current_path.pop()
+
+        # Start recursive path building from the submission root
+        build_paths(sub_node_id, [sub_node_id])
+
+    # Now flatten paths into sequence items to match schema and assign is_canonical
+    silver_chain_records = []
+
+    # Sort chains deterministically to mimic SQL ORDER BY chain_id
+    all_chains.sort(key=lambda x: x["chain_id"])
+
+    for chain in all_chains:
+        chain_id = chain["chain_id"]
+        submission_id = chain["submission_id"]
+        for idx, node_id in enumerate(chain["path"]):
+            is_canonical = False
+            if node_id not in seen_nodes:
+                is_canonical = True
+                seen_nodes.add(node_id)
+
+            silver_chain_records.append(
+                {
+                    "chain_id": chain_id,
+                    "submission_id": submission_id,
+                    "reddit_node_id": node_id,
+                    "sequence_order": idx + 1,  # 1-based indexing
+                    "is_canonical": is_canonical,
+                }
+            )
+
+    return silver_chain_records
+
+
 @asset(
     group_name="silver",
     partitions_def=chains_partitions_def,
@@ -61,7 +129,7 @@ def silver_reddit_chains(context: AssetExecutionContext, config: SilverRedditCha
     dt = datetime.strptime(date_key, "%Y-%m-%d").replace(tzinfo=timezone.utc)
     start_utc = int(dt.timestamp())
     end_utc = start_utc + 86400
-    cutoff_utc = start_utc + (45 * 86400) # 45 day comment window
+    cutoff_utc = start_utc + (45 * 86400)  # 45 day comment window
 
     # Generate partitioned write path using Hive-style partitions
     target_parquet = get_write_path(f"silver/chains/subreddit={sub_lower}/date={date_key}/chains.parquet")
@@ -69,98 +137,59 @@ def silver_reddit_chains(context: AssetExecutionContext, config: SilverRedditCha
     source_submissions = get_read_path(f"bronze/reddit_{sub_lower}_submissions.parquet")
     source_comments = get_read_path(f"bronze/reddit_{sub_lower}_comments.parquet")
 
-    # We use CAST(s.created_utc AS BIGINT) and to_timestamp to safely parse the Unix timestamp.
-    query = f"""
-    COPY (
-        WITH RECURSIVE target_submissions AS (
-            SELECT
-                CAST(s.id AS VARCHAR) AS submission_id,
-                COALESCE(CAST(s.name AS VARCHAR), 't3_' || CAST(s.id AS VARCHAR)) AS reddit_node_id,
-                CAST(s.subreddit AS VARCHAR) AS subreddit,
-                [COALESCE(CAST(s.name AS VARCHAR), 't3_' || CAST(s.id AS VARCHAR))] AS path_nodes,
-                COALESCE(CAST(s.name AS VARCHAR), 't3_' || CAST(s.id AS VARCHAR)) AS current_node,
-                1 AS depth
-            FROM read_parquet('{source_submissions}') s
-            WHERE lower(CAST(s.subreddit AS VARCHAR)) = '{sub_lower}'
-            AND CAST(s.created_utc AS BIGINT) >= {start_utc}
-            AND CAST(s.created_utc AS BIGINT) < {end_utc}
-        ),
-        target_comments AS (
-            SELECT c.*
-            FROM read_parquet('{source_comments}') c
-            SEMI JOIN target_submissions s 
-              ON trim(CAST(c.link_id AS VARCHAR), '"') = s.reddit_node_id
-            WHERE CAST(c.created_utc AS BIGINT) >= {start_utc}
-            AND CAST(c.created_utc AS BIGINT) < {cutoff_utc}
-        ),
-        chains AS (
-            SELECT * FROM target_submissions
+    sub_query = f"""
+        SELECT
+            CAST(s.id AS VARCHAR) AS submission_id,
+            COALESCE(CAST(s.name AS VARCHAR), 't3_' || CAST(s.id AS VARCHAR)) AS reddit_node_id,
+            CAST(s.subreddit AS VARCHAR) AS subreddit
+        FROM read_parquet('{source_submissions}') s
+        WHERE lower(CAST(s.subreddit AS VARCHAR)) = '{sub_lower}'
+        AND CAST(s.created_utc AS BIGINT) >= {start_utc}
+        AND CAST(s.created_utc AS BIGINT) < {end_utc}
+    """
 
-            UNION ALL
-
-            SELECT
-                p.submission_id,
-                COALESCE(CAST(c.name AS VARCHAR), 't1_' || CAST(c.id AS VARCHAR)) AS reddit_node_id,
-                CAST(c.subreddit AS VARCHAR) AS subreddit,
-                list_append(p.path_nodes, COALESCE(CAST(c.name AS VARCHAR), 't1_' || CAST(c.id AS VARCHAR))) AS path_nodes,
-                COALESCE(CAST(c.name AS VARCHAR), 't1_' || CAST(c.id AS VARCHAR)) AS current_node,
-                p.depth + 1 AS depth
-            FROM target_comments c
-            JOIN chains p ON trim(CAST(c.parent_id AS VARCHAR), '"') = p.current_node
-        ),
-        leaf_nodes AS (
-            SELECT c.*
-            FROM chains c
-            LEFT JOIN target_comments child
-              ON trim(CAST(child.parent_id AS VARCHAR), '"') = c.current_node
-            WHERE child.name IS NULL
-        ),
-        unnested_paths AS (
-            SELECT
-                CAST(hash(CAST(path_nodes AS VARCHAR)) AS VARCHAR) AS chain_id,
-                submission_id,
-                UNNEST(path_nodes) AS reddit_node_id,
-                path_nodes
-            FROM leaf_nodes
-        ),
-        numbered_paths AS (
-            SELECT
-                chain_id,
-                submission_id,
-                CAST(reddit_node_id AS VARCHAR) AS reddit_node_id,
-                list_position(path_nodes, reddit_node_id) as sequence_order
-            FROM unnested_paths
+    com_query = f"""
+        WITH target_submissions AS (
+            {sub_query}
         )
         SELECT
-            chain_id,
-            submission_id,
-            reddit_node_id,
-            sequence_order,
-            CAST(ROW_NUMBER() OVER(PARTITION BY reddit_node_id ORDER BY chain_id) = 1 AS BOOLEAN) AS is_canonical
-        FROM numbered_paths
-        ORDER BY chain_id, sequence_order
-    ) TO '{target_parquet}' (FORMAT PARQUET);
+            CAST(c.id AS VARCHAR) AS comment_id,
+            COALESCE(CAST(c.name AS VARCHAR), 't1_' || CAST(c.id AS VARCHAR)) AS reddit_node_id,
+            trim(CAST(c.parent_id AS VARCHAR), '"') AS parent_id,
+            trim(CAST(c.link_id AS VARCHAR), '"') AS link_id,
+            CAST(c.subreddit AS VARCHAR) AS subreddit
+        FROM read_parquet('{source_comments}') c
+        SEMI JOIN target_submissions s
+          ON trim(CAST(c.link_id AS VARCHAR), '"') = s.reddit_node_id
+        WHERE CAST(c.created_utc AS BIGINT) >= {start_utc}
+        AND CAST(c.created_utc AS BIGINT) < {cutoff_utc}
     """
 
     context.log.info(f"Generating chains for {subreddit_key} on {date_key}")
 
     with get_duckdb_connection() as con:
-        con.execute(query)
+        submissions_df = con.execute(sub_query).fetchdf()
+        comments_df = con.execute(com_query).fetchdf()
 
-        # Pydantic Validation Gate
-        if config.validation_sample_size is not None:
-            context.log.info(f"Validating sample of {config.validation_sample_size} rows")
-            validation_df = con.execute(
-                f"SELECT * FROM '{target_parquet}' LIMIT {config.validation_sample_size}"
-            ).fetchdf()
-        else:
-            context.log.info("Validating 100% of generated rows")
-            validation_df = con.execute(f"SELECT * FROM '{target_parquet}'").fetchdf()
+    submissions = submissions_df.to_dict("records")
+    comments = comments_df.to_dict("records")
 
-        records = validation_df.to_dict("records")
+    records = build_thread_chains(submissions, comments)
+
+    # Pydantic Validation Gate
+    if config.validation_sample_size is not None:
+        context.log.info(f"Validating sample of {config.validation_sample_size} rows")
+        TypeAdapter(list[SilverChain]).validate_python(records[: config.validation_sample_size])
+    else:
+        context.log.info("Validating 100% of generated rows")
         TypeAdapter(list[SilverChain]).validate_python(records)
-        context.log.info("Schema validation strictly passed!")
+    context.log.info("Schema validation strictly passed!")
 
+    # Write back to Parquet via DuckDB
+    output_df = pd.DataFrame(records)  # noqa: F841
+    with get_duckdb_connection() as con:
+        # Load into duckdb and export to partitioned parquet file
+        con.execute(f"COPY (SELECT * FROM output_df) TO '{target_parquet}' (FORMAT PARQUET)")
         preview_df = con.execute(f"SELECT * FROM '{target_parquet}' LIMIT 10").fetchdf()
         preview_md = preview_df.to_markdown()
 

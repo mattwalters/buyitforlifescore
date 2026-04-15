@@ -1,61 +1,41 @@
 import duckdb
+import pandas as pd
 from dagster import MultiPartitionKey, build_asset_context
 
-from pipeline.defs.silver.chains import SilverRedditChainsConfig, silver_reddit_chains
+from pipeline.defs.silver.chains import SilverRedditChainsConfig, build_thread_chains, silver_reddit_chains
 
 
-def test_duckdb_recursive_chain_logic():
-    """Atomic test for recursive CTE logic using in-memory DuckDB."""
-    con = duckdb.connect()
+def test_python_recursive_chain_logic():
+    """Atomic test for recursive chain logic using the new Python builder."""
+    submissions = [{"submission_id": "S1", "reddit_node_id": "t3_S1", "subreddit": "buyitforlife"}]
 
-    con.execute("""
-    CREATE TABLE submissions (id VARCHAR, name VARCHAR, subreddit VARCHAR, created_utc BIGINT);
-    CREATE TABLE comments (id VARCHAR, name VARCHAR, parent_id VARCHAR, link_id VARCHAR, subreddit VARCHAR, created_utc BIGINT);
+    comments = [
+        {
+            "comment_id": "C1",
+            "reddit_node_id": "t1_C1",
+            "parent_id": "t3_S1",
+            "link_id": "t3_S1",
+            "subreddit": "buyitforlife",
+        },
+        {
+            "comment_id": "C2",
+            "reddit_node_id": "t1_C2",
+            "parent_id": "t1_C1",
+            "link_id": "t3_S1",
+            "subreddit": "buyitforlife",
+        },
+        {
+            "comment_id": "C3",
+            "reddit_node_id": "t1_C3",
+            "parent_id": "t3_S1",
+            "link_id": "t3_S1",
+            "subreddit": "buyitforlife",
+        },
+    ]
 
-    INSERT INTO submissions VALUES
-    ('S1', 't3_S1', 'buyitforlife', 1600000000);
+    records = build_thread_chains(submissions, comments)
+    df = pd.DataFrame(records)
 
-    INSERT INTO comments VALUES
-    ('C1', 't1_C1', '"t3_S1"', '"t3_S1"', 'buyitforlife', 1600000010),
-    ('C2', 't1_C2', '"t1_C1"', '"t3_S1"', 'buyitforlife', 1600000020),
-    ('C3', 't1_C3', '"t3_S1"', '"t3_S1"', 'buyitforlife', 1600000030);
-    """)
-
-    query = """
-    WITH RECURSIVE target_submissions AS (
-        SELECT s.id AS submission_id, COALESCE(s.name, 't3_' || s.id) AS reddit_node_id, s.subreddit,
-               [COALESCE(s.name, 't3_' || s.id)] AS path_nodes, COALESCE(s.name, 't3_' || s.id) AS current_node, 1 AS depth
-        FROM submissions s WHERE lower(s.subreddit) = 'buyitforlife'
-    ), target_comments AS (
-        SELECT c.* FROM comments c
-        SEMI JOIN target_submissions s ON trim(c.link_id, '"') = s.reddit_node_id
-    ), 
-    chains AS (
-        SELECT * FROM target_submissions
-        UNION ALL
-        SELECT p.submission_id, COALESCE(c.name, 't1_' || c.id) AS reddit_node_id, c.subreddit,
-               list_append(p.path_nodes, COALESCE(c.name, 't1_' || c.id)) AS path_nodes, COALESCE(c.name, 't1_' || c.id) AS current_node, p.depth + 1 AS depth
-        FROM target_comments c JOIN chains p ON trim(c.parent_id, '"') = p.current_node
-    ), leaf_nodes AS (
-        SELECT c.* FROM chains c LEFT JOIN target_comments child ON trim(child.parent_id, '"') = c.current_node
-        WHERE child.name IS NULL
-    ), unnested_paths AS (
-        SELECT
-            hash(path_nodes::VARCHAR)::VARCHAR AS chain_id,
-            submission_id,
-            UNNEST(path_nodes) AS reddit_node_id,
-            path_nodes
-        FROM leaf_nodes
-    ), numbered_paths AS (
-        SELECT chain_id, submission_id, reddit_node_id, list_position(path_nodes, reddit_node_id) as sequence_order
-        FROM unnested_paths
-    )
-    SELECT chain_id, submission_id, reddit_node_id, sequence_order,
-           CAST(ROW_NUMBER() OVER(PARTITION BY reddit_node_id ORDER BY chain_id) = 1 AS BOOLEAN) AS is_canonical
-    FROM numbered_paths ORDER BY chain_id, sequence_order;
-    """
-
-    df = con.execute(query).fetchdf()
     assert len(df) == 5
 
     # S1 should appear twice, once canonical and once not
@@ -76,18 +56,22 @@ def test_silver_reddit_chains_execution(monkeypatch, tmp_path):
     con = duckdb.connect()
 
     # Create mock parquets
-    con.execute(f"""
+    con.execute(
+        f"""
         CREATE TABLE sub (id VARCHAR, name VARCHAR, subreddit VARCHAR, created_utc BIGINT);
         INSERT INTO sub VALUES ('mock_s1', 't3_mock', 'buyitforlife', 1293840000);
         -- 1293840000 is 2011-01-01
 
         COPY sub TO '{bronze_dir}/reddit_buyitforlife_submissions.parquet' (FORMAT PARQUET);
 
-        CREATE TABLE com (id VARCHAR, name VARCHAR, parent_id VARCHAR, link_id VARCHAR, subreddit VARCHAR, created_utc BIGINT);
+        CREATE TABLE com (
+            id VARCHAR, name VARCHAR, parent_id VARCHAR, link_id VARCHAR, subreddit VARCHAR, created_utc BIGINT
+        );
         INSERT INTO com VALUES ('mock_c1', 't1_mock', '"t3_mock"', '"t3_mock"', 'buyitforlife', 1293840050);
 
         COPY com TO '{bronze_dir}/reddit_buyitforlife_comments.parquet' (FORMAT PARQUET);
-    """)
+    """
+    )
 
     # Mock paths
     def mock_get_read_path(filename):
