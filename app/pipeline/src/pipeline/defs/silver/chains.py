@@ -57,10 +57,10 @@ def silver_reddit_chains(context: AssetExecutionContext, config: SilverRedditCha
         chains AS (
             SELECT
                 CAST(s.id AS VARCHAR) AS submission_id,
-                CAST(s.name AS VARCHAR) AS reddit_node_id,
+                COALESCE(CAST(s.name AS VARCHAR), 't3_' || CAST(s.id AS VARCHAR)) AS reddit_node_id,
                 CAST(s.subreddit AS VARCHAR) AS subreddit,
-                [CAST(s.name AS VARCHAR)] AS path_nodes,
-                CAST(s.name AS VARCHAR) AS current_node,
+                [COALESCE(CAST(s.name AS VARCHAR), 't3_' || CAST(s.id AS VARCHAR))] AS path_nodes,
+                COALESCE(CAST(s.name AS VARCHAR), 't3_' || CAST(s.id AS VARCHAR)) AS current_node,
                 1 AS depth
             FROM read_parquet('{source_submissions}') s
             WHERE lower(CAST(s.subreddit AS VARCHAR)) = '{sub_lower}'
@@ -70,10 +70,10 @@ def silver_reddit_chains(context: AssetExecutionContext, config: SilverRedditCha
 
             SELECT
                 p.submission_id,
-                CAST(c.name AS VARCHAR) AS reddit_node_id,
+                COALESCE(CAST(c.name AS VARCHAR), 't1_' || CAST(c.id AS VARCHAR)) AS reddit_node_id,
                 CAST(c.subreddit AS VARCHAR) AS subreddit,
-                list_append(p.path_nodes, c.name) AS path_nodes,
-                CAST(c.name AS VARCHAR) AS current_node,
+                list_append(p.path_nodes, COALESCE(CAST(c.name AS VARCHAR), 't1_' || CAST(c.id AS VARCHAR))) AS path_nodes,
+                COALESCE(CAST(c.name AS VARCHAR), 't1_' || CAST(c.id AS VARCHAR)) AS current_node,
                 p.depth + 1 AS depth
             FROM read_parquet('{source_comments}') c
             JOIN chains p ON trim(CAST(c.parent_id AS VARCHAR), '"') = p.current_node

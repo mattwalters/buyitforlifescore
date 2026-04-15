@@ -23,12 +23,12 @@ def test_duckdb_recursive_chain_logic():
 
     query = """
     WITH RECURSIVE chains AS (
-        SELECT s.id AS submission_id, s.name AS reddit_node_id, s.subreddit,
-               [s.name] AS path_nodes, s.name AS current_node, 1 AS depth
+        SELECT s.id AS submission_id, COALESCE(s.name, 't3_' || s.id) AS reddit_node_id, s.subreddit,
+               [COALESCE(s.name, 't3_' || s.id)] AS path_nodes, COALESCE(s.name, 't3_' || s.id) AS current_node, 1 AS depth
         FROM submissions s WHERE lower(s.subreddit) = 'buyitforlife'
         UNION ALL
-        SELECT p.submission_id, c.name AS reddit_node_id, c.subreddit,
-               list_append(p.path_nodes, c.name) AS path_nodes, c.name AS current_node, p.depth + 1 AS depth
+        SELECT p.submission_id, COALESCE(c.name, 't1_' || c.id) AS reddit_node_id, c.subreddit,
+               list_append(p.path_nodes, COALESCE(c.name, 't1_' || c.id)) AS path_nodes, COALESCE(c.name, 't1_' || c.id) AS current_node, p.depth + 1 AS depth
         FROM comments c JOIN chains p ON trim(c.parent_id, '"') = p.current_node
     ), leaf_nodes AS (
         SELECT c.* FROM chains c LEFT JOIN comments child ON trim(child.parent_id, '"') = c.current_node
