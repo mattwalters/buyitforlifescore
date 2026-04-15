@@ -6,22 +6,23 @@ Both production Dagster assets and evaluation scripts import from here to
 guarantee identical inference behavior.
 """
 
-import json
 import asyncio
-from typing import Optional
+import json
 from dataclasses import dataclass
+from typing import Optional
 
 from google import genai
 from google.genai import types
-from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
-from pipeline.utils.pricing import calculate_gemini_cost
 from pipeline.prompts.entity_discovery import MentionItem, get_entity_discovery_prompt
+from pipeline.utils.pricing import calculate_gemini_cost
 
 
 @dataclass
 class DiscoveryResult:
     """The canonical return type for a single entity discovery LLM call."""
+
     items: list[dict]
     raw_json: str
     cost: float
@@ -64,13 +65,9 @@ async def run_entity_discovery(
 
     if thinking:
         if thinking.lstrip("-").isdigit():
-            gen_config.thinking_config = types.ThinkingConfig(
-                thinking_budget=int(thinking)
-            )
+            gen_config.thinking_config = types.ThinkingConfig(thinking_budget=int(thinking))
         else:
-            gen_config.thinking_config = types.ThinkingConfig(
-                thinking_level=thinking
-            )
+            gen_config.thinking_config = types.ThinkingConfig(thinking_level=thinking)
 
     @retry(
         stop=stop_after_attempt(3),

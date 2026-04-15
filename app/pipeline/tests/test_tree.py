@@ -1,10 +1,9 @@
 """Tests for pipeline.utils.tree — comment tree building and branch-aware chunking."""
 
-import pytest
 from pipeline.utils.tree import build_comment_tree, chunk_branches
 
-
 # ---- Helpers ----
+
 
 def _make_comment(comment_id: str, parent_id: str, body: str = "test") -> dict:
     return {
@@ -20,6 +19,7 @@ TOP_LEVEL_PARENT = f"t3_{SUBMISSION_ID}"
 
 
 # ---- build_comment_tree ----
+
 
 class TestBuildCommentTree:
     def test_empty_comments(self):
@@ -54,6 +54,7 @@ class TestBuildCommentTree:
 
 
 # ---- chunk_branches ----
+
 
 class TestChunkBranches:
     def test_single_flat_branch(self):

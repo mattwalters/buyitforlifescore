@@ -1,16 +1,23 @@
 from pydantic import BaseModel, Field
 
+
 class JudgeDiscoveryResult(BaseModel):
-    missed_brands: list[str] = Field(description="A list of obvious physical commercial product brands or manufacturers that were mentioned in the text but NOT extracted by the pipeline.")
-    hallucinations: list[str] = Field(description="A list of items that the pipeline mistakenly extracted that are NOT physical commercial brands (e.g. generic nouns like 'shoe', 'wood', or 'car' with no brand attached).")
+    missed_brands: list[str] = Field(
+        description="A list of obvious physical commercial product brands or manufacturers that were mentioned in the text but NOT extracted by the pipeline."
+    )
+    hallucinations: list[str] = Field(
+        description="A list of items that the pipeline mistakenly extracted that are NOT physical commercial brands (e.g. generic nouns like 'shoe', 'wood', or 'car' with no brand attached)."
+    )
     reasoning: str = Field(description="A brief explanation justifying the misses and hallucinations.")
+
 
 def get_blind_judge_discovery_prompt(thread_text: str, extractions: list[dict]) -> str:
     import json
+
     extractions_str = json.dumps(extractions, indent=2) if extractions else "[]"
-    
+
     return f"""You are the final Quality Assurance Auditor for a consumer goods data pipeline.
-Your job is to read a user discussion thread, and then review the list of extracted physical product brands exactly as the pipeline outputted them. 
+Your job is to read a user discussion thread, and then review the list of extracted physical product brands exactly as the pipeline outputted them.
 
 You do not know the exact instructions the pipeline followed. You are simply judging its final output based on this high-level Human QA Rubric:
 

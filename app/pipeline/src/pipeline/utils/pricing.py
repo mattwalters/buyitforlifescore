@@ -1,5 +1,6 @@
 from enum import Enum
-from typing import Dict, Optional, Any
+from typing import Any, Dict
+
 
 class AiModel(str, Enum):
     GEMINI_3_FLASH = "gemini-3-flash-preview"
@@ -9,6 +10,7 @@ class AiModel(str, Enum):
     GEMINI_3_1_FLASH_LITE = "gemini-3.1-flash-lite-preview"
     GEMINI_2_5_FLASH = "gemini-2.5-flash"
     GEMINI_2_5_FLASH_LITE = "gemini-2.5-flash-lite"
+
 
 # Map pricing per 1 million tokens, then we divide
 PRICING: Dict[AiModel, Dict[str, float]] = {
@@ -55,6 +57,7 @@ PRICING: Dict[AiModel, Dict[str, float]] = {
     },
 }
 
+
 def calculate_gemini_cost(model: str, usage_metadata: Any) -> float:
     """
     Calculate cost based on the Google GenAI usage metadata object.
@@ -75,10 +78,14 @@ def calculate_gemini_cost(model: str, usage_metadata: Any) -> float:
             return obj.get(key, 0)
         return getattr(obj, key, 0) or 0
 
-    prompt_tokens = get_attr(usage_metadata, 'prompt_token_count') or get_attr(usage_metadata, 'promptTokenCount')
-    cached_tokens = get_attr(usage_metadata, 'cached_content_token_count') or get_attr(usage_metadata, 'cachedContentTokenCount')
-    candidates_tokens = get_attr(usage_metadata, 'candidates_token_count') or get_attr(usage_metadata, 'candidatesTokenCount')
-    thoughts_tokens = get_attr(usage_metadata, 'thoughts_token_count') or get_attr(usage_metadata, 'thoughtsTokenCount')
+    prompt_tokens = get_attr(usage_metadata, "prompt_token_count") or get_attr(usage_metadata, "promptTokenCount")
+    cached_tokens = get_attr(usage_metadata, "cached_content_token_count") or get_attr(
+        usage_metadata, "cachedContentTokenCount"
+    )
+    candidates_tokens = get_attr(usage_metadata, "candidates_token_count") or get_attr(
+        usage_metadata, "candidatesTokenCount"
+    )
+    thoughts_tokens = get_attr(usage_metadata, "thoughts_token_count") or get_attr(usage_metadata, "thoughtsTokenCount")
 
     # The user was fundamentally correct: candidatesTokenCount is EXCLUSIVE of thoughtsTokenCount in the API response.
     response_tokens = candidates_tokens + thoughts_tokens
@@ -86,9 +93,13 @@ def calculate_gemini_cost(model: str, usage_metadata: Any) -> float:
 
     # Calculate Input Cost
     standard_input_tokens = max(0, prompt_tokens - cached_tokens)
-    
+
     standard_input_rate = pricing.get("inputLong", pricing["input"]) if is_long_context else pricing["input"]
-    cached_input_rate = pricing.get("inputCachedLong", pricing.get("inputCached", 0)) if is_long_context else pricing.get("inputCached", 0)
+    cached_input_rate = (
+        pricing.get("inputCachedLong", pricing.get("inputCached", 0))
+        if is_long_context
+        else pricing.get("inputCached", 0)
+    )
 
     input_cost = (standard_input_tokens * standard_input_rate) + (cached_tokens * cached_input_rate)
 

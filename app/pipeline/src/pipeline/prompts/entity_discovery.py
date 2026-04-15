@@ -1,12 +1,17 @@
-import json
 from pydantic import BaseModel, Field
 
 # --- Extraction Schema ---
 
+
 class MentionItem(BaseModel):
     author_id: str = Field(description="The unique author identifier from the ContentBlock.")
-    raw_mention: str = Field(description="The exact continuous text string highlighting the brand and product. (e.g. 'Sony Playstation 5' or 'darn tough socks' or 'lodge cast iron')")
-    source_block_ids: list[int] = Field(description="The list of block_ids where this author explicitly mentioned this product.")
+    raw_mention: str = Field(
+        description="The exact continuous text string highlighting the brand and product. (e.g. 'Sony Playstation 5' or 'darn tough socks' or 'lodge cast iron')"
+    )
+    source_block_ids: list[int] = Field(
+        description="The list of block_ids where this author explicitly mentioned this product."
+    )
+
 
 def get_entity_discovery_prompt(thread_text: str) -> str:
     return f"""You are an Entity Discovery agent scanning text blocks.
@@ -21,4 +26,3 @@ CRITICAL INSTRUCTIONS:
 
 Thread to analyze (JSON ContentBlocks):
 {thread_text}"""
-
