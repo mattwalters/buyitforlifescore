@@ -19,7 +19,7 @@ from pipeline.utils.db import get_duckdb_connection
 from pipeline.utils.llm import run_entity_discovery
 from pipeline.utils.paths import get_read_path
 from pipeline.utils.pricing import calculate_gemini_cost
-from pipeline.utils.tree import build_comment_tree, chunk_branches
+from pipeline.utils.tree import build_comment_tree, build_content_blocks, chunk_branches
 
 # Max content blocks sent to the LLM per thread during eval (OP post + this many comments)
 _EVAL_MAX_BLOCKS = 12
@@ -65,15 +65,12 @@ def get_random_bronze_threads(count: int, seed: int = 42) -> list[dict]:
         for chunk in branch_chunks:
             ordered_comments.extend(chunk)
 
-        blocks = []
-        blocks.append({"block_id": 0, "author_id": "op", "text": f"Title: {title}\nBody: {body}"})
-
-        for c in ordered_comments:
-            if c.get("body") and c.get("body") not in ("[deleted]", "[removed]"):
-                block_id = len(blocks)
-                blocks.append({"block_id": block_id, "author_id": c.get("author", "commenter"), "text": c.get("body")})
-                if len(blocks) >= _EVAL_MAX_BLOCKS:
-                    break
+        blocks = build_content_blocks(
+            title=title,
+            body=body,
+            comments=ordered_comments,
+            max_blocks=_EVAL_MAX_BLOCKS,
+        )
 
         threads.append({"document_id": doc_id, "content_blocks": blocks})
     return threads

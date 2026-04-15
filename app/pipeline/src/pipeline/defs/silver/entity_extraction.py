@@ -1,20 +1,14 @@
 import asyncio
+import json
 import os
 from typing import Optional
 
 import pandas as pd
 from dagster import AssetExecutionContext, MaterializeResult, MetadataValue, asset
-from google import genai
-from google.genai import types
-from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
-from pipeline.prompts.entity_extraction import EntityExtraction, get_extraction_prompt
 from pipeline.utils.db import get_duckdb_connection
-from pipeline.utils.llm import apply_thinking_config
+from pipeline.utils.llm import run_entity_extraction
 from pipeline.utils.paths import get_read_path, get_write_path
-from pipeline.utils.pricing import calculate_gemini_cost
-
-_client = genai.Client()
 
 from .shared import PROMPT_VERSION, SILVER_CODE_VERSION, SilverLLMConfig, bifl_daily_partitions
 
@@ -28,66 +22,39 @@ async def _process_extraction_batch(
     total_output = 0
 
     async def _extract_item(item: dict):
-        brand = item.get("brand")
-        productName = item.get("productName", "")
-        text = item.get("target_text")
-        parent_text = item.get("parent_text", "")
-        created_utc = item.get("target_authored_at")
-        discovery_chunk_id = item.get("chunk_id")
-
-        prompt = get_extraction_prompt(brand, productName, created_utc, text, parent_text)
-
         nonlocal total_cost, total_input, total_output
-        gen_config = types.GenerateContentConfig(
-            response_mime_type="application/json", response_schema=EntityExtraction, temperature=0.1
-        )
-        apply_thinking_config(gen_config, thinking)
-
-        @retry(
-            stop=stop_after_attempt(3),
-            wait=wait_exponential(multiplier=2, min=4, max=10),
-            retry=retry_if_exception_type(Exception),
-            before_sleep=lambda rs: print(
-                f"Retrying API call for extraction {brand} after error: {rs.outcome.exception()}"
-            ),
-        )
-        async def api_call():
-            async with semaphore:
-                return await client.aio.models.generate_content(model=model_name, contents=prompt, config=gen_config)
+        brand = item.get("brand")
 
         try:
-            response = await api_call()
-            cost = 0.0
-            prompt_tokens = 0
-            candidates_tokens = 0
+            result = await run_entity_extraction(
+                brand=brand,
+                product_name=item.get("productName", ""),
+                target_authored_at=item.get("target_authored_at"),
+                text=item.get("target_text"),
+                parent_text=item.get("parent_text", ""),
+                model_name=model_name,
+                thinking=thinking,
+                semaphore=semaphore,
+            )
 
-            if response.usage_metadata:
-                usage = response.usage_metadata
-                cost = calculate_gemini_cost(model_name, usage)
-                total_cost += cost
-                prompt_tokens = usage.prompt_token_count or 0
-                candidates_tokens = usage.candidates_token_count or 0
-                total_input += prompt_tokens
-                total_output += candidates_tokens
-
-            raw_json = response.text if response.text else "{}"
-            if raw_json.startswith("```json"):
-                raw_json = raw_json[7:-3]
+            total_cost += result.cost
+            total_input += result.input_tokens
+            total_output += result.output_tokens
 
             results.append(
                 {
-                    "discovery_chunk_id": discovery_chunk_id,
+                    "discovery_chunk_id": item.get("chunk_id"),
                     "author_id": item.get("author_id"),
                     "brand": brand,
-                    "productName": productName,
-                    "target_authored_at": created_utc,
+                    "productName": item.get("productName", ""),
+                    "target_authored_at": item.get("target_authored_at"),
                     "model_used": model_name,
                     "thinking_level": thinking,
-                    "input_tokens": prompt_tokens,
-                    "output_tokens": candidates_tokens,
-                    "cost_usd": cost,
-                    "raw_json_output": raw_json,
-                    "full_prompt_text": prompt,
+                    "input_tokens": result.input_tokens,
+                    "output_tokens": result.output_tokens,
+                    "cost_usd": result.cost,
+                    "raw_json_output": result.raw_json,
+                    "full_prompt_text": result.prompt_text,
                 }
             )
 
@@ -116,7 +83,6 @@ def silver_entity_extraction_payloads(context: AssetExecutionContext, config: Si
 
     limit_clause = f"LIMIT {config.limit}" if config.limit else ""
 
-    # Check if discovery output exists, otherwise skip
     if not os.path.exists(discovery_parquet):
         context.log.info(f"Skipping extraction, no Discovery outputs found for {partition_date_str}")
         return MaterializeResult(metadata={"status": "skipped", "reason": "No upstream partition data"})
@@ -144,17 +110,14 @@ def silver_entity_extraction_payloads(context: AssetExecutionContext, config: Si
     items = df.to_dict("records")
     context.log.info(f"Processing {len(items)} entity extractions natively.")
 
-    # Restrict to 10 concurrent requests to respect rate limits
     semaphore = asyncio.Semaphore(10)
 
-    # We must explicitly define the event loop runtime behavior for Dagster compatibility
     try:
         loop = asyncio.get_running_loop()
     except RuntimeError:
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
 
-    # Run API Loop
     results, total_cost, total_input, total_output = loop.run_until_complete(
         _process_extraction_batch(items, config.model, semaphore, config.thinking)
     )
@@ -196,8 +159,6 @@ def silver_entity_extraction(context: AssetExecutionContext) -> MaterializeResul
     payloads_parquet = get_read_path(f"silver/entity_extraction_payloads_{partition_date_str}.parquet")
     target_parquet = get_write_path(f"silver/entity_extraction_{partition_date_str}.parquet")
 
-    import json
-
     if not os.path.exists(payloads_parquet):
         context.log.info(f"Skipping unnest, no extraction payloads found for {partition_date_str}")
         return MaterializeResult(metadata={"status": "skipped"})
@@ -214,10 +175,7 @@ def silver_entity_extraction(context: AssetExecutionContext) -> MaterializeResul
             if not isinstance(payload, dict) or not payload:
                 continue
 
-            # Safely inherit complex JSON schema natively without manual mapping
             item = payload.copy()
-
-            # Map canonical upstream identifiers
             item["discovery_chunk_id"] = row["discovery_chunk_id"]
             item["author_id"] = row["author_id"]
             item["brand"] = row["brand"]

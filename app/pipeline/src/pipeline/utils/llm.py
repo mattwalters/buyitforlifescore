@@ -16,6 +16,7 @@ from google.genai import types
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
 from pipeline.prompts.entity_discovery import MentionItem, get_entity_discovery_prompt
+from pipeline.prompts.entity_extraction import EntityExtraction, get_extraction_prompt
 from pipeline.utils.pricing import calculate_gemini_cost
 
 _client: Optional[genai.Client] = None
@@ -47,6 +48,18 @@ class DiscoveryResult:
     """The canonical return type for a single entity discovery LLM call."""
 
     items: list[dict]
+    raw_json: str
+    cost: float
+    input_tokens: int
+    output_tokens: int
+    prompt_text: str
+
+
+@dataclass
+class ExtractionResult:
+    """The canonical return type for a single entity extraction LLM call."""
+
+    payload: dict
     raw_json: str
     cost: float
     input_tokens: int
@@ -123,6 +136,95 @@ async def run_entity_discovery(
 
         return DiscoveryResult(
             items=parsed_items,
+            raw_json=raw_json,
+            cost=cost,
+            input_tokens=input_tokens,
+            output_tokens=output_tokens,
+            prompt_text=prompt,
+        )
+
+    if semaphore:
+        async with semaphore:
+            return await _execute()
+    else:
+        return await _execute()
+
+
+async def run_entity_extraction(
+    brand: str,
+    product_name: str,
+    target_authored_at: str,
+    text: str,
+    parent_text: str,
+    model_name: str,
+    thinking: Optional[str] = None,
+    semaphore: Optional[asyncio.Semaphore] = None,
+) -> ExtractionResult:
+    """
+    Runs Phase 2 (Entity Extraction) against the Gemini API.
+
+    This is the single source of truth for the extraction LLM call. Both the
+    production Dagster asset and all evaluation scripts call this function.
+
+    Args:
+        brand: The brand name extracted in Phase 1.
+        product_name: The product name extracted in Phase 1.
+        target_authored_at: The date the source text was authored. Used as the
+            reference date for all relative time calculations in the prompt.
+        text: The source text block(s) to extract attributes from.
+        parent_text: The parent submission text for additional context.
+        model_name: The Gemini model identifier (e.g. "gemini-2.5-flash-lite").
+        thinking: Optional thinking config — either a numeric string for
+            thinking_budget or a level string like "low"/"medium"/"high".
+        semaphore: Optional asyncio.Semaphore for rate limiting.
+
+    Returns:
+        An ExtractionResult containing the parsed payload, raw JSON, cost, and token counts.
+    """
+    client = _get_client()
+    prompt = get_extraction_prompt(brand, product_name, target_authored_at, text, parent_text)
+
+    gen_config = types.GenerateContentConfig(
+        response_mime_type="application/json",
+        response_schema=EntityExtraction,
+        temperature=0.1,
+    )
+    apply_thinking_config(gen_config, thinking)
+
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=2, min=4, max=10),
+        retry=retry_if_exception_type(Exception),
+        reraise=True,
+    )
+    async def call_api():
+        return await client.aio.models.generate_content(
+            model=model_name,
+            contents=prompt,
+            config=gen_config,
+        )
+
+    async def _execute():
+        response = await call_api()
+
+        cost = 0.0
+        input_tokens = 0
+        output_tokens = 0
+
+        if response.usage_metadata:
+            usage = response.usage_metadata
+            cost = calculate_gemini_cost(model_name, usage)
+            input_tokens = usage.prompt_token_count or 0
+            output_tokens = usage.candidates_token_count or 0
+
+        raw_json = response.text if response.text else "{}"
+        if raw_json.startswith("```json"):
+            raw_json = raw_json[7:-3]
+
+        payload = json.loads(raw_json)
+
+        return ExtractionResult(
+            payload=payload,
             raw_json=raw_json,
             cost=cost,
             input_tokens=input_tokens,

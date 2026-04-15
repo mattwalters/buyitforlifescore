@@ -9,7 +9,7 @@ from dagster import AssetExecutionContext, MaterializeResult, MetadataValue, ass
 from pipeline.utils.db import get_duckdb_connection
 from pipeline.utils.llm import run_entity_discovery
 from pipeline.utils.paths import get_read_path, get_write_path
-from pipeline.utils.tree import build_comment_tree, chunk_branches
+from pipeline.utils.tree import build_comment_tree, build_content_blocks, chunk_branches
 
 from .shared import PROMPT_VERSION, SILVER_CODE_VERSION, SilverLLMConfig, bifl_daily_partitions
 
@@ -26,29 +26,13 @@ async def _process_discovery_batch(
         submission_id: str, title: str, body: str, chunk: list, chunk_index: int, created_utc: Optional[str] = None
     ):
 
-        # Build Canonical ContentBlocks array
-        content_blocks = []
-        if chunk_index == 0:
-            content_blocks.append(
-                {
-                    "block_id": 0,
-                    "author_id": "OP",
-                    "text": f"Title: {title}\nBody: {body or ''}",
-                    "created_utc": created_utc,
-                }
-            )
-
-        for idx, c_obj in enumerate(chunk):
-            if c_obj and isinstance(c_obj, dict) and c_obj.get("body"):
-                block_id = len(content_blocks)
-                content_blocks.append(
-                    {
-                        "block_id": block_id,
-                        "author_id": f"Commenter_{block_id}",
-                        "text": c_obj["body"],
-                        "created_utc": c_obj.get("created_utc"),
-                    }
-                )
+        content_blocks = build_content_blocks(
+            title=title,
+            body=body,
+            comments=chunk,
+            created_utc=created_utc,
+            include_op=(chunk_index == 0),
+        )
 
         thread_text = json.dumps([{k: v for k, v in b.items() if k != "created_utc"} for b in content_blocks], indent=2)
 
@@ -140,7 +124,7 @@ def silver_entity_discovery_payloads(context: AssetExecutionContext, config: Sil
             s.created_utc,
             list({{
                 'id': c.id, 'parent_id': c.parent_id,
-                'body': c.body, 'created_utc': c.created_utc
+                'body': c.body, 'author': c.author, 'created_utc': c.created_utc
             }} ORDER BY c.created_utc ASC) as comments
         FROM '{str(bronze_submissions_parquet)}' s
         LEFT JOIN '{str(bronze_comments_parquet)}' c ON c.link_id = 't3_' || s.id

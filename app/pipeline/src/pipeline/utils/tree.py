@@ -51,6 +51,61 @@ def _walk_branch(comment: dict, tree: dict[str, list[dict]]) -> list[dict]:
     return result
 
 
+def build_content_blocks(
+    title: str,
+    body: str | None,
+    comments: list[dict],
+    created_utc: str | None = None,
+    include_op: bool = True,
+    max_blocks: int | None = None,
+) -> list[dict]:
+    """
+    Converts a flat ordered list of comment dicts into the canonical ContentBlocks
+    format consumed by LLM prompts.
+
+    Args:
+        title: Submission title (used in the OP block).
+        body: Submission body text (used in the OP block).
+        comments: Flat ordered list of comment dicts. Each must have 'body' and
+            optionally 'author' and 'created_utc'. Deleted/removed comments are
+            skipped automatically.
+        created_utc: Timestamp for the OP block.
+        include_op: Whether to prepend a block for the submission author (OP).
+            Set to False for non-first chunks in a multi-chunk thread.
+        max_blocks: If set, caps the total number of blocks returned.
+
+    Returns:
+        A list of ContentBlock dicts with block_id, author_id, text, created_utc.
+    """
+    blocks: list[dict] = []
+
+    if include_op:
+        blocks.append({
+            "block_id": 0,
+            "author_id": "OP",
+            "text": f"Title: {title}\nBody: {body or ''}",
+            "created_utc": created_utc,
+        })
+
+    for comment in comments:
+        if not comment or not isinstance(comment, dict):
+            continue
+        text = comment.get("body", "")
+        if not text or text in ("[deleted]", "[removed]"):
+            continue
+        block_id = len(blocks)
+        blocks.append({
+            "block_id": block_id,
+            "author_id": comment.get("author") or f"anon_{block_id}",
+            "text": text,
+            "created_utc": comment.get("created_utc"),
+        })
+        if max_blocks and len(blocks) >= max_blocks:
+            break
+
+    return blocks
+
+
 def chunk_branches(tree: dict[str, list[dict]], max_chunk_size: int = 20) -> list[list[dict]]:
     """
     Walks the comment tree depth-first and packs complete conversational branches

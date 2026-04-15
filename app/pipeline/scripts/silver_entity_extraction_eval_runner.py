@@ -5,24 +5,19 @@ import os
 import sys
 from pathlib import Path
 
-import tqdm
 import tqdm.asyncio
-from google import genai
 from google.genai import types
 
 # Allow import of the pipeline package
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from pipeline.utils.llm import apply_thinking_config
+from pipeline.utils.llm import _get_client, run_entity_extraction
 from pipeline.utils.pricing import AiModel, calculate_gemini_cost
 
-# Allow fallback defaults
 DEFAULT_MODEL = "gemini-2.5-flash-lite"
 
-from pipeline.prompts.entity_extraction import EntityExtraction, get_extraction_prompt
 
-
-async def semantically_equivalent(client, expected: str, actual: str, field: str, semaphore: asyncio.Semaphore) -> bool:
+async def semantically_equivalent(expected: str, actual: str, field: str, semaphore: asyncio.Semaphore) -> bool:
     """Uses a cheap LLM Judge to determine if an unstructured text matches the benchmark."""
     if expected is None and actual is None:
         return True, 0.0
@@ -47,43 +42,37 @@ Respond exactly with the word MATCH or MISMATCH. Do not output anything else."""
     async with semaphore:
         try:
             gen_config = types.GenerateContentConfig(thinking_config=types.ThinkingConfig(thinking_level="low"))
-            cost = 0.0
-            response = await client.aio.models.generate_content(
+            response = await _get_client().aio.models.generate_content(
                 model=AiModel.GEMINI_3_FLASH.value, contents=prompt, config=gen_config
             )
-            if response.usage_metadata:
-                cost = calculate_gemini_cost(AiModel.GEMINI_3_FLASH.value, response.usage_metadata)
+            cost = calculate_gemini_cost(AiModel.GEMINI_3_FLASH.value, response.usage_metadata) if response.usage_metadata else 0.0
             return "MATCH" in (response.text or "").upper(), cost
         except Exception:
             return False, 0.0
 
 
 async def evaluate_extraction(
-    client, fixture, model_name: str, thinking: str | None, judge_semaphore: asyncio.Semaphore
+    fixture, model_name: str, thinking: str | None, extraction_semaphore: asyncio.Semaphore, judge_semaphore: asyncio.Semaphore
 ):
     brand = fixture.get("brand")
-    productName = fixture.get("productName", "")
-    text = fixture.get("text")
-    parent_text = fixture.get("parent_text", "")
     expected = fixture.get("expected", {})
-    target_authored_at = fixture.get("targetAuthoredAt", "2024-01-01")
-
-    prompt = get_extraction_prompt(brand, productName, target_authored_at, text, parent_text)
-
-    gen_config = types.GenerateContentConfig(
-        response_mime_type="application/json", response_schema=EntityExtraction, temperature=0.1
-    )
-    apply_thinking_config(gen_config, thinking)
 
     cost = 0.0
     try:
-        response = await client.aio.models.generate_content(model=model_name, contents=prompt, config=gen_config)
-        if response.usage_metadata:
-            cost += calculate_gemini_cost(model_name, response.usage_metadata)
-
-        actual = json.loads(response.text)
+        result = await run_entity_extraction(
+            brand=brand,
+            product_name=fixture.get("productName", ""),
+            target_authored_at=fixture.get("targetAuthoredAt", "2024-01-01"),
+            text=fixture.get("text"),
+            parent_text=fixture.get("parent_text", ""),
+            model_name=model_name,
+            thinking=thinking,
+            semaphore=extraction_semaphore,
+        )
+        cost = result.cost
+        actual = result.payload
     except Exception as e:
-        return {}, {}, cost, 0.0, f"Failed to parse LLM Response for {brand}: {e}"
+        return {}, {}, cost, 0.0, f"Failed to run extraction for {brand}: {e}"
 
     # SCORE THE RESULTS (Micro F1 Arrays)
     tps = []
@@ -91,7 +80,7 @@ async def evaluate_extraction(
     fns = []
     mismatch_logs = []
 
-    # We define which fields need LLM Semantic Judging vs Exact Match
+    # Fields requiring LLM semantic judging vs exact match
     semantic_fields = {"primaryFlawOrFailure", "alternativeBrandMentioned"}
 
     judge_tasks = {}
@@ -117,13 +106,10 @@ async def evaluate_extraction(
         # Match Resolution
         if key in semantic_fields:
             judge_tasks[key] = asyncio.create_task(
-                semantically_equivalent(client, expected_val, actual_val, key, judge_semaphore)
+                semantically_equivalent(expected_val, actual_val, key, judge_semaphore)
             )
         else:
             # Type-safe exact match to handle 1000.0 vs 1000 numeric overlaps safely
-            str_expected = str(expected_val).lower().strip()
-            str_actual = str(actual_val).lower().strip()
-
             is_match = False
             try:
                 exp_float = float(expected_val)
@@ -131,22 +117,21 @@ async def evaluate_extraction(
                 if exp_float == act_float:
                     is_match = True
                 else:
-                    # 10% proportional tolerance math (min 3)
+                    # 10% proportional tolerance (min 3 months)
                     tolerance = max(3.0, 0.10 * abs(exp_float))
                     if abs(exp_float - act_float) <= tolerance:
                         is_match = True
             except (ValueError, TypeError):
                 pass
 
-            if is_match or str_expected == str_actual:
+            if is_match or str(expected_val).lower().strip() == str(actual_val).lower().strip():
                 tps.append(key)
             else:
-                fps.append(key)  # Got it wrong
-                fns.append(key)  # Missed the right answer
+                fps.append(key)
+                fns.append(key)
                 mismatch_logs.append(f"❌ [MM] {key}: Expected <{expected_val}> | Got <{actual_val}>")
 
     judge_cost = 0.0
-    # Await Judges
     for key, task in judge_tasks.items():
         is_match, task_cost = await task
         judge_cost += task_cost
@@ -163,8 +148,6 @@ async def evaluate_extraction(
 
 
 async def run_evaluation(model_name: str, thinking_budget: str | None, verbose: bool):
-    client = genai.Client()
-
     fixture_path = Path(__file__).parent.parent / "fixtures" / "silver_entity_extraction_benchmark.json"
     with open(fixture_path, "r") as f:
         fixtures = json.load(f)
@@ -172,8 +155,9 @@ async def run_evaluation(model_name: str, thinking_budget: str | None, verbose: 
     print(f"Loaded {len(fixtures)} synthetic evaluation cases.")
     print(f"--- Entity Extraction Phase 2 Eval: {model_name} (Thinking: {thinking_budget}) ---")
 
+    extraction_semaphore = asyncio.Semaphore(10)
     judge_semaphore = asyncio.Semaphore(5)
-    tasks = [evaluate_extraction(client, fix, model_name, thinking_budget, judge_semaphore) for fix in fixtures]
+    tasks = [evaluate_extraction(fix, model_name, thinking_budget, extraction_semaphore, judge_semaphore) for fix in fixtures]
     results = await tqdm.asyncio.tqdm.gather(*tasks, desc="Evaluating Extraction")
 
     total_tp = 0
