@@ -4,6 +4,7 @@ from dagster import (
     AssetExecutionContext,
     MaterializeResult,
     MetadataValue,
+    BackfillPolicy,
     asset,
     define_asset_job,
 )
@@ -20,6 +21,7 @@ from pipeline.utils.paths import get_read_path, get_write_path
     partitions_def=chains_partitions_def,
     description="Unwraps the bundled LLM entity extraction payloads into a highly normalized, normalized, relational table bridging directly to individual node IDs.",
     deps=[AssetDep("silver_reddit_entity_discovery")],
+    backfill_policy=BackfillPolicy.single_run(),
 )
 def silver_reddit_entity_discovery_results(context: AssetExecutionContext) -> MaterializeResult:
     partition_keys_dict = context.partition_key.keys_by_dimension

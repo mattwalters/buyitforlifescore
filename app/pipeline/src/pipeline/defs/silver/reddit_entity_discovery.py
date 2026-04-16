@@ -7,6 +7,7 @@ from dagster import (
     AssetExecutionContext,
     MaterializeResult,
     MetadataValue,
+    BackfillPolicy,
     asset,
     define_asset_job,
     multiprocess_executor,
@@ -26,6 +27,7 @@ from pipeline.utils.paths import get_read_path, get_write_path
     partitions_def=chains_partitions_def,
     description="Invokes Google Gemini to discover entities and verbatim quotes from LLM payloads.",
     deps=[AssetDep("silver_reddit_llm_payloads")],
+    backfill_policy=BackfillPolicy.single_run(),
 )
 def silver_reddit_entity_discovery(context: AssetExecutionContext) -> MaterializeResult:
     partition_keys_dict = context.partition_key.keys_by_dimension
