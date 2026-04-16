@@ -8,6 +8,9 @@ UI_PORT=${PORT:-3000}
 export DAGSTER_HOME=/app/dagster_home
 mkdir -p $DAGSTER_HOME
 
+echo "Applying Production Dagster Configuration..."
+cp dagster.production.yaml $DAGSTER_HOME/dagster.yaml
+
 echo "Booting Dagster Daemon (Background orchestrator for sensors & schedules)..."
 # Both webserver and daemon rely on workspace.yaml being implicitly present in the working directory
 dagster-daemon run &
