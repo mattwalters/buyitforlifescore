@@ -43,7 +43,7 @@ def main():
     out_dir = os.path.join(os.path.dirname(__file__), "..", "evals", "datasets")
     os.makedirs(out_dir, exist_ok=True)
 
-    out_file = os.path.join(out_dir, "offline_seed.json")
+    out_file = os.path.join(out_dir, "entity_discovery_seed.json")
     with open(out_file, "w") as f:
         json.dump(seed_data, f, indent=2)
 

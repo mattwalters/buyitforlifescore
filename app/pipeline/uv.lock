@@ -1647,6 +1647,7 @@ dependencies = [
     { name = "pydantic" },
     { name = "questionary" },
     { name = "tabulate" },
+    { name = "tenacity" },
     { name = "tqdm" },
 ]
 
@@ -1669,6 +1670,7 @@ requires-dist = [
     { name = "pydantic" },
     { name = "questionary", specifier = ">=2.1.1" },
     { name = "tabulate" },
+    { name = "tenacity" },
     { name = "tqdm", specifier = ">=4.67.3" },
 ]
 

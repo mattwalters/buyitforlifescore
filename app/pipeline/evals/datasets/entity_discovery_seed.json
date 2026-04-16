@@ -104,7 +104,26 @@
         }
       ]
     },
-    "expected_entities": []
+    "expected_entities": [
+      {
+        "verbatim_quote": "King of Spades",
+        "block_indexes": [
+          0
+        ]
+      },
+      {
+        "verbatim_quote": "Craftsman shovels",
+        "block_indexes": [
+          1
+        ]
+      },
+      {
+        "verbatim_quote": "Ames Pony",
+        "block_indexes": [
+          5
+        ]
+      }
+    ]
   },
   {
     "bundle_id": "jv9wq_b0",
@@ -139,7 +158,20 @@
         }
       ]
     },
-    "expected_entities": []
+    "expected_entities": [
+      {
+        "verbatim_quote": "Allen Edmonds Shoes",
+        "block_indexes": [
+          0
+        ]
+      },
+      {
+        "verbatim_quote": "Park Ave shoes",
+        "block_indexes": [
+          1
+        ]
+      }
+    ]
   },
   {
     "bundle_id": "jvda9_b0",
@@ -318,7 +350,26 @@
         }
       ]
     },
-    "expected_entities": []
+    "expected_entities": [
+      {
+        "verbatim_quote": "Snapware Glasslock Storage Containers Set",
+        "block_indexes": [
+          6
+        ]
+      },
+      {
+        "verbatim_quote": "Glasslock food containers",
+        "block_indexes": [
+          9
+        ]
+      },
+      {
+        "verbatim_quote": "pyrex containers",
+        "block_indexes": [
+          12
+        ]
+      }
+    ]
   },
   {
     "bundle_id": "jvkm7_b0",
@@ -557,7 +608,30 @@
         }
       ]
     },
-    "expected_entities": []
+    "expected_entities": [
+      {
+        "verbatim_quote": "Radio Shack",
+        "block_indexes": [
+          0,
+          18
+        ]
+      },
+      {
+        "verbatim_quote": "monoprice",
+        "block_indexes": [
+          2,
+          14,
+          18
+        ]
+      },
+      {
+        "verbatim_quote": "monster",
+        "block_indexes": [
+          14,
+          16
+        ]
+      }
+    ]
   },
   {
     "bundle_id": "jv88h_b0",
@@ -592,7 +666,14 @@
         }
       ]
     },
-    "expected_entities": []
+    "expected_entities": [
+      {
+        "verbatim_quote": "Oster 76 clippers",
+        "block_indexes": [
+          1
+        ]
+      }
+    ]
   },
   {
     "bundle_id": "jvy0g_b0",
@@ -711,7 +792,41 @@
         }
       ]
     },
-    "expected_entities": []
+    "expected_entities": [
+      {
+        "verbatim_quote": "ExOfficio",
+        "block_indexes": [
+          0,
+          3,
+          4,
+          6
+        ]
+      },
+      {
+        "verbatim_quote": "Ex-Officio",
+        "block_indexes": [
+          2
+        ]
+      },
+      {
+        "verbatim_quote": "Duofold",
+        "block_indexes": [
+          1
+        ]
+      },
+      {
+        "verbatim_quote": "Patagonia Capilene boxers",
+        "block_indexes": [
+          7
+        ]
+      },
+      {
+        "verbatim_quote": "Patagonia Capilene briefs",
+        "block_indexes": [
+          8
+        ]
+      }
+    ]
   },
   {
     "bundle_id": "jvug5_b0",
@@ -734,7 +849,14 @@
         }
       ]
     },
-    "expected_entities": []
+    "expected_entities": [
+      {
+        "verbatim_quote": "Amana heat pumps",
+        "block_indexes": [
+          0
+        ]
+      }
+    ]
   },
   {
     "bundle_id": "jvsez_b0",
@@ -829,7 +951,58 @@
         }
       ]
     },
-    "expected_entities": []
+    "expected_entities": [
+      {
+        "verbatim_quote": "Saddleback Leather bags",
+        "block_indexes": [
+          0
+        ]
+      },
+      {
+        "verbatim_quote": "Saddleback Leather",
+        "block_indexes": [
+          1,
+          2
+        ]
+      },
+      {
+        "verbatim_quote": "Saddleback",
+        "block_indexes": [
+          5
+        ]
+      },
+      {
+        "verbatim_quote": "Glaser Designs",
+        "block_indexes": [
+          0,
+          2
+        ]
+      },
+      {
+        "verbatim_quote": "Louis Vuitton",
+        "block_indexes": [
+          5
+        ]
+      },
+      {
+        "verbatim_quote": "Hermes",
+        "block_indexes": [
+          6
+        ]
+      },
+      {
+        "verbatim_quote": "Coach",
+        "block_indexes": [
+          6
+        ]
+      },
+      {
+        "verbatim_quote": "Valextra",
+        "block_indexes": [
+          6
+        ]
+      }
+    ]
   },
   {
     "bundle_id": "jwdwy_b0",
@@ -852,7 +1025,14 @@
         }
       ]
     },
-    "expected_entities": []
+    "expected_entities": [
+      {
+        "verbatim_quote": "Nissan SS Thermos",
+        "block_indexes": [
+          0
+        ]
+      }
+    ]
   },
   {
     "bundle_id": "jy1h9_b0",
@@ -959,7 +1139,63 @@
         }
       ]
     },
-    "expected_entities": []
+    "expected_entities": [
+      {
+        "verbatim_quote": "Cobra",
+        "block_indexes": [
+          2
+        ]
+      },
+      {
+        "verbatim_quote": "Midland Radio",
+        "block_indexes": [
+          3
+        ]
+      },
+      {
+        "verbatim_quote": "Icom",
+        "block_indexes": [
+          4,
+          6
+        ]
+      },
+      {
+        "verbatim_quote": "Galaxy DX95T2",
+        "block_indexes": [
+          5
+        ]
+      },
+      {
+        "verbatim_quote": "Ranger (RCI)",
+        "block_indexes": [
+          5
+        ]
+      },
+      {
+        "verbatim_quote": "Galaxy",
+        "block_indexes": [
+          5
+        ]
+      },
+      {
+        "verbatim_quote": "Ranger",
+        "block_indexes": [
+          5
+        ]
+      },
+      {
+        "verbatim_quote": "Midland",
+        "block_indexes": [
+          7
+        ]
+      },
+      {
+        "verbatim_quote": "President",
+        "block_indexes": [
+          7
+        ]
+      }
+    ]
   },
   {
     "bundle_id": "k12l6_b0",
@@ -1018,7 +1254,20 @@
         }
       ]
     },
-    "expected_entities": []
+    "expected_entities": [
+      {
+        "verbatim_quote": "Restoration Hardware Kensington Leather Couch",
+        "block_indexes": [
+          0
+        ]
+      },
+      {
+        "verbatim_quote": "Restoration Hardware",
+        "block_indexes": [
+          3
+        ]
+      }
+    ]
   },
   {
     "bundle_id": "k4nuc_b0",
@@ -1041,7 +1290,20 @@
         }
       ]
     },
-    "expected_entities": []
+    "expected_entities": [
+      {
+        "verbatim_quote": "Wii",
+        "block_indexes": [
+          0
+        ]
+      },
+      {
+        "verbatim_quote": "360",
+        "block_indexes": [
+          0
+        ]
+      }
+    ]
   },
   {
     "bundle_id": "k6zfl_b0",
@@ -1292,7 +1554,97 @@
         }
       ]
     },
-    "expected_entities": []
+    "expected_entities": [
+      {
+        "verbatim_quote": "Walmart",
+        "block_indexes": [
+          0
+        ]
+      },
+      {
+        "verbatim_quote": "LL Bean",
+        "block_indexes": [
+          2
+        ]
+      },
+      {
+        "verbatim_quote": "Ultimax",
+        "block_indexes": [
+          4
+        ]
+      },
+      {
+        "verbatim_quote": "Wigwam",
+        "block_indexes": [
+          4
+        ]
+      },
+      {
+        "verbatim_quote": "HoleProof Explorers",
+        "block_indexes": [
+          5
+        ]
+      },
+      {
+        "verbatim_quote": "REI Merino Wool Expedition Socks",
+        "block_indexes": [
+          6
+        ]
+      },
+      {
+        "verbatim_quote": "REI",
+        "block_indexes": [
+          6,
+          7,
+          16,
+          17
+        ]
+      },
+      {
+        "verbatim_quote": "Ragg Wool socks from REI",
+        "block_indexes": [
+          7
+        ]
+      },
+      {
+        "verbatim_quote": "Fox River socks",
+        "block_indexes": [
+          13
+        ]
+      },
+      {
+        "verbatim_quote": "smartwool",
+        "block_indexes": [
+          14,
+          16
+        ]
+      },
+      {
+        "verbatim_quote": "Smartwool",
+        "block_indexes": [
+          17
+        ]
+      },
+      {
+        "verbatim_quote": "darn tough",
+        "block_indexes": [
+          14,
+          15
+        ]
+      },
+      {
+        "verbatim_quote": "Wrightsock",
+        "block_indexes": [
+          16
+        ]
+      },
+      {
+        "verbatim_quote": "WrightSock CoolMesh II Quarter",
+        "block_indexes": [
+          16
+        ]
+      }
+    ]
   },
   {
     "bundle_id": "kiqpj_b0",
@@ -1615,7 +1967,162 @@
         }
       ]
     },
-    "expected_entities": []
+    "expected_entities": [
+      {
+        "verbatim_quote": "Skagen",
+        "block_indexes": [
+          1
+        ]
+      },
+      {
+        "verbatim_quote": "Casio G Shocks",
+        "block_indexes": [
+          3
+        ]
+      },
+      {
+        "verbatim_quote": "Casios",
+        "block_indexes": [
+          4
+        ]
+      },
+      {
+        "verbatim_quote": "Casio",
+        "block_indexes": [
+          21
+        ]
+      },
+      {
+        "verbatim_quote": "Bertucci",
+        "block_indexes": [
+          5
+        ]
+      },
+      {
+        "verbatim_quote": "Luminox",
+        "block_indexes": [
+          5
+        ]
+      },
+      {
+        "verbatim_quote": "Kenneth Cole",
+        "block_indexes": [
+          6
+        ]
+      },
+      {
+        "verbatim_quote": "KC",
+        "block_indexes": [
+          7,
+          8
+        ]
+      },
+      {
+        "verbatim_quote": "Seiko",
+        "block_indexes": [
+          13,
+          21
+        ]
+      },
+      {
+        "verbatim_quote": "Seiko 5",
+        "block_indexes": [
+          13,
+          23
+        ]
+      },
+      {
+        "verbatim_quote": "Seiko Orange Monster",
+        "block_indexes": [
+          13
+        ]
+      },
+      {
+        "verbatim_quote": "Seiko Kinetics",
+        "block_indexes": [
+          22
+        ]
+      },
+      {
+        "verbatim_quote": "Victorinox Officer's Watch",
+        "block_indexes": [
+          17
+        ]
+      },
+      {
+        "verbatim_quote": "Victorinox",
+        "block_indexes": [
+          18
+        ]
+      },
+      {
+        "verbatim_quote": "G-shock",
+        "block_indexes": [
+          20
+        ]
+      },
+      {
+        "verbatim_quote": "Edifice",
+        "block_indexes": [
+          21
+        ]
+      },
+      {
+        "verbatim_quote": "Oceanus",
+        "block_indexes": [
+          21
+        ]
+      },
+      {
+        "verbatim_quote": "Tissot",
+        "block_indexes": [
+          21
+        ]
+      },
+      {
+        "verbatim_quote": "Swatch",
+        "block_indexes": [
+          21
+        ]
+      },
+      {
+        "verbatim_quote": "Longines",
+        "block_indexes": [
+          21
+        ]
+      },
+      {
+        "verbatim_quote": "Omega",
+        "block_indexes": [
+          21
+        ]
+      },
+      {
+        "verbatim_quote": "Citizen",
+        "block_indexes": [
+          21,
+          22
+        ]
+      },
+      {
+        "verbatim_quote": "TAG Heur",
+        "block_indexes": [
+          21
+        ]
+      },
+      {
+        "verbatim_quote": "Patek Ph",
+        "block_indexes": [
+          21
+        ]
+      },
+      {
+        "verbatim_quote": "Orient Blue Mako",
+        "block_indexes": [
+          23
+        ]
+      }
+    ]
   },
   {
     "bundle_id": "kju9c_b0",
@@ -1757,7 +2264,26 @@
         }
       ]
     },
-    "expected_entities": []
+    "expected_entities": [
+      {
+        "verbatim_quote": "Mountain Khakis",
+        "block_indexes": [
+          1
+        ]
+      },
+      {
+        "verbatim_quote": "Arbor Wear jeans",
+        "block_indexes": [
+          5
+        ]
+      },
+      {
+        "verbatim_quote": "Carhartt pants",
+        "block_indexes": [
+          8
+        ]
+      }
+    ]
   },
   {
     "bundle_id": "lusof_b0",
@@ -1804,7 +2330,27 @@
         }
       ]
     },
-    "expected_entities": []
+    "expected_entities": [
+      {
+        "verbatim_quote": "RM Williams",
+        "block_indexes": [
+          0,
+          1
+        ]
+      },
+      {
+        "verbatim_quote": "RM williams",
+        "block_indexes": [
+          1
+        ]
+      },
+      {
+        "verbatim_quote": "Comfort Craftsman",
+        "block_indexes": [
+          2
+        ]
+      }
+    ]
   },
   {
     "bundle_id": "lx8il_b0",
@@ -2079,7 +2625,20 @@
         }
       ]
     },
-    "expected_entities": []
+    "expected_entities": [
+      {
+        "verbatim_quote": "Esschert",
+        "block_indexes": [
+          2
+        ]
+      },
+      {
+        "verbatim_quote": "Blue Rooster",
+        "block_indexes": [
+          2
+        ]
+      }
+    ]
   },
   {
     "bundle_id": "lyrsr_b0",
@@ -2210,7 +2769,65 @@
         }
       ]
     },
-    "expected_entities": []
+    "expected_entities": [
+      {
+        "verbatim_quote": "justeyewear.com",
+        "block_indexes": [
+          0
+        ]
+      },
+      {
+        "verbatim_quote": "googles4u.com",
+        "block_indexes": [
+          1
+        ]
+      },
+      {
+        "verbatim_quote": "Zenni",
+        "block_indexes": [
+          3,
+          4,
+          6,
+          8
+        ]
+      },
+      {
+        "verbatim_quote": "warbyparker.com",
+        "block_indexes": [
+          6
+        ]
+      },
+      {
+        "verbatim_quote": "classicspecs.com",
+        "block_indexes": [
+          6
+        ]
+      },
+      {
+        "verbatim_quote": "zennioptical",
+        "block_indexes": [
+          7
+        ]
+      },
+      {
+        "verbatim_quote": "glassesshop",
+        "block_indexes": [
+          7
+        ]
+      },
+      {
+        "verbatim_quote": "goggles4you",
+        "block_indexes": [
+          7
+        ]
+      },
+      {
+        "verbatim_quote": "eyebuydirect",
+        "block_indexes": [
+          8
+        ]
+      }
+    ]
   },
   {
     "bundle_id": "m4po8_b0",
