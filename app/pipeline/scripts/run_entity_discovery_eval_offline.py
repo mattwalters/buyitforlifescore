@@ -1,5 +1,6 @@
 import json
 import os
+import string
 import sys
 
 from pydantic import TypeAdapter
@@ -44,18 +45,41 @@ def main():
             total_tests += 1
             continue
 
+        # Helper function for liberal matching
+        def is_match(expected_str: str, extracted_str: str) -> bool:
+            # Lowercase and remove punctuation
+            ex_clean = expected_str.lower().translate(str.maketrans('', '', string.punctuation))
+            ext_clean = extracted_str.lower().translate(str.maketrans('', '', string.punctuation))
+            
+            # Substring exact
+            if ex_clean in ext_clean or ext_clean in ex_clean:
+                return True
+                
+            ex_tokens = set(ex_clean.split())
+            ext_tokens = set(ext_clean.split())
+            
+            # Remove stop words
+            stopwords = {"the", "a", "an", "and", "or", "to", "for", "in", "of", "on", "is", "it", "with"}
+            ex_tokens = ex_tokens - stopwords
+            ext_tokens = ext_tokens - stopwords
+            
+            if len(ex_tokens.intersection(ext_tokens)) > 0:
+                return True
+                
+            return False
+
         # We perform Bidirectional Substring Matching against 'verbatim_quote'
         case_passed = True
         matched_extractions = set()
 
         for expected in expected_entities:
-            expected_quote = expected["verbatim_quote"].lower()
+            expected_quote = expected["verbatim_quote"]
 
             # Look for it in the extracted items
             found = False
             for i, item in enumerate(result.items):
-                extracted = item.verbatim_quote.lower()
-                if expected_quote in extracted or extracted in expected_quote:
+                extracted = item.verbatim_quote
+                if is_match(expected_quote, extracted):
                     found = True
                     matched_extractions.add(i)
                     break

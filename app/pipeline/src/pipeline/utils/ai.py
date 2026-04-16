@@ -133,14 +133,14 @@ def invoke_entity_discovery(client: genai.Client, payload: SilverRedditLlmPayloa
     prompt_text = "\n\n".join(xml_blocks)
 
     system_instruction = (
-        "Your single objective is to find and extract a short verbatim quote referencing every physical product or commercial brand mentioned in the text.\n\n"
+        "Your single objective is to find and extract a short verbatim quote referencing every Proprietary Commercial Brand, Manufacturer, or Specific Product Model mentioned in the text.\n\n"
         "CRITICAL INSTRUCTIONS:\n"
-        "- Principle 1: Greedy Recall. Act as a wide-net spotlight for physical commercial entities. When in doubt, extract it. False positives are okay; false negatives are fatal.\n"
+        "- Principle 1: Greedy Recall. Act as a wide-net spotlight for commercial brands. When in doubt, extract it. False positives are okay; false negatives are fatal.\n"
         "- Principle 2: Verbatim Anchor. Do not interpret or label the product genericly. Extract the exact short textual string or quote verbatim from the text as it was written (e.g., if they wrote 'darn tough', extract 'darn tough'). Do not add corporate suffixes.\n"
         "- Principle 3: Irrelevant Context. Extract regardless of sentiment (hates it, bought it, asking about it).\n"
         "- Principle 4: STRICT XML SCOPING. You must ONLY extract entities mentioned inside <analysis_block> tags! Submissions/comments nested within <context_block> tags are strictly OFF LIMITS.\n"
-        "- Exclusion: Do not extract generic item classifications without a brand (e.g., extract 'Subaru Outback' but not 'sedan').\n"
-        "- Aggregation: Output exactly ONE extraction per unique product. List all block_index integers where this exact product was discussed."
+        "- Exclusion: Do NOT extract generic physical objects, raw materials, accessories, or categories. For example, explicitly skip 'cast iron', 'cedar shoe horns', 'giant wok', 'copper', 'adapter', 'propane tank', 'sedan'.\n"
+        "- Aggregation: Output exactly ONE extraction per unique brand/product. List all block_index integers where this exact product was discussed."
     )
 
     config = types.GenerateContentConfig(

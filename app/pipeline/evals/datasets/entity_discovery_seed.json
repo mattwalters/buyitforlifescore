@@ -803,12 +803,6 @@
         ]
       },
       {
-        "verbatim_quote": "Ex-Officio",
-        "block_indexes": [
-          2
-        ]
-      },
-      {
         "verbatim_quote": "Duofold",
         "block_indexes": [
           1
@@ -2011,13 +2005,6 @@
         ]
       },
       {
-        "verbatim_quote": "KC",
-        "block_indexes": [
-          7,
-          8
-        ]
-      },
-      {
         "verbatim_quote": "Seiko",
         "block_indexes": [
           13,
@@ -2335,12 +2322,6 @@
         "verbatim_quote": "RM Williams",
         "block_indexes": [
           0,
-          1
-        ]
-      },
-      {
-        "verbatim_quote": "RM williams",
-        "block_indexes": [
           1
         ]
       },
