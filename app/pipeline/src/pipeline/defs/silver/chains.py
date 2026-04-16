@@ -14,6 +14,8 @@ from dagster import (
     MultiPartitionsDefinition,
     MultiToSingleDimensionPartitionMapping,
     asset,
+    define_asset_job,
+    multiprocess_executor,
 )
 from pydantic import TypeAdapter
 
@@ -214,3 +216,10 @@ def silver_reddit_chains(context: AssetExecutionContext, config: SilverRedditCha
             "data_preview": MetadataValue.md(preview_md),
         }
     )
+
+
+silver_chains_job = define_asset_job(
+    name="silver_chains_job",
+    selection="silver_reddit_chains",
+    executor_def=multiprocess_executor.configured({"max_concurrent": 100}),
+)
