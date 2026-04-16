@@ -23,7 +23,7 @@ from pipeline.utils.paths import get_read_path, get_write_path
 
 class SilverChainBundlesConfig(Config):
     max_bundle_budget: int = 50000
-    max_context_length: int = 5000
+    max_context_length: int = 2000
     summarized_context_length_estimate: int = 500
     validation_sample_size: Optional[int] = None
 
