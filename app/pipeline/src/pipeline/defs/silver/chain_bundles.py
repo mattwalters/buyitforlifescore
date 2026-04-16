@@ -178,7 +178,7 @@ def silver_reddit_chain_bundles(context: AssetExecutionContext, config: SilverCh
             WITH target_nodes AS (
                 SELECT DISTINCT reddit_node_id FROM read_parquet('{source_chains}')
             )
-            SELECT n.reddit_node_id, CAST(length(COALESCE(s.title, '') || ' ' || COALESCE(s.selftext, '')) AS BIGINT) AS text_length
+            SELECT n.reddit_node_id, CAST(length(COALESCE(s.selftext, '')) AS BIGINT) AS text_length
             FROM read_parquet('{source_submissions}') s
             JOIN target_nodes n ON COALESCE(CAST(s.name AS VARCHAR), 't3_' || CAST(s.id AS VARCHAR)) = n.reddit_node_id
             UNION ALL
