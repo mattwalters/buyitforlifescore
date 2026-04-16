@@ -9,6 +9,7 @@ dependencies = [
     "pydantic",
     "pandas",
     "tabulate",
+    "tenacity",
     "tqdm>=4.67.3",
     "questionary>=2.1.1",
 ]
