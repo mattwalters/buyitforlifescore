@@ -31,9 +31,6 @@ class SilverChainBundlesConfig(Config):
 def build_chain_bundles(
     chains: list[dict[str, Any]], lengths_map: dict[str, int], config: SilverChainBundlesConfig
 ) -> list[dict[str, Any]]:
-    # Group chains by submission
-    chains_by_sub: dict[str, list[dict[str, Any]]] = defaultdict(list)
-    
     # We must group chains structurally by Chain ID first
     chains_grouped: dict[str, dict[str, list[dict[str, Any]]]] = defaultdict(lambda: defaultdict(list))
     for row in chains:
@@ -165,12 +162,28 @@ def silver_reddit_chain_bundles(context: AssetExecutionContext, config: SilverCh
     with get_duckdb_connection() as con:
         chains_df = con.execute(f"SELECT * FROM read_parquet('{source_chains}') ORDER BY submission_id, chain_id, sequence_order").fetchdf()
         
+        if chains_df.empty:
+            context.log.info(f"No chains found for {subreddit_key} on {date_key}. Skipping bundle generation.")
+            # Touch an empty parquet to satisfy downstream dependencies
+            con.execute(f"COPY (SELECT * FROM chains_df) TO '{target_parquet}' (FORMAT PARQUET)")
+            return MaterializeResult(
+                metadata={
+                    "target_file": target_parquet,
+                    "data_preview": MetadataValue.md("No data generated (empty upstream)."),
+                }
+            )
+
         lengths_query = f"""
-            SELECT COALESCE(CAST(name AS VARCHAR), 't3_' || CAST(id AS VARCHAR)) AS reddit_node_id, CAST(length(COALESCE(title, '') || ' ' || COALESCE(selftext, '')) AS BIGINT) AS text_length
-            FROM read_parquet('{source_submissions}')
+            WITH target_nodes AS (
+                SELECT DISTINCT reddit_node_id FROM read_parquet('{source_chains}')
+            )
+            SELECT n.reddit_node_id, CAST(length(COALESCE(s.title, '') || ' ' || COALESCE(s.selftext, '')) AS BIGINT) AS text_length
+            FROM read_parquet('{source_submissions}') s
+            JOIN target_nodes n ON COALESCE(CAST(s.name AS VARCHAR), 't3_' || CAST(s.id AS VARCHAR)) = n.reddit_node_id
             UNION ALL
-            SELECT COALESCE(CAST(name AS VARCHAR), 't1_' || CAST(id AS VARCHAR)) AS reddit_node_id, CAST(length(COALESCE(body, '')) AS BIGINT) AS text_length
-            FROM read_parquet('{source_comments}')
+            SELECT n.reddit_node_id, CAST(length(COALESCE(c.body, '')) AS BIGINT) AS text_length
+            FROM read_parquet('{source_comments}') c
+            JOIN target_nodes n ON COALESCE(CAST(c.name AS VARCHAR), 't1_' || CAST(c.id AS VARCHAR)) = n.reddit_node_id
         """
         raw_lengths_df = con.execute(lengths_query).fetchdf()
         
