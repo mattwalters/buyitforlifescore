@@ -15,7 +15,8 @@ def main():
     source_payloads = get_read_path("silver/reddit_llm_payloads/*/*/*.parquet")
 
     query = f"""
-        SELECT * FROM read_parquet('{source_payloads}')
+        SELECT * FROM read_parquet('{source_payloads}', union_by_name=true)
+        WHERE length(nodes) > 0
         USING SAMPLE 20
     """
 
