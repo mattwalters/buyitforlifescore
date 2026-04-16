@@ -1,6 +1,5 @@
 import duckdb
 import pandas as pd
-import pytest
 from dagster import MultiPartitionKey, build_asset_context
 
 from pipeline.defs.silver.reddit_llm_payloads import silver_reddit_llm_payloads

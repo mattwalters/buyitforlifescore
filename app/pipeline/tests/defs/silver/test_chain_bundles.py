@@ -2,7 +2,11 @@ import duckdb
 import pandas as pd
 from dagster import MultiPartitionKey, build_asset_context
 
-from pipeline.defs.silver.chain_bundles import SilverChainBundlesConfig, build_chain_bundles, silver_reddit_chain_bundles
+from pipeline.defs.silver.chain_bundles import (
+    SilverChainBundlesConfig,
+    build_chain_bundles,
+    silver_reddit_chain_bundles,
+)
 
 
 def test_build_chain_bundles_under_budget():
@@ -13,12 +17,12 @@ def test_build_chain_bundles_under_budget():
         {"submission_id": "S1", "chain_id": "CH2", "reddit_node_id": "t3_S1", "sequence_order": 1}, # 0 cost (already in bundle)
         {"submission_id": "S1", "chain_id": "CH2", "reddit_node_id": "t1_C2", "sequence_order": 2}, # 500 cost. Total 2000
     ]
-    
+
     lengths_map = {"t3_S1": 1000, "t1_C1": 500, "t1_C2": 500}
     config = SilverChainBundlesConfig(max_bundle_budget=3000, max_context_length=5000, summarized_context_length_estimate=500)
-    
+
     bundles = build_chain_bundles(chains, lengths_map, config)
-    
+
     # Everything fits in 1 bundle
     assert len(set([b["bundle_id"] for b in bundles])) == 1
     assert len(bundles) == 3
@@ -35,21 +39,21 @@ def test_build_chain_bundles_over_budget():
         {"submission_id": "S1", "chain_id": "CH2", "reddit_node_id": "t3_S1", "sequence_order": 1}, # length=1000 (re-evaluated for Bundle 2)
         {"submission_id": "S1", "chain_id": "CH2", "reddit_node_id": "t1_C2", "sequence_order": 2}, # length=1500. Total CH2=2500
     ]
-    
+
     lengths_map = {"t3_S1": 1000, "t1_C1": 1500, "t1_C2": 1500}
     config = SilverChainBundlesConfig(max_bundle_budget=3000, max_context_length=5000)
-    
+
     bundles = build_chain_bundles(chains, lengths_map, config)
     df = pd.DataFrame(bundles)
-    
-    # Because CH1=2500, adding CH2(cost=1500, S1 is free) would push bundle to 4000. 
+
+    # Because CH1=2500, adding CH2(cost=1500, S1 is free) would push bundle to 4000.
     # Wait, in CH2, S1 is already in bundle. So marginal cost is just 1500 for C2!
     # Wait! current_bundle_budget=2500. Adding C2 (+1500) makes it exactly 4000 > 3000 max.
     # Therefore it should split!
-    
+
     assert list(df[df["chain_id"] == "CH1"]["bundle_id"].unique()) == ["S1_b0"]
     assert list(df[df["chain_id"] == "CH2"]["bundle_id"].unique()) == ["S1_b1"]
-    
+
     # Verify S1 behavior in the second bundle.
     # When evaluated for Bundle 2, S1 is "seen_nodes_global", so is_analysis=False
     s1_b1 = df[(df["bundle_id"] == "S1_b1") & (df["reddit_node_id"] == "t3_S1")]
@@ -61,22 +65,22 @@ def test_giant_root_context_summarization():
     """Test the constraint that a giant root gets summarized on subsequent bundles."""
     chains = [
         {"submission_id": "S1", "chain_id": "CH1", "reddit_node_id": "t3_S1", "sequence_order": 1}, # length=35000!
-        {"submission_id": "S1", "chain_id": "CH1", "reddit_node_id": "t1_C1", "sequence_order": 2}, # length=500. 
-        {"submission_id": "S1", "chain_id": "CH2", "reddit_node_id": "t3_S1", "sequence_order": 1}, 
-        {"submission_id": "S1", "chain_id": "CH2", "reddit_node_id": "t1_C2", "sequence_order": 2}, # length=500. 
+        {"submission_id": "S1", "chain_id": "CH1", "reddit_node_id": "t1_C1", "sequence_order": 2}, # length=500.
+        {"submission_id": "S1", "chain_id": "CH2", "reddit_node_id": "t3_S1", "sequence_order": 1},
+        {"submission_id": "S1", "chain_id": "CH2", "reddit_node_id": "t1_C2", "sequence_order": 2}, # length=500.
     ]
-    
+
     lengths_map = {"t3_S1": 35000, "t1_C1": 500, "t1_C2": 500}
     # Using the 30k limit constraint, 500 length context constraint
     config = SilverChainBundlesConfig(max_bundle_budget=30000, max_context_length=1000, summarized_context_length_estimate=500)
-    
+
     bundles = build_chain_bundles(chains, lengths_map, config)
     df = pd.DataFrame(bundles)
 
     # First chain: S1 (35000) + C1 (500) = 35500. Exceeds budget on first item!
     # Because current_bundle is empty, it adds S1+C1 as an oversized bundle.
     assert "S1_b0" in df["bundle_id"].values
-    
+
     # Looking at S1 in bundle 0
     s1_b0 = df[(df["bundle_id"] == "S1_b0") & (df["reddit_node_id"] == "t3_S1")].iloc[0]
     assert s1_b0["needs_summarization"] == False, "Analysis nodes must never be summarized"
@@ -87,7 +91,7 @@ def test_giant_root_context_summarization():
     # Total cost for CH2 = 1000. It fits perfectly into Bundle 1!
     assert "S1_b1" in df["bundle_id"].values
     s1_b1 = df[(df["bundle_id"] == "S1_b1") & (df["reddit_node_id"] == "t3_S1")].iloc[0]
-    
+
     assert s1_b1["is_canonical"] == False
     assert s1_b1["needs_summarization"] == True, "Excessive context nodes should be summarized"
 
@@ -123,7 +127,7 @@ def test_silver_reddit_chain_bundles_execution(monkeypatch, tmp_path):
         COPY chains TO '{target_chain}/chains.parquet' (FORMAT PARQUET);
     """
     )
-    
+
     # Mock paths
     def mock_get_read_path(filename):
         if "bronze" in filename:
@@ -148,7 +152,7 @@ def test_silver_reddit_chain_bundles_execution(monkeypatch, tmp_path):
     assert result.metadata["target_file"] is not None
     output_parquet = tmp_path.joinpath("silver/chain_bundles/subreddit=buyitforlife/date=2011-01-01/bundles.parquet")
     assert output_parquet.exists()
-    
+
     # Read output and verify
     out_df = con.execute(f"SELECT * FROM read_parquet('{output_parquet}')").fetchdf()
     assert len(out_df) == 2

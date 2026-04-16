@@ -32,7 +32,7 @@ def ops_ai_cost_summary(context: AssetExecutionContext) -> MaterializeResult:
             has_data = not test_df.empty
         except Exception:
             has_data = False
-            
+
         if not has_data:
             context.log.info("No upstream summarizations found. Outputting empty cost table.")
             # Generate empty but valid table
@@ -71,9 +71,9 @@ def ops_ai_cost_summary(context: AssetExecutionContext) -> MaterializeResult:
                 SUM(total_nodes_processed) AS total_nodes_processed
             FROM base_data
         """
-        
+
         results_df = con.execute(query).fetchdf()
-        
+
         # Pydantic validation
         records = results_df.to_dict("records")
         TypeAdapter(list[OpsAiCostSummary]).validate_python(records)
@@ -82,7 +82,7 @@ def ops_ai_cost_summary(context: AssetExecutionContext) -> MaterializeResult:
         con.execute(f"COPY (SELECT * FROM results_df) TO '{target_parquet}' (FORMAT PARQUET)")
 
     preview_md = results_df.to_markdown(index=False)
-    
+
     return MaterializeResult(
         metadata={
             "target_file": target_parquet,

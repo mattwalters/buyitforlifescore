@@ -115,7 +115,7 @@ def silver_reddit_llm_payloads(context: AssetExecutionContext) -> MaterializeRes
             )
             SELECT * FROM bundled_nodes
         """
-        
+
         results_df = con.execute(query).fetchdf()
 
     records = results_df.to_dict("records")
@@ -127,7 +127,7 @@ def silver_reddit_llm_payloads(context: AssetExecutionContext) -> MaterializeRes
 
     with get_duckdb_connection() as con:
         con.execute(f"COPY (SELECT * FROM results_df) TO '{target_parquet}' (FORMAT PARQUET)")
-        
+
         # We don't want to dump the complete giant nested structs to Dagster markdown
         preview_df = con.execute(f"SELECT bundle_id, submission_id, length(nodes) as node_count FROM '{target_parquet}' LIMIT 10").fetchdf()
         preview_md = preview_df.to_markdown()

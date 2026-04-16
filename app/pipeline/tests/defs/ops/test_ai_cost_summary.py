@@ -9,7 +9,7 @@ def test_ops_ai_cost_summary_execution(monkeypatch, tmp_path):
     """Integration test using Dagster context."""
     silver_dir = tmp_path / "silver" / "reddit_node_summarizations" / "sub=test" / "date=2024"
     ops_dir = tmp_path / "ops" / "ai_cost_summary"
-    
+
     silver_dir.mkdir(parents=True)
     ops_dir.mkdir(parents=True)
 
@@ -32,7 +32,7 @@ def test_ops_ai_cost_summary_execution(monkeypatch, tmp_path):
             "cost_usd": 1.00
         }
     ])
-    
+
     silver_path = silver_dir / "summarizations.parquet"
     con.execute(f"COPY (SELECT * FROM test_df) TO '{silver_path}' (FORMAT PARQUET)")
 
@@ -51,25 +51,25 @@ def test_ops_ai_cost_summary_execution(monkeypatch, tmp_path):
 
     metadata = result.metadata
     assert metadata["target_file"] is not None
-    
+
     # Read output and verify
     output_parquet = tmp_path.joinpath("ops/ai_cost_summary/summary.parquet")
     assert output_parquet.exists()
-    
+
     out_df = con.execute(f"SELECT * FROM read_parquet('{output_parquet}')").fetchdf()
-    
+
     # Expect 2 rows: node_summarization, and TOTAL
     assert len(out_df) == 2
-    
+
     node_row = out_df.iloc[0]
     total_row = out_df.iloc[1]
-    
+
     assert node_row["service_name"] == "node_summarization"
     assert node_row["total_cost_usd"] == 1.50
     assert node_row["total_prompt_tokens"] == 3000
     assert node_row["total_completion_tokens"] == 300
     assert node_row["total_nodes_processed"] == 2
-    
+
     assert total_row["service_name"] == "TOTAL"
     assert total_row["total_cost_usd"] == 1.50
     assert total_row["total_prompt_tokens"] == 3000
@@ -98,10 +98,10 @@ def test_ops_ai_cost_summary_empty(monkeypatch, tmp_path):
 
     metadata = result.metadata
     assert "No upstream data observed" in metadata["data_preview"].value
-    
+
     output_parquet = tmp_path.joinpath("ops/ai_cost_summary/summary.parquet")
     assert output_parquet.exists()
-    
+
     con = duckdb.connect()
     out_df = con.execute(f"SELECT * FROM read_parquet('{output_parquet}')").fetchdf()
     assert len(out_df) == 0

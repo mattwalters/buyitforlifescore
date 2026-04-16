@@ -66,10 +66,10 @@ def build_chain_bundles(
 
                 raw_length = lengths_map.get(node_id, 0)
                 needs_summarization = False
-                
+
                 # Use our dynamic state to know if it's context or analysis
                 is_analysis = node_id not in seen_nodes_global
-                
+
                 if is_analysis:
                     marginal_cost = raw_length
                     # We do NOT mark it seen here, only after it's officially added to the bundle
@@ -99,7 +99,7 @@ def build_chain_bundles(
                 # The bundle is full! Yield it and start a new one
                 all_bundles.extend(current_bundle_nodes)
                 bundle_index += 1
-                
+
                 # Mark all newly analyzed nodes in that bundle as officially "seen" globally
                 for n in current_bundle_nodes:
                     if n["is_canonical"]:
@@ -109,10 +109,10 @@ def build_chain_bundles(
                 current_bundle_nodes = []
                 current_bundle_node_ids = set()
                 current_bundle_budget = 0
-                
+
                 # Note: We do NOT increment chain_idx so this chain gets re-evaluated in the empty bundle
                 continue
-            
+
             # Chain fits in the bundle (or bundle was empty so we MUST add it)
             current_bundle_nodes.extend(nodes_to_add)
             current_bundle_node_ids.update([n["reddit_node_id"] for n in nodes_to_add])
@@ -161,7 +161,7 @@ def silver_reddit_chain_bundles(context: AssetExecutionContext, config: SilverCh
     # Read chains
     with get_duckdb_connection() as con:
         chains_df = con.execute(f"SELECT * FROM read_parquet('{source_chains}') ORDER BY submission_id, chain_id, sequence_order").fetchdf()
-        
+
         if chains_df.empty:
             context.log.info(f"No chains found for {subreddit_key} on {date_key}. Skipping bundle generation.")
             # Touch an empty parquet to satisfy downstream dependencies, ensuring correct schema
@@ -187,9 +187,9 @@ def silver_reddit_chain_bundles(context: AssetExecutionContext, config: SilverCh
             JOIN target_nodes n ON COALESCE(CAST(c.name AS VARCHAR), 't1_' || CAST(c.id AS VARCHAR)) = n.reddit_node_id
         """
         raw_lengths_df = con.execute(lengths_query).fetchdf()
-        
+
         lengths_map = dict(zip(raw_lengths_df["reddit_node_id"], raw_lengths_df["text_length"]))
-    
+
         chains_records = chains_df.to_dict("records")
 
         context.log.info(f"Generating chain bundles for {subreddit_key} on {date_key}")

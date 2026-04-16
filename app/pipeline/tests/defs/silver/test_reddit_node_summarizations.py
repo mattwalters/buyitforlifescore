@@ -14,13 +14,13 @@ def test_calculate_cost():
     cost = calculate_cost(AiModel.GEMINI_2_5_FLASH_LITE, prompt, completion)
     assert cost == 0.50
 
-    
+
 def test_silver_reddit_node_summarizations_execution(monkeypatch, tmp_path):
     """Integration test using Dagster context, skipping GenAI explicitly."""
     silver_dir = tmp_path / "silver"
     bronze_dir = tmp_path / "bronze"
     target_bundles = silver_dir / "chain_bundles/subreddit=buyitforlife/date=2011-01-01"
-    
+
     silver_dir.mkdir(parents=True)
     bronze_dir.mkdir(parents=True)
     target_bundles.mkdir(parents=True)
@@ -68,7 +68,7 @@ def test_silver_reddit_node_summarizations_execution(monkeypatch, tmp_path):
         target = tmp_path / filename
         target.parent.mkdir(parents=True, exist_ok=True)
         return str(target)
-        
+
     def mock_invoke_summarize_node(client, text, model=AiModel.GEMINI_2_5_FLASH_LITE):
         return {
             "summary": f"[MOCKED SUMMARY OF: {text[:10]}]",
@@ -76,7 +76,7 @@ def test_silver_reddit_node_summarizations_execution(monkeypatch, tmp_path):
             "completion_tokens": 10,
             "cost_usd": 0.0001
         }
-        
+
     def mock_get_client():
         return "mocked_client"
 
@@ -93,13 +93,13 @@ def test_silver_reddit_node_summarizations_execution(monkeypatch, tmp_path):
     metadata = result.metadata
     assert metadata["target_file"] is not None
     assert metadata["cost_usd"].value == pytest.approx(0.0002) # two items * 0.0001
-    
+
     output_parquet = tmp_path.joinpath("silver/reddit_node_summarizations/subreddit=buyitforlife/date=2011-01-01/summarizations.parquet")
     assert output_parquet.exists()
-    
+
     # Read output and verify
     out_df = con.execute(f"SELECT * FROM read_parquet('{output_parquet}') ORDER BY reddit_node_id").fetchdf()
-    
+
     assert len(out_df) == 2 # Only the two with needs_summarization=True
     assert out_df.iloc[0]["reddit_node_id"] == "t1_c1"
     assert out_df.iloc[0]["summary"] == "[MOCKED SUMMARY OF: Giant body]"

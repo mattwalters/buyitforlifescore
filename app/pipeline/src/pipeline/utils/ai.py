@@ -1,5 +1,4 @@
 import logging
-import os
 from enum import Enum
 from typing import Any
 
@@ -54,7 +53,7 @@ def invoke_summarize_node(client: genai.Client, text: str, model: AiModel = AiMo
         "judgments. Keep the output clinical and maximally compressed. Do not include introductions like 'This comment "
         "says'. Just return the summary."
     )
-    
+
     config = types.GenerateContentConfig(
         system_instruction=system_instruction,
         temperature=0.0,  # Zero temperature for factual consistency

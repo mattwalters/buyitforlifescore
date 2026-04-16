@@ -85,7 +85,7 @@ def silver_reddit_node_summarizations(context: AssetExecutionContext) -> Materia
             FROM nodes_to_summarize n
             JOIN read_parquet('{source_comments}') c ON COALESCE(CAST(c.name AS VARCHAR), 't1_' || CAST(c.id AS VARCHAR)) = n.reddit_node_id
         """
-        
+
         nodes_df = con.execute(query).fetchdf()
 
     if nodes_df.empty:
@@ -104,13 +104,13 @@ def silver_reddit_node_summarizations(context: AssetExecutionContext) -> Materia
     results: list[dict[str, Any]] = []
 
     context.log.info(f"Executing Gemini summarizations for {len(records)} nodes...")
-    
+
     total_cost = 0.0
 
     for idx, row in enumerate(tqdm(records, desc="Summarizing nodes")):
         try:
             sum_res = invoke_summarize_node(client, row["full_text"])
-            
+
             results.append({
                 "reddit_node_id": row["reddit_node_id"],
                 "summary": sum_res["summary"],
@@ -119,7 +119,7 @@ def silver_reddit_node_summarizations(context: AssetExecutionContext) -> Materia
                 "cost_usd": sum_res["cost_usd"],
             })
             total_cost += sum_res["cost_usd"]
-            
+
         except Exception as e:
             context.log.error(f"Failed to summarize node {row['reddit_node_id']}: {e}")
             # If an error happens on one node due to API issue or safety blocking, insert empty but capture cost.
