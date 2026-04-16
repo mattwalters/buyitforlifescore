@@ -1,3 +1,4 @@
+import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import pandas as pd
@@ -36,6 +37,17 @@ def silver_reddit_entity_discovery(context: AssetExecutionContext) -> Materializ
     target_parquet = get_write_path(
         f"silver/reddit_entity_discovery/subreddit={sub_lower}/date={date_key}/entities.parquet"
     )
+
+    # Fail-safe Idempotency: Do not re-run expensive AI inference if we already have the output.
+    if os.path.exists(target_parquet):
+        context.log.info("Physical Parquet file already exists! Skipping expensive LLM re-computation.")
+        return MaterializeResult(
+            metadata={
+                "skipped": MetadataValue.bool(True),
+                "target_file": target_parquet,
+                "reason": MetadataValue.md("Manual idempotency check passed. To re-run, manually delete the target file."),
+            }
+        )
 
     with get_duckdb_connection() as con:
         try:
@@ -96,5 +108,5 @@ def silver_reddit_entity_discovery(context: AssetExecutionContext) -> Materializ
 silver_reddit_entity_discovery_job = define_asset_job(
     name="silver_reddit_entity_discovery_job",
     selection="silver_reddit_entity_discovery",
-    executor_def=multiprocess_executor.configured({"max_concurrent": 20}),
+    executor_def=multiprocess_executor.configured({"max_concurrent": 6}),
 )

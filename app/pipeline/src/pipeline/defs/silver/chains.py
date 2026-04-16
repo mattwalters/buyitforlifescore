@@ -214,5 +214,5 @@ def silver_reddit_chains(context: AssetExecutionContext, config: SilverRedditCha
 silver_chains_job = define_asset_job(
     name="silver_chains_job",
     selection="silver_reddit_chains",
-    executor_def=multiprocess_executor.configured({"max_concurrent": 100}),
+    executor_def=multiprocess_executor.configured({"max_concurrent": 16}),
 )

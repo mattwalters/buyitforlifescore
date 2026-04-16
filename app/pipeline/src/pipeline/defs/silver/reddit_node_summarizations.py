@@ -155,5 +155,5 @@ def silver_reddit_node_summarizations(context: AssetExecutionContext) -> Materia
 silver_reddit_node_summarizations_job = define_asset_job(
     name="silver_reddit_node_summarizations_job",
     selection="silver_reddit_node_summarizations",
-    executor_def=multiprocess_executor.configured({"max_concurrent": 20}),
+    executor_def=multiprocess_executor.configured({"max_concurrent": 6}),
 )
