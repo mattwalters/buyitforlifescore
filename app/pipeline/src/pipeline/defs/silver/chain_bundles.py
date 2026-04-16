@@ -164,8 +164,9 @@ def silver_reddit_chain_bundles(context: AssetExecutionContext, config: SilverCh
         
         if chains_df.empty:
             context.log.info(f"No chains found for {subreddit_key} on {date_key}. Skipping bundle generation.")
-            # Touch an empty parquet to satisfy downstream dependencies
-            con.execute(f"COPY (SELECT * FROM chains_df) TO '{target_parquet}' (FORMAT PARQUET)")
+            # Touch an empty parquet to satisfy downstream dependencies, ensuring correct schema
+            empty_df = pd.DataFrame(columns=list(SilverChainBundle.model_fields.keys()))
+            con.execute(f"COPY (SELECT * FROM empty_df) TO '{target_parquet}' (FORMAT PARQUET)")
             return MaterializeResult(
                 metadata={
                     "target_file": target_parquet,
