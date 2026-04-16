@@ -48,7 +48,6 @@ def build_thread_chains(
         comments_by_sub[c["link_id"]].append(c)
 
     all_chains = []
-    seen_nodes = set()
 
     for sub in submissions:
         sub_id = sub["submission_id"]
@@ -85,18 +84,12 @@ def build_thread_chains(
         chain_id = chain["chain_id"]
         submission_id = chain["submission_id"]
         for idx, node_id in enumerate(chain["path"]):
-            is_canonical = False
-            if node_id not in seen_nodes:
-                is_canonical = True
-                seen_nodes.add(node_id)
-
             silver_chain_records.append(
                 {
                     "chain_id": chain_id,
                     "submission_id": submission_id,
                     "reddit_node_id": node_id,
                     "sequence_order": idx + 1,  # 1-based indexing
-                    "is_canonical": is_canonical,
                 }
             )
 

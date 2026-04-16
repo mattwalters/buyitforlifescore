@@ -8,10 +8,10 @@ from pipeline.defs.silver.chain_bundles import SilverChainBundlesConfig, build_c
 def test_build_chain_bundles_under_budget():
     """Test standard chunking where nodes easily fit within budget."""
     chains = [
-        {"submission_id": "S1", "chain_id": "CH1", "reddit_node_id": "t3_S1", "sequence_order": 1, "is_canonical": True}, # 1000 cost. Total: 1000
-        {"submission_id": "S1", "chain_id": "CH1", "reddit_node_id": "t1_C1", "sequence_order": 2, "is_canonical": True}, # 500 cost. Total: 1500
-        {"submission_id": "S1", "chain_id": "CH2", "reddit_node_id": "t3_S1", "sequence_order": 1, "is_canonical": False}, # 0 cost (already in bundle)
-        {"submission_id": "S1", "chain_id": "CH2", "reddit_node_id": "t1_C2", "sequence_order": 2, "is_canonical": True}, # 500 cost. Total 2000
+        {"submission_id": "S1", "chain_id": "CH1", "reddit_node_id": "t3_S1", "sequence_order": 1}, # 1000 cost. Total: 1000
+        {"submission_id": "S1", "chain_id": "CH1", "reddit_node_id": "t1_C1", "sequence_order": 2}, # 500 cost. Total: 1500
+        {"submission_id": "S1", "chain_id": "CH2", "reddit_node_id": "t3_S1", "sequence_order": 1}, # 0 cost (already in bundle)
+        {"submission_id": "S1", "chain_id": "CH2", "reddit_node_id": "t1_C2", "sequence_order": 2}, # 500 cost. Total 2000
     ]
     
     lengths_map = {"t3_S1": 1000, "t1_C1": 500, "t1_C2": 500}
@@ -30,10 +30,10 @@ def test_build_chain_bundles_under_budget():
 def test_build_chain_bundles_over_budget():
     """Test that a large comment trips the bundle limit correctly."""
     chains = [
-        {"submission_id": "S1", "chain_id": "CH1", "reddit_node_id": "t3_S1", "sequence_order": 1, "is_canonical": True}, # length=1000
-        {"submission_id": "S1", "chain_id": "CH1", "reddit_node_id": "t1_C1", "sequence_order": 2, "is_canonical": True}, # length=1500. Total CH1=2500
-        {"submission_id": "S1", "chain_id": "CH2", "reddit_node_id": "t3_S1", "sequence_order": 1, "is_canonical": False}, # length=1000 (re-evaluated for Bundle 2)
-        {"submission_id": "S1", "chain_id": "CH2", "reddit_node_id": "t1_C2", "sequence_order": 2, "is_canonical": True}, # length=1500. Total CH2=2500
+        {"submission_id": "S1", "chain_id": "CH1", "reddit_node_id": "t3_S1", "sequence_order": 1}, # length=1000
+        {"submission_id": "S1", "chain_id": "CH1", "reddit_node_id": "t1_C1", "sequence_order": 2}, # length=1500. Total CH1=2500
+        {"submission_id": "S1", "chain_id": "CH2", "reddit_node_id": "t3_S1", "sequence_order": 1}, # length=1000 (re-evaluated for Bundle 2)
+        {"submission_id": "S1", "chain_id": "CH2", "reddit_node_id": "t1_C2", "sequence_order": 2}, # length=1500. Total CH2=2500
     ]
     
     lengths_map = {"t3_S1": 1000, "t1_C1": 1500, "t1_C2": 1500}
@@ -60,10 +60,10 @@ def test_build_chain_bundles_over_budget():
 def test_giant_root_context_summarization():
     """Test the constraint that a giant root gets summarized on subsequent bundles."""
     chains = [
-        {"submission_id": "S1", "chain_id": "CH1", "reddit_node_id": "t3_S1", "sequence_order": 1, "is_canonical": True}, # length=35000!
-        {"submission_id": "S1", "chain_id": "CH1", "reddit_node_id": "t1_C1", "sequence_order": 2, "is_canonical": True}, # length=500. 
-        {"submission_id": "S1", "chain_id": "CH2", "reddit_node_id": "t3_S1", "sequence_order": 1, "is_canonical": False}, 
-        {"submission_id": "S1", "chain_id": "CH2", "reddit_node_id": "t1_C2", "sequence_order": 2, "is_canonical": True}, # length=500. 
+        {"submission_id": "S1", "chain_id": "CH1", "reddit_node_id": "t3_S1", "sequence_order": 1}, # length=35000!
+        {"submission_id": "S1", "chain_id": "CH1", "reddit_node_id": "t1_C1", "sequence_order": 2}, # length=500. 
+        {"submission_id": "S1", "chain_id": "CH2", "reddit_node_id": "t3_S1", "sequence_order": 1}, 
+        {"submission_id": "S1", "chain_id": "CH2", "reddit_node_id": "t1_C2", "sequence_order": 2}, # length=500. 
     ]
     
     lengths_map = {"t3_S1": 35000, "t1_C1": 500, "t1_C2": 500}
@@ -116,9 +116,9 @@ def test_silver_reddit_chain_bundles_execution(monkeypatch, tmp_path):
 
         COPY com TO '{bronze_dir}/reddit_buyitforlife_comments.parquet' (FORMAT PARQUET);
         
-        CREATE TABLE chains (submission_id VARCHAR, chain_id VARCHAR, reddit_node_id VARCHAR, sequence_order BIGINT, is_canonical BOOLEAN);
-        INSERT INTO chains VALUES ('s1', 'chain_1', 't3_s1', 1, true);
-        INSERT INTO chains VALUES ('s1', 'chain_1', 't1_c1', 2, true);
+        CREATE TABLE chains (submission_id VARCHAR, chain_id VARCHAR, reddit_node_id VARCHAR, sequence_order BIGINT);
+        INSERT INTO chains VALUES ('s1', 'chain_1', 't3_s1', 1);
+        INSERT INTO chains VALUES ('s1', 'chain_1', 't1_c1', 2);
         
         COPY chains TO '{target_chain}/chains.parquet' (FORMAT PARQUET);
     """

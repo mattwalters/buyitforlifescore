@@ -29,4 +29,3 @@ class SilverChain(BaseModel):
     submission_id: str
     reddit_node_id: str
     sequence_order: int = Field(gt=0)
-    is_canonical: bool

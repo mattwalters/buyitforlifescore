@@ -38,10 +38,9 @@ def test_python_recursive_chain_logic():
 
     assert len(df) == 5
 
-    # S1 should appear twice, once canonical and once not
+    # S1 should appear twice
     s1_rows = df[df["reddit_node_id"] == "t3_S1"]
     assert len(s1_rows) == 2
-    assert s1_rows["is_canonical"].sum() == 1  # Exactly one true
 
     # sequence_order tests
     assert df[df["reddit_node_id"] == "t1_C2"]["sequence_order"].iloc[0] == 3
