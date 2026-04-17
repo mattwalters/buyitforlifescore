@@ -4,10 +4,12 @@ requires-python = ">=3.10,<3.15"
 version = "0.1.0"
 dependencies = [
     "dagster==1.13.0",
+    "dagster-postgres",
     "duckdb",
     "google-genai",
     "pydantic",
     "pandas",
+    "psycopg2-binary",
     "tabulate",
     "tenacity",
     "tqdm>=4.67.3",
