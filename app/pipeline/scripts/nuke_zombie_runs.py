@@ -1,7 +1,5 @@
 import os
-from dagster import DagsterInstance
-from dagster.core.storage.pipeline_run import DagsterRunStatus
-from dagster.core.storage.tags import CANCEL_REASON_TAG
+from dagster import DagsterInstance, DagsterRunStatus
 
 def nuke_zombies():
     print("Connecting to Dagster SQLite Instance...")
@@ -23,7 +21,7 @@ def nuke_zombies():
             instance.report_run_canceled(run)
             instance.add_run_tags(
                 run.run_id, 
-                {CANCEL_REASON_TAG: "Forcefully wiped by zombie nuke script"}
+                {"cancel_reason": "Forcefully wiped by zombie nuke script"}
             )
             zombies_killed += 1
             
