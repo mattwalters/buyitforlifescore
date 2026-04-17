@@ -1,8 +1,0 @@
-[build]
-builder = "DOCKERFILE"
-dockerfilePath = "app/pipeline/Dockerfile"
-
-[deploy]
-startCommand = "./run_worker.sh"
-restartPolicyType = "ON_FAILURE"
-restartPolicyMaxRetries = 10
