@@ -4,6 +4,15 @@ run_coordinator:
   config:
     max_concurrent_runs: 20
 
+run_launcher:
+  module: dagster_celery.run_launcher
+  class: CeleryRunLauncher
+  config:
+    broker:
+      env: REDIS_URL
+    backend:
+      env: REDIS_URL
+
 storage:
   postgres:
     postgres_db:
