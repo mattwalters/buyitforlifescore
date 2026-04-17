@@ -10,11 +10,11 @@ def get_duckdb_connection(database=":memory:", read_only=False):
     """
     con = duckdb.connect(database=database, read_only=read_only)
 
-    # CRITICAL: We are running 40 concurrent multiprocessing workers!
-    # DuckDB defaults to maxing out threads/RAM per connection. If we don't throttle
-    # this locally, 40 connections * 24 threads = 960 threads which causes a C++ SIGSEGV (-11).
+    # CRITICAL: We are natively throttling to 20 concurrent workers now.
+    # DuckDB defaults to maxing out threads/RAM per connection. 
+    # 20 connections * 1GB = 20GB max RAM footprint (safely under the 24GB hardware limit).
     con.execute("PRAGMA threads=1;")
-    con.execute("PRAGMA memory_limit='512MB';")
+    con.execute("PRAGMA memory_limit='1GB';")
 
     r2_endpoint = os.getenv("R2_ENDPOINT_URL")
     r2_access_key = os.getenv("R2_ACCESS_KEY_ID")
