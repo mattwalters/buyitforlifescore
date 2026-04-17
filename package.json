@@ -37,6 +37,7 @@
     "deploy:admin": "git push origin origin/main:deploy/admin --force",
     "deploy:web": "git push origin origin/main:deploy/web --force",
     "deploy:pipeline": "git push origin origin/main:deploy/pipeline --force",
+    "deploy:pipeline-worker": "git push origin origin/main:deploy/pipeline-worker --force",
     "deploy:worker": "git push origin origin/main:deploy/worker --force",
     "deploy": "npm run deploy:worker && npm run deploy:admin",
     "ssh": "railway ssh -s admin",
