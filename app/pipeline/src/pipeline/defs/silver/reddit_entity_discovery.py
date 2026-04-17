@@ -25,8 +25,12 @@ from pipeline.utils.paths import get_read_path, get_write_path
 @asset(
     group_name="silver",
     partitions_def=chains_partitions_def,
-    description="Invokes Google Gemini to discover entities and verbatim quotes from LLM payloads.",
-    deps=[AssetDep("silver_reddit_llm_payloads")],
+    description="Scans bundled LLM payloads for commercial products and brand entities using Gemini.",
+    deps=[
+        AssetDep(
+            "silver_reddit_llm_payloads",
+        ),
+    ],
 )
 def silver_reddit_entity_discovery(context: AssetExecutionContext) -> MaterializeResult:
     partition_keys_dict = context.partition_key.keys_by_dimension
