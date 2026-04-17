@@ -26,7 +26,7 @@ def bronze_reddit_comments(context: AssetExecutionContext) -> MaterializeResult:
     ) TO '{target_parquet}' (FORMAT PARQUET);
     """
 
-    with get_duckdb_connection() as con:
+    with get_duckdb_connection(memory_limit="8GB") as con:
         context.log.info("Executing DuckDB COPY command...")
         con.execute(query)
 
@@ -65,7 +65,7 @@ def bronze_reddit_submissions(context: AssetExecutionContext) -> MaterializeResu
     ) TO '{target_parquet}' (FORMAT PARQUET);
     """
 
-    with get_duckdb_connection() as con:
+    with get_duckdb_connection(memory_limit="8GB") as con:
         context.log.info("Executing DuckDB COPY command...")
         con.execute(query)
 

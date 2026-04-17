@@ -3,18 +3,17 @@ import os
 import duckdb
 
 
-def get_duckdb_connection(database=":memory:", read_only=False):
+def get_duckdb_connection(database=":memory:", read_only=False, memory_limit="1GB"):
     """
     Creates a centralized DuckDB connection and configures the `httpfs` extension
     if R2/S3 environment variables are present. This allows seamless `s3://` queries.
     """
     con = duckdb.connect(database=database, read_only=read_only)
 
-    # CRITICAL: We are natively throttling to 20 concurrent workers now.
-    # DuckDB defaults to maxing out threads/RAM per connection. 
-    # 20 connections * 1GB = 20GB max RAM footprint (safely under the 24GB hardware limit).
+    # CRITICAL: We natively throttle concurrent workers dynamically.
+    # Silver processes run at 1GB, Bronze (JSON Extraction) runs at 8GB.
     con.execute("PRAGMA threads=1;")
-    con.execute("PRAGMA memory_limit='1GB';")
+    con.execute(f"PRAGMA memory_limit='{memory_limit}';")
 
     r2_endpoint = os.getenv("R2_ENDPOINT_URL")
     r2_access_key = os.getenv("R2_ACCESS_KEY_ID")
