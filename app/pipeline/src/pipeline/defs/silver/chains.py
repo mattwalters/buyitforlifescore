@@ -111,7 +111,6 @@ def build_thread_chains(
             partition_mapping=MultiToSingleDimensionPartitionMapping(partition_dimension_name="subreddit"),
         ),
     ],
-    backfill_policy=BackfillPolicy.single_run(),
 )
 def silver_reddit_chains(context: AssetExecutionContext, config: SilverRedditChainsConfig) -> MaterializeResult:
     # 1. Get partition keys

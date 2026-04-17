@@ -39,7 +39,6 @@ from pipeline.utils.paths import get_read_path, get_write_path
             partition_mapping=MultiToSingleDimensionPartitionMapping(partition_dimension_name="subreddit"),
         ),
     ],
-    backfill_policy=BackfillPolicy.single_run(),
 )
 def silver_reddit_node_summarizations(context: AssetExecutionContext) -> MaterializeResult:
     partition_keys_dict = context.partition_key.keys_by_dimension
