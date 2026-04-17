@@ -17,4 +17,4 @@ cp dagster.production.yaml $DAGSTER_HOME/dagster.yaml
 echo "Booting Celery Worker Node..."
 # Tell Celery to spin up with concurrency bounded to what we mathematically proved earlier (20 runs = ~4GB peak natively).
 # The container will securely process runs out of the Redis queue indefinitely.
-exec dagster-celery worker start -A dagster_celery.app --concurrency=20
+exec dagster-celery worker start -A dagster_celery.app -- --concurrency=20
