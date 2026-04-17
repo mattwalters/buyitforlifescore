@@ -12,8 +12,8 @@ def get_duckdb_connection(database=":memory:", read_only=False, memory_limit="1G
 
     # CRITICAL: We natively throttle concurrent workers dynamically.
     # Silver processes run at 1GB, Bronze (JSON Extraction) runs at 8GB.
-    con.execute("PRAGMA threads=1;")
-    con.execute(f"PRAGMA memory_limit='{memory_limit}';")
+    # con.execute("PRAGMA threads=1;")
+    # con.execute(f"PRAGMA memory_limit='{memory_limit}';")
 
     r2_endpoint = os.getenv("R2_ENDPOINT_URL")
     r2_access_key = os.getenv("R2_ACCESS_KEY_ID")
