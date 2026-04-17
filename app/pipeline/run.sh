@@ -23,5 +23,12 @@ echo "Booting Dagster Daemon (Background orchestrator for sensors & schedules)..
 dagster-daemon run &
 
 echo "Booting Dagster Webserver on port $UI_PORT..."
-# exec replaces the shell with the webserver process, ensuring it receives termination signals cleanly
-exec dagster-webserver -h 0.0.0.0 -p $UI_PORT -w workspace.yaml
+dagster-webserver -h 0.0.0.0 -p $UI_PORT -w workspace.yaml &
+
+# Wait for whichever background process exits first. 
+# If the daemon dies but the webserver lives (or vice versa), this catches it instantly,
+# exits the script with an error, and triggers Railway to automatically reboot the entire container!
+wait -n
+
+echo "A critical process crashed! Exiting to trigger Railway auto-reboot..."
+exit 1
