@@ -57,6 +57,15 @@ def bronze_reddit_submissions(context: AssetExecutionContext) -> MaterializeResu
 
     context.log.info(f"Connecting to DuckDB and reading from {source_zst}")
 
+    import os
+    access = os.getenv("R2_ACCESS_KEY_ID", "MISSING")
+    secret = os.getenv("R2_SECRET_ACCESS_KEY", "MISSING")
+    endpt = os.getenv("R2_ENDPOINT_URL", "MISSING")
+    
+    context.log.info(f"[DIAGNOSTICS] Access Key: {access[:5]}*** (Len: {len(access)})")
+    context.log.info(f"[DIAGNOSTICS] Secret Key: {secret[:5]}*** (Len: {len(secret)})")
+    context.log.info(f"[DIAGNOSTICS] Endpoint: {endpt}")
+
     # We use sample_size=-1 to infer full schema safely over mutations
     query = f"""
     COPY (

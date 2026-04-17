@@ -28,17 +28,11 @@ def get_write_path(stage_and_filename: str) -> str:
 def get_read_path(stage_and_filename: str) -> str:
     """
     Returns the target path to READ a file from.
-    In production, always reads from R2 bucket.
-    Locally, acts as a "Shadow Branch":
-        If the file exists locally (e.g. you generated it in a test), it reads that copy.
-        If it does not exist locally, it successfully falls back to streaming it from Prod R2.
+    Evaluates in Hybrid Mode:
+        1. Always checks if the file physically exists on the local MacBook drive first.
+        2. If missing, streams it from Prod/Cloudflare R2 seamlessly.
     """
-    data_dir = os.environ.get("DATA_DIR")
-    if data_dir:
-        # Prod always reads from prod
-        return f"{str(data_dir).rstrip('/')}/{stage_and_filename}"
-
-    # Local Override Detection
+    # 1. Local Override Detection (e.g., massive 'ore' ZST files downloaded via torrent)
     local_path = os.path.join(_get_local_base_dir(), stage_and_filename)
     if "*" in local_path:
         import glob
@@ -48,5 +42,6 @@ def get_read_path(stage_and_filename: str) -> str:
     elif os.path.exists(local_path):
         return local_path
 
-    # Fallback to streaming from prod (Read-Only)
-    return f"s3://buyitforlifescore/{stage_and_filename}"
+    # 2. Fallback to streaming from prod (Read-Only)
+    data_dir = os.environ.get("DATA_DIR", "s3://buyitforlifescore")
+    return f"{str(data_dir).rstrip('/')}/{stage_and_filename}"

@@ -30,16 +30,18 @@ def get_duckdb_connection(database=":memory:", read_only=False, memory_limit="1G
         elif r2_endpoint.startswith("http://"):
             r2_endpoint = r2_endpoint[7:]
 
-        con.execute(f"SET s3_endpoint='{r2_endpoint}';")
-        con.execute(f"SET s3_access_key_id='{r2_access_key}';")
-        con.execute(f"SET s3_secret_access_key='{r2_secret_key}';")
-        con.execute("SET s3_region='auto';")
-
-        # Cloudflare R2 strongly recommends vhost routing or using fully qualified URLs.
-        # But 'path' style is strictly required without custom domains on the base account URL.
-        # Actually, Cloudflare now supports vhost. 'vhost' or 'path' depends on DuckDB version,
-        # but 'path' is safest for the raw accountid.r2.cloudflarestorage.com endpoint
-        con.execute("SET s3_url_style='path';")
-        con.execute("SET s3_use_ssl=true;")
+        # DuckDB 1.0+ prefers the Secret Manager over global SET s3_ variables,
+        # which can fail on Cloudflare R2 authorization headers.
+        secret_query = f"""
+        CREATE OR REPLACE SECRET r2_secret (
+            TYPE S3,
+            ENDPOINT '{r2_endpoint}',
+            KEY_ID '{r2_access_key}',
+            SECRET '{r2_secret_key}',
+            REGION 'auto',
+            URL_STYLE 'path'
+        );
+        """
+        con.execute(secret_query)
 
     return con
