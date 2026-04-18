@@ -49,17 +49,21 @@ export default function CategoryIdeaClientTable({
           </thead>
           <tbody className="[&_tr:last-child]:border-0 bg-background">
             {data.map((idea) => (
-              <tr key={idea.id} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+              <tr
+                key={idea.id}
+                className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+              >
                 <td className="p-4 align-middle text-xs font-mono text-muted-foreground">
                   {idea.id.slice(-6)}
                 </td>
-                <td className="p-4 align-middle font-medium text-slate-300">
-                  "{idea.rawName}"
-                </td>
+                <td className="p-4 align-middle font-medium text-slate-300">"{idea.rawName}"</td>
                 <td className="p-4 align-middle text-muted-foreground">
                   {idea.goldProductLine ? (
                     <span>
-                      <span className="font-semibold text-foreground">{idea.goldProductLine.brand}</span> {idea.goldProductLine.canonicalName}
+                      <span className="font-semibold text-foreground">
+                        {idea.goldProductLine.brand}
+                      </span>{" "}
+                      {idea.goldProductLine.canonicalName}
                     </span>
                   ) : (
                     <span className="italic">Orphaned</span>
@@ -67,8 +71,8 @@ export default function CategoryIdeaClientTable({
                 </td>
                 <td className="p-4 align-middle text-center">
                   {idea.isProcessed ? (
-                     <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
-                     Consolidated
+                    <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
+                      Consolidated
                     </span>
                   ) : (
                     <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-orange-500/10 text-orange-500 border-orange-500/20">

@@ -1,9 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
- 
+
 import { prisma } from "@mono/db";
 import { GoogleGenAI, Type, Schema } from "@google/genai";
-import { AiModel, calculateCost, ThinkingLevel, getThinkingConfig } from "../../worker/src/pricing.js";
+import {
+  AiModel,
+  calculateCost,
+  ThinkingLevel,
+  getThinkingConfig,
+} from "../../worker/src/pricing.js";
 import { z } from "zod";
 import * as dotenv from "dotenv";
 dotenv.config({ path: "../../.env" });
@@ -22,31 +27,38 @@ const ACTIVE_THINKING_LEVEL: ThinkingLevel = "low";
 const llmResponseSchema: Schema = {
   type: Type.OBJECT,
   properties: {
-    isLinked: { type: Type.BOOLEAN, description: "True if the model belongs to one of the candidate product lines." },
-    matchedLineId: { type: Type.STRING, nullable: true, description: "The ID of the matching product line, if any." }
+    isLinked: {
+      type: Type.BOOLEAN,
+      description: "True if the model belongs to one of the candidate product lines.",
+    },
+    matchedLineId: {
+      type: Type.STRING,
+      nullable: true,
+      description: "The ID of the matching product line, if any.",
+    },
   },
-  required: ["isLinked"]
+  required: ["isLinked"],
 };
 
 const generateWithRetry = async (prompt: string, retries = 3) => {
   if (!ai) return null;
   for (let i = 0; i < retries; i++) {
     try {
-      await new Promise(r => setTimeout(r, 1000));
+      await new Promise((r) => setTimeout(r, 1000));
       const response = await ai.models.generateContent({
         model: ACTIVE_MODEL,
         contents: prompt,
         config: {
           responseMimeType: "application/json",
           responseSchema: llmResponseSchema,
-          thinkingConfig: getThinkingConfig(ACTIVE_MODEL, ACTIVE_THINKING_LEVEL) as any
-        }
+          thinkingConfig: getThinkingConfig(ACTIVE_MODEL, ACTIVE_THINKING_LEVEL) as any,
+        },
       });
       return response;
     } catch (e: unknown) {
       console.warn(`   ⚠️ LLM failed (attempt ${i + 1}/${retries}):`, (e as any).message || e);
       if (i === retries - 1) return null;
-      await new Promise(r => setTimeout(r, 2000));
+      await new Promise((r) => setTimeout(r, 2000));
     }
   }
   return null;
@@ -70,9 +82,9 @@ async function main() {
     where: { goldProductLineId: null, isHierarchyAnalyzed: false },
     include: {
       goldBrand: {
-         include: { productLines: true }
-      }
-    }
+        include: { productLines: true },
+      },
+    },
   });
 
   if (items.length === 0) {
@@ -80,8 +92,10 @@ async function main() {
     return;
   }
 
-  console.log(`[Hierarchy] 📦 Analyzing ${items.length} Extra Models for Hierarchy Links (concurrency: ${CONCURRENCY})...`);
-  
+  console.log(
+    `[Hierarchy] 📦 Analyzing ${items.length} Extra Models for Hierarchy Links (concurrency: ${CONCURRENCY})...`,
+  );
+
   const total = items.length;
   let linkedCount = 0;
   let processIndex = 0;
@@ -93,23 +107,33 @@ async function main() {
       const brand = model.goldBrand;
       const candidates = brand?.productLines || [];
 
-      console.log(`\n[Hierarchy] 🔍 [${i + 1}/${total}] Inspecting Model: "${model.canonicalName}"`);
+      console.log(
+        `\n[Hierarchy] 🔍 [${i + 1}/${total}] Inspecting Model: "${model.canonicalName}"`,
+      );
 
       if (!brand) {
-         console.log(`   [Hierarchy] ⏭️ Skipping: Model is orphaned (No Brand ID).`);
-         await prisma.goldProduct.update({ where: { id: model.id }, data: { isHierarchyAnalyzed: true } });
-         continue;
+        console.log(`   [Hierarchy] ⏭️ Skipping: Model is orphaned (No Brand ID).`);
+        await prisma.goldProduct.update({
+          where: { id: model.id },
+          data: { isHierarchyAnalyzed: true },
+        });
+        continue;
       }
 
       if (candidates.length === 0) {
-         console.log(`   [Hierarchy] ⏭️ Skipping: No product lines exist for brand "${brand.canonicalName}".`);
-         await prisma.goldProduct.update({ where: { id: model.id }, data: { isHierarchyAnalyzed: true } });
-         continue;
+        console.log(
+          `   [Hierarchy] ⏭️ Skipping: No product lines exist for brand "${brand.canonicalName}".`,
+        );
+        await prisma.goldProduct.update({
+          where: { id: model.id },
+          data: { isHierarchyAnalyzed: true },
+        });
+        continue;
       }
 
-      const candidateContext = candidates.map((l: any) => 
-        `- [ID: ${l.id}] ${l.canonicalName}`
-      ).join("\n");
+      const candidateContext = candidates
+        .map((l: any) => `- [ID: ${l.id}] ${l.canonicalName}`)
+        .join("\n");
 
       const prompt = `You are an expert e-commerce catalog taxonomist. We are building a specific product hierarchy.
 
@@ -129,51 +153,57 @@ Return a JSON object indicating if the Exact Model is a member of any of the can
       const response = await generateWithRetry(prompt);
 
       if (response && response.text) {
-         try {
-            const result = JSON.parse(response.text);
-            if (result.isLinked && result.matchedLineId) {
-               const verifiedLine = candidates.find((c: any) => c.id === result.matchedLineId);
-               if (verifiedLine) {
-                  console.log(`   [Hierarchy] 🔗 LINKED: "${model.canonicalName}"  ➡️  [${verifiedLine.canonicalName}]`);
-                  linkedCount++;
+        try {
+          const result = JSON.parse(response.text);
+          if (result.isLinked && result.matchedLineId) {
+            const verifiedLine = candidates.find((c: any) => c.id === result.matchedLineId);
+            if (verifiedLine) {
+              console.log(
+                `   [Hierarchy] 🔗 LINKED: "${model.canonicalName}"  ➡️  [${verifiedLine.canonicalName}]`,
+              );
+              linkedCount++;
 
-                  await prisma.goldProduct.update({ 
-                     where: { id: model.id }, 
-                     data: { goldProductLineId: verifiedLine.id }
-                  });
-               } else {
-                  console.log(`   [Hierarchy] ⚠️ LLM returned invalid ID: ${result.matchedLineId}`);
-               }
+              await prisma.goldProduct.update({
+                where: { id: model.id },
+                data: { goldProductLineId: verifiedLine.id },
+              });
             } else {
-               console.log(`   [Hierarchy] 📉 Unlinked: Model stands alone.`);
+              console.log(`   [Hierarchy] ⚠️ LLM returned invalid ID: ${result.matchedLineId}`);
             }
+          } else {
+            console.log(`   [Hierarchy] 📉 Unlinked: Model stands alone.`);
+          }
 
-            // Always mark as analyzed so we don't query it again!
-            await prisma.goldProduct.update({ where: { id: model.id }, data: { isHierarchyAnalyzed: true } });
+          // Always mark as analyzed so we don't query it again!
+          await prisma.goldProduct.update({
+            where: { id: model.id },
+            data: { isHierarchyAnalyzed: true },
+          });
 
-            // Log AI Spend
-            const usage = response.usageMetadata;
-            if (usage) {
-              const cost = calculateCost(ACTIVE_MODEL, {
-                promptTokenCount: usage.promptTokenCount,
-                cachedContentTokenCount: 0,
-                candidatesTokenCount: usage.candidatesTokenCount,
-              });
-              await prisma.aiSpend.create({
-                data: {
-                  jobName: "[Gold] Hierarchy Linker",
-                  model: ACTIVE_MODEL,
-                  promptTokens: usage.promptTokenCount,
-                  responseTokens: usage.candidatesTokenCount || 0,
-                  thinkingTokens: usage.thoughtsTokenCount || (usage as any).thoughts_token_count || 0,
-                  totalTokens: usage.totalTokenCount,
-                  costInUsd: cost
-                }
-              });
-            }
-         } catch (err: unknown) {
-            console.error(`   [Hierarchy] ❌ Failed to parse LLM response:`, response.text);
-         }
+          // Log AI Spend
+          const usage = response.usageMetadata;
+          if (usage) {
+            const cost = calculateCost(ACTIVE_MODEL, {
+              promptTokenCount: usage.promptTokenCount,
+              cachedContentTokenCount: 0,
+              candidatesTokenCount: usage.candidatesTokenCount,
+            });
+            await prisma.aiSpend.create({
+              data: {
+                jobName: "[Gold] Hierarchy Linker",
+                model: ACTIVE_MODEL,
+                promptTokens: usage.promptTokenCount,
+                responseTokens: usage.candidatesTokenCount || 0,
+                thinkingTokens:
+                  usage.thoughtsTokenCount || (usage as any).thoughts_token_count || 0,
+                totalTokens: usage.totalTokenCount,
+                costInUsd: cost,
+              },
+            });
+          }
+        } catch (err: unknown) {
+          console.error(`   [Hierarchy] ❌ Failed to parse LLM response:`, response.text);
+        }
       }
     }
   };
@@ -181,7 +211,9 @@ Return a JSON object indicating if the Exact Model is a member of any of the can
   const pool = Array.from({ length: Math.min(CONCURRENCY, items.length) }).map(() => worker());
   await Promise.all(pool);
 
-  console.log(`\n[Hierarchy] ✅ Hierarchy sweep complete! Linked ${linkedCount}/${total} exact models to a parent line.`);
+  console.log(
+    `\n[Hierarchy] ✅ Hierarchy sweep complete! Linked ${linkedCount}/${total} exact models to a parent line.`,
+  );
 }
 
 main()

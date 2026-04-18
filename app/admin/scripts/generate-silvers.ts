@@ -1,9 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
- 
+
 import { prisma } from "@mono/db";
 import { GoogleGenAI, Type, Schema } from "@google/genai";
-import { AiModel, calculateCost, ThinkingLevel, getThinkingConfig } from "../../worker/src/pricing.js";
+import {
+  AiModel,
+  calculateCost,
+  ThinkingLevel,
+  getThinkingConfig,
+} from "../../worker/src/pricing.js";
 import { z } from "zod";
 import * as dotenv from "dotenv";
 dotenv.config({ path: "../../.env" });
@@ -27,11 +32,13 @@ const MENTION_ITEM_SCHEMA: Schema = {
   properties: {
     sourceId: {
       type: Type.INTEGER,
-      description: "Extract the exact [SOURCE INDEX: X] integer from the comment where this product was found.",
+      description:
+        "Extract the exact [SOURCE INDEX: X] integer from the comment where this product was found.",
     },
     quote: {
       type: Type.STRING,
-      description: "Extract exactly 1 phrase or continuous sentence from the raw comment where the product or brand was explicitly named or heavily contextualized. Do not extract full paragraphs, limit to just enough to ground the exact context.",
+      description:
+        "Extract exactly 1 phrase or continuous sentence from the raw comment where the product or brand was explicitly named or heavily contextualized. Do not extract full paragraphs, limit to just enough to ground the exact context.",
     },
     brand: {
       type: Type.STRING,
@@ -127,12 +134,15 @@ const generateWithRetry = async (prompt: string, retries = 4) => {
         config: {
           responseMimeType: "application/json",
           responseSchema: THREAD_EXTRACTION_SCHEMA,
-          thinkingConfig: getThinkingConfig(ACTIVE_MODEL, ACTIVE_THINKING_LEVEL) as any
+          thinkingConfig: getThinkingConfig(ACTIVE_MODEL, ACTIVE_THINKING_LEVEL) as any,
         },
       });
       return response;
     } catch (e: unknown) {
-      console.error(`      ❌ Extraction failed (attempt ${i + 1}/${retries}):`, (e as any).message || e);
+      console.error(
+        `      ❌ Extraction failed (attempt ${i + 1}/${retries}):`,
+        (e as any).message || e,
+      );
       if (i === retries - 1) return null;
       await new Promise((r) => setTimeout(r, 3000));
     }
@@ -160,18 +170,20 @@ async function main() {
   const seedArgIndex = process.argv.indexOf("--seed");
   const seed = seedArgIndex !== -1 ? parseFloat(process.argv[seedArgIndex + 1]) : 42;
 
-  console.log(`[Extraction] 🧹 Fetching unprocessed Bronze Submissions (limit ${limit}, random: ${isRandom}, seed: ${seed})...`);
+  console.log(
+    `[Extraction] 🧹 Fetching unprocessed Bronze Submissions (limit ${limit}, random: ${isRandom}, seed: ${seed})...`,
+  );
 
   // Grab the root submissions, include their comments
   let submissions: any[] = [];
   if (isRandom) {
-    let idsResponse: {id: string}[];
+    let idsResponse: { id: string }[];
     if (seed !== null) {
       // Postgres setseed requires -1 <= x <= 1. Map any number deterministically.
       const seedVal = Math.sin(seed);
       idsResponse = await prisma.$transaction(async (tx) => {
         await tx.$executeRaw`SELECT setseed(${seedVal})`;
-        return tx.$queryRaw<{id: string}[]>`
+        return tx.$queryRaw<{ id: string }[]>`
           SELECT id FROM "BronzeRedditSubmission" 
           WHERE "isProcessed" = false 
           ORDER BY RANDOM() 
@@ -179,7 +191,7 @@ async function main() {
         `;
       });
     } else {
-      idsResponse = await prisma.$queryRaw<{id: string}[]>`
+      idsResponse = await prisma.$queryRaw<{ id: string }[]>`
         SELECT id FROM "BronzeRedditSubmission" 
         WHERE "isProcessed" = false 
         ORDER BY RANDOM() 
@@ -187,8 +199,8 @@ async function main() {
       `;
     }
     submissions = await prisma.bronzeRedditSubmission.findMany({
-      where: { id: { in: idsResponse.map(r => r.id) } },
-      include: { comments: { select: { id: true, body: true } } }
+      where: { id: { in: idsResponse.map((r) => r.id) } },
+      include: { comments: { select: { id: true, body: true } } },
     });
   } else {
     submissions = await prisma.bronzeRedditSubmission.findMany({
@@ -219,20 +231,24 @@ async function main() {
 
       const baseContext = `[SOURCE INDEX: 0] Title: ${sub.title} | Body: ${sub.selftext || ""}`;
       const CHUNK_SIZE = 25;
-      
+
       const chunks: string[] = [];
       if (sub.comments.length === 0) {
         chunks.push(baseContext);
       } else {
         for (let i = 0; i < sub.comments.length; i += CHUNK_SIZE) {
-          const chunkComments = sub.comments.slice(i, i + CHUNK_SIZE).map((c: any, localIdx: number) => 
-            `[SOURCE INDEX: ${i + localIdx + 1}] Body: ${c.body}`
-          );
+          const chunkComments = sub.comments
+            .slice(i, i + CHUNK_SIZE)
+            .map(
+              (c: any, localIdx: number) => `[SOURCE INDEX: ${i + localIdx + 1}] Body: ${c.body}`,
+            );
           chunks.push([baseContext, ...chunkComments].join("\n\n"));
         }
       }
 
-      console.log(`\n[Extraction] 🔍 [${i + 1}/${total}] Analyzing Topic: "${sub.title}" | Comments: ${sub.comments.length} | Chunks: ${chunks.length}`);
+      console.log(
+        `\n[Extraction] 🔍 [${i + 1}/${total}] Analyzing Topic: "${sub.title}" | Comments: ${sub.comments.length} | Chunks: ${chunks.length}`,
+      );
 
       let allChunksSucceeded = true;
       let totalMentionsSaved = 0;
@@ -254,8 +270,10 @@ Thread to analyze:
 ${threadText}`;
 
           const promptTokensEst = Math.ceil(prompt.length / 4);
-          console.log(`   [Extraction] 🧠 Sending ${promptTokensEst} estimated tokens to Gemini (Chunk ${chunkIdx + 1}/${chunks.length})...`);
-          
+          console.log(
+            `   [Extraction] 🧠 Sending ${promptTokensEst} estimated tokens to Gemini (Chunk ${chunkIdx + 1}/${chunks.length})...`,
+          );
+
           try {
             const response = await generateWithRetry(prompt);
 
@@ -283,7 +301,7 @@ ${threadText}`;
                       typeof parsed.sourceId === "number"
                         ? parsed.sourceId
                         : parseInt(String(parsed.sourceId), 10);
-                    
+
                     const isComment = sourceIndex > 0;
                     return {
                       submissionId: isComment ? null : sub.id,
@@ -326,19 +344,26 @@ ${threadText}`;
                         promptTokens: usage.promptTokenCount,
                         cachedTokens: 0,
                         responseTokens: usage.candidatesTokenCount || 0,
-                        thinkingTokens: usage.thoughtsTokenCount || (usage as any).thoughts_token_count || 0,
+                        thinkingTokens:
+                          usage.thoughtsTokenCount || (usage as any).thoughts_token_count || 0,
                         totalTokens: usage.totalTokenCount,
                       },
                     });
                   }
                 } else {
-                  console.log(`   [Extraction] 📉 Output parsed, but contained no valid/clean entities in Chunk ${chunkIdx + 1}. Skipped.`);
+                  console.log(
+                    `   [Extraction] 📉 Output parsed, but contained no valid/clean entities in Chunk ${chunkIdx + 1}. Skipped.`,
+                  );
                 }
               } else {
-                console.log(`   [Extraction] 📉 Output array empty. No valid models detected in Chunk ${chunkIdx + 1}.`);
+                console.log(
+                  `   [Extraction] 📉 Output array empty. No valid models detected in Chunk ${chunkIdx + 1}.`,
+                );
               }
             } else {
-              console.log(`   [Extraction] ❌ LLM returned empty string or crashed entirely in Chunk ${chunkIdx + 1}.`);
+              console.log(
+                `   [Extraction] ❌ LLM returned empty string or crashed entirely in Chunk ${chunkIdx + 1}.`,
+              );
               allChunksSucceeded = false;
             }
           } catch (err: unknown) {
@@ -347,23 +372,27 @@ ${threadText}`;
             );
             allChunksSucceeded = false;
           }
-        })
+        }),
       );
 
       // We only mark as processed if ALL chunks within the thread were successfully queried and parsed
       if (allChunksSucceeded) {
         if (totalMentionsSaved > 0) {
-           successCount++;
+          successCount++;
         }
-        console.log(`[Extraction] 🎉 Finished Thread [${i + 1}/${total}]. Found ${totalMentionsSaved} Extracted Entities.`);
+        console.log(
+          `[Extraction] 🎉 Finished Thread [${i + 1}/${total}]. Found ${totalMentionsSaved} Extracted Entities.`,
+        );
         await prisma.bronzeRedditSubmission.update({
           where: { id: sub.id },
-          data: { 
-            isProcessed: true
+          data: {
+            isProcessed: true,
           },
         });
       } else {
-        console.error(`   ❌ Thread aborting due to chunk failures. Will not mark as processed so it can retry.`);
+        console.error(
+          `   ❌ Thread aborting due to chunk failures. Will not mark as processed so it can retry.`,
+        );
       }
     }
   };

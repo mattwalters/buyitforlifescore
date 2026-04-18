@@ -4,8 +4,6 @@ import SilverClientTable from "./silver-client-table";
 
 export const dynamic = "force-dynamic";
 
-
-
 export default async function SilverPage(props: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
@@ -19,9 +17,12 @@ export default async function SilverPage(props: {
   const validDirs: readonly ["asc", "desc"] = ["asc", "desc"];
   const orderDir = validDirs.includes(dir as "asc" | "desc") ? (dir as "asc" | "desc") : "desc";
 
-  const goldProductId = typeof searchParams.goldProductId === "string" ? searchParams.goldProductId : undefined;
-  const goldBrandId = typeof searchParams.goldBrandId === "string" ? searchParams.goldBrandId : undefined;
-  const goldProductLineId = typeof searchParams.goldProductLineId === "string" ? searchParams.goldProductLineId : undefined;
+  const goldProductId =
+    typeof searchParams.goldProductId === "string" ? searchParams.goldProductId : undefined;
+  const goldBrandId =
+    typeof searchParams.goldBrandId === "string" ? searchParams.goldBrandId : undefined;
+  const goldProductLineId =
+    typeof searchParams.goldProductLineId === "string" ? searchParams.goldProductLineId : undefined;
 
   const where = {
     ...(goldProductId ? { goldProductId } : {}),
@@ -41,9 +42,9 @@ export default async function SilverPage(props: {
         select: {
           title: true,
           postedAt: true,
-        }
-      }
-    }
+        },
+      },
+    },
   });
 
   const total = await prisma.silverProductMention.count({ where });

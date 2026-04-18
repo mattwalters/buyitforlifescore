@@ -41,7 +41,11 @@ export async function GET(request: Request) {
       });
 
       data = rawRecords.map((r) => {
-        return { ...r, createdAt: r.createdAt?.toISOString() ?? "", updatedAt: r.updatedAt ? r.updatedAt.toISOString() : undefined };
+        return {
+          ...r,
+          createdAt: r.createdAt?.toISOString() ?? "",
+          updatedAt: r.updatedAt ? r.updatedAt.toISOString() : undefined,
+        };
       });
 
       filename = "gold-brands.csv";
@@ -51,7 +55,11 @@ export async function GET(request: Request) {
       });
 
       data = rawRecords.map((r) => {
-        return { ...r, createdAt: r.createdAt?.toISOString() ?? "", updatedAt: r.updatedAt ? r.updatedAt.toISOString() : undefined };
+        return {
+          ...r,
+          createdAt: r.createdAt?.toISOString() ?? "",
+          updatedAt: r.updatedAt ? r.updatedAt.toISOString() : undefined,
+        };
       });
 
       filename = "gold-lines.csv";
@@ -61,7 +69,11 @@ export async function GET(request: Request) {
       });
 
       data = rawRecords.map((r) => {
-        return { ...r, createdAt: r.createdAt?.toISOString() ?? "", updatedAt: r.updatedAt ? r.updatedAt.toISOString() : undefined };
+        return {
+          ...r,
+          createdAt: r.createdAt?.toISOString() ?? "",
+          updatedAt: r.updatedAt ? r.updatedAt.toISOString() : undefined,
+        };
       });
 
       filename = "gold-models.csv";
@@ -69,15 +81,15 @@ export async function GET(request: Request) {
       const allBrands = await prisma.goldBrand.findMany({
         orderBy: { mentionCount: "desc" },
         include: {
-          productLines: { 
-             orderBy: { mentionCount: "desc" },
-             include: { goldDepartment: true, categories: true }
+          productLines: {
+            orderBy: { mentionCount: "desc" },
+            include: { goldDepartment: true, categories: true },
           },
-          products: { 
-             orderBy: { mentionCount: "desc" },
-             include: { goldDepartment: true, categories: true }
-          }
-        }
+          products: {
+            orderBy: { mentionCount: "desc" },
+            include: { goldDepartment: true, categories: true },
+          },
+        },
       });
 
       for (const brand of allBrands) {
@@ -89,68 +101,93 @@ export async function GET(request: Request) {
           Brand_CreatedAt: brand.createdAt?.toISOString() ?? "",
         };
 
-        const unallocatedModels = brand.products.filter(p => !p.goldProductLineId);
-        
+        const unallocatedModels = brand.products.filter((p) => !p.goldProductLineId);
+
         // Brand has absolutely nothing
         if (brand.productLines.length === 0 && unallocatedModels.length === 0) {
-           data.push({
-             ..._b,
-             Line_ID: "", Line_Name: "", Line_Mentions: "", Line_Sentiment: "", Line_CreatedAt: "", Line_Department: "", Line_Categories: "",
-             Model_ID: "", Model_Name: "", Model_Mentions: "", Model_Sentiment: "", Model_CreatedAt: "", Model_Department: "", Model_Categories: ""
-           });
-        } 
-        
+          data.push({
+            ..._b,
+            Line_ID: "",
+            Line_Name: "",
+            Line_Mentions: "",
+            Line_Sentiment: "",
+            Line_CreatedAt: "",
+            Line_Department: "",
+            Line_Categories: "",
+            Model_ID: "",
+            Model_Name: "",
+            Model_Mentions: "",
+            Model_Sentiment: "",
+            Model_CreatedAt: "",
+            Model_Department: "",
+            Model_Categories: "",
+          });
+        }
+
         // Iterate Product Lines
         for (const line of brand.productLines) {
-           const _l = {
-             Line_ID: line.id,
-             Line_Name: line.canonicalName,
-             Line_Mentions: line.mentionCount,
-             Line_Sentiment: line.avgSentiment,
-             Line_CreatedAt: line.createdAt?.toISOString() ?? "",
-             Line_Department: line.goldDepartment?.canonicalName ?? "",
-             Line_Categories: line.categories.map(c => c.canonicalName).join(" | "),
-           };
+          const _l = {
+            Line_ID: line.id,
+            Line_Name: line.canonicalName,
+            Line_Mentions: line.mentionCount,
+            Line_Sentiment: line.avgSentiment,
+            Line_CreatedAt: line.createdAt?.toISOString() ?? "",
+            Line_Department: line.goldDepartment?.canonicalName ?? "",
+            Line_Categories: line.categories.map((c) => c.canonicalName).join(" | "),
+          };
 
-           const lineModels = brand.products.filter(p => p.goldProductLineId === line.id);
-           
-           if (lineModels.length === 0) {
-              data.push({
-                ..._b, ..._l,
-                Model_ID: "", Model_Name: "", Model_Mentions: "", Model_Sentiment: "", Model_CreatedAt: "", Model_Department: "", Model_Categories: ""
-              });
-           } else {
-              for (const mod of lineModels) {
-                 const _m = {
-                   Model_ID: mod.id,
-                   Model_Name: mod.canonicalName,
-                   Model_Mentions: mod.mentionCount,
-                   Model_Sentiment: mod.avgSentiment,
-                   Model_CreatedAt: mod.createdAt?.toISOString() ?? "",
-                   Model_Department: mod.goldDepartment?.canonicalName ?? "",
-                   Model_Categories: mod.categories.map(c => c.canonicalName).join(" | "),
-                 };
-                 data.push({ ..._b, ..._l, ..._m });
-              }
-           }
+          const lineModels = brand.products.filter((p) => p.goldProductLineId === line.id);
+
+          if (lineModels.length === 0) {
+            data.push({
+              ..._b,
+              ..._l,
+              Model_ID: "",
+              Model_Name: "",
+              Model_Mentions: "",
+              Model_Sentiment: "",
+              Model_CreatedAt: "",
+              Model_Department: "",
+              Model_Categories: "",
+            });
+          } else {
+            for (const mod of lineModels) {
+              const _m = {
+                Model_ID: mod.id,
+                Model_Name: mod.canonicalName,
+                Model_Mentions: mod.mentionCount,
+                Model_Sentiment: mod.avgSentiment,
+                Model_CreatedAt: mod.createdAt?.toISOString() ?? "",
+                Model_Department: mod.goldDepartment?.canonicalName ?? "",
+                Model_Categories: mod.categories.map((c) => c.canonicalName).join(" | "),
+              };
+              data.push({ ..._b, ..._l, ..._m });
+            }
+          }
         }
 
         // Iterate Orphaned Models
         for (const mod of unallocatedModels) {
-           const _m = {
-              Model_ID: mod.id,
-              Model_Name: mod.canonicalName,
-              Model_Mentions: mod.mentionCount,
-              Model_Sentiment: mod.avgSentiment,
-              Model_CreatedAt: mod.createdAt?.toISOString() ?? "",
-              Model_Department: mod.goldDepartment?.canonicalName ?? "",
-              Model_Categories: mod.categories.map(c => c.canonicalName).join(" | "),
-           };
-           data.push({
-              ..._b,
-              Line_ID: "", Line_Name: "<ORPHANED>", Line_Mentions: "", Line_Sentiment: "", Line_CreatedAt: "", Line_Department: "", Line_Categories: "",
-              ..._m
-           });
+          const _m = {
+            Model_ID: mod.id,
+            Model_Name: mod.canonicalName,
+            Model_Mentions: mod.mentionCount,
+            Model_Sentiment: mod.avgSentiment,
+            Model_CreatedAt: mod.createdAt?.toISOString() ?? "",
+            Model_Department: mod.goldDepartment?.canonicalName ?? "",
+            Model_Categories: mod.categories.map((c) => c.canonicalName).join(" | "),
+          };
+          data.push({
+            ..._b,
+            Line_ID: "",
+            Line_Name: "<ORPHANED>",
+            Line_Mentions: "",
+            Line_Sentiment: "",
+            Line_CreatedAt: "",
+            Line_Department: "",
+            Line_Categories: "",
+            ..._m,
+          });
         }
       }
 
@@ -161,14 +198,14 @@ export async function GET(request: Request) {
         ...(goldBrandId ? { goldBrandId } : {}),
         ...(goldProductLineId ? { goldProductLineId } : {}),
       };
-      
+
       const rawRecords = await prisma.silverProductMention.findMany({
         where,
         orderBy: { brand: "asc" },
       });
 
       data = rawRecords.map((r) => {
-         return { ...r };
+        return { ...r };
       });
 
       filename = "silver-mentions.csv";
@@ -190,9 +227,6 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     console.error("CSV Export Error:", error);
-    return NextResponse.json(
-      { error: "Failed to generate CSV" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to generate CSV" }, { status: 500 });
   }
 }

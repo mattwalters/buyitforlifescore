@@ -21,15 +21,16 @@ export default async function DepartmentsPage(props: {
   const sortSafe = validSorts.includes(sortBy) ? sortBy : "canonicalName";
 
   const departments = await prisma.goldDepartment.findMany({
-    orderBy: sortSafe === "productLines" 
-      ? { productLines: { _count: orderDir } }
-      : sortSafe === "products" 
-      ? { products: { _count: orderDir } }
-      : { [sortSafe]: orderDir },
+    orderBy:
+      sortSafe === "productLines"
+        ? { productLines: { _count: orderDir } }
+        : sortSafe === "products"
+          ? { products: { _count: orderDir } }
+          : { [sortSafe]: orderDir },
     include: {
       _count: {
-        select: { productLines: true, products: true }
-      }
+        select: { productLines: true, products: true },
+      },
     },
     take: pageSize,
     skip: Math.max(0, (page - 1) * pageSize),
@@ -43,7 +44,7 @@ export default async function DepartmentsPage(props: {
       <div className="flex items-start justify-between">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-bold tracking-tight text-yellow-500 flex items-center gap-2">
-             Top-Down Departments
+            Top-Down Departments
           </h1>
           <p className="text-muted-foreground">
             View all {total.toLocaleString()} core parent departments defining the taxonomy.

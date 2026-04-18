@@ -10,7 +10,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend
+  Legend,
 } from "recharts";
 
 interface SpendChartProps {
@@ -53,7 +53,9 @@ export function SpendChart({ data, keys }: SpendChartProps) {
   if (data.length === 0) {
     return (
       <div className="flex h-[350px] items-center justify-center rounded-lg border border-dashed bg-muted/20">
-        <span className="text-muted-foreground text-sm">No recorded AI spend in the last 7 days.</span>
+        <span className="text-muted-foreground text-sm">
+          No recorded AI spend in the last 7 days.
+        </span>
       </div>
     );
   }
@@ -70,36 +72,46 @@ export function SpendChart({ data, keys }: SpendChartProps) {
             bottom: 5,
           }}
         >
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--muted-foreground)/0.2)" />
-          <XAxis 
-            dataKey="date" 
-            tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} 
-            tickLine={false}
-            axisLine={false}
+          <CartesianGrid
+            strokeDasharray="3 3"
+            vertical={false}
+            stroke="hsl(var(--muted-foreground)/0.2)"
           />
-          <YAxis 
-            tickFormatter={formatters.dollar} 
+          <XAxis
+            dataKey="date"
             tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
             tickLine={false}
             axisLine={false}
           />
-          <Tooltip 
+          <YAxis
+            tickFormatter={formatters.dollar}
+            tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
+            tickLine={false}
+            axisLine={false}
+          />
+          <Tooltip
             formatter={(value: any) => [formatters.dollar(value as number), ""]}
-            contentStyle={{ 
-              backgroundColor: "hsl(var(--card))", 
+            contentStyle={{
+              backgroundColor: "hsl(var(--card))",
               borderColor: "hsl(var(--border))",
               borderRadius: "0.5rem",
-              color: "hsl(var(--foreground))"
+              color: "hsl(var(--foreground))",
             }}
             itemStyle={{ color: "hsl(var(--foreground))" }}
           />
-          <Legend wrapperStyle={{ paddingTop: "20px", fontSize: "12px", color: "hsl(var(--muted-foreground))" }} />
+          <Legend
+            wrapperStyle={{
+              paddingTop: "20px",
+              fontSize: "12px",
+              color: "hsl(var(--muted-foreground))",
+            }}
+          />
           {keys.map((key, index) => (
-            <Bar 
-              key={key} 
-              dataKey={key} 
-              stackId="a" 
-              fill={COLOR_PALETTE[index % COLOR_PALETTE.length]} 
+            <Bar
+              key={key}
+              dataKey={key}
+              stackId="a"
+              fill={COLOR_PALETTE[index % COLOR_PALETTE.length]}
             />
           ))}
         </BarChart>

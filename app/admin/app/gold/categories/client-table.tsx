@@ -21,7 +21,6 @@ export default function CategoryClientTable({
   sortBy: string;
   dir: string;
 }) {
-
   const getSortLink = (colKey: string) => {
     const p = new URLSearchParams();
     p.set("sortBy", colKey);
@@ -64,7 +63,10 @@ export default function CategoryClientTable({
           </thead>
           <tbody className="[&_tr:last-child]:border-0 bg-background">
             {categories.map((cat) => (
-              <tr key={cat.id} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+              <tr
+                key={cat.id}
+                className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+              >
                 <td className="p-4 align-middle text-xs font-mono text-muted-foreground">
                   {cat.id.slice(-6)}
                 </td>

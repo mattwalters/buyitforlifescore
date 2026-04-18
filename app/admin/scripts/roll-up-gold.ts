@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
- 
- 
- 
+
 import { prisma } from "@mono/db";
 import { GoogleGenAI } from "@google/genai";
 import { AiModel, calculateCost } from "../../worker/src/pricing.js";
@@ -70,28 +68,33 @@ async function main() {
         vectorLiteral = rawSilver[0].vec;
       } else {
         // Fallback: Generate if missing and save it
-        await new Promise(r => setTimeout(r, 200));
+        await new Promise((r) => setTimeout(r, 200));
 
         const embedRes3072 = await ai.models.embedContent({
           model: "gemini-embedding-2-preview",
           contents: `task: clustering | query: ${canonicalStr}`,
-          config: { outputDimensionality: 3072 }
+          config: { outputDimensionality: 3072 },
         });
 
-        await new Promise(r => setTimeout(r, 200));
+        await new Promise((r) => setTimeout(r, 200));
 
         const embedRes768 = await ai.models.embedContent({
           model: "gemini-embedding-2-preview",
           contents: `task: clustering | query: ${canonicalStr}`,
-          config: { outputDimensionality: 768 }
+          config: { outputDimensionality: 768 },
         });
 
         const vectorValue3072 = embedRes3072.embeddings?.[0]?.values || [];
         const vectorValue768 = embedRes768.embeddings?.[0]?.values || [];
 
-        if (!vectorValue3072 || vectorValue3072.length === 0 || !vectorValue768 || vectorValue768.length === 0) {
-           console.warn(`⚠️ Failed to generate embedding for ${m.id}`);
-           continue;
+        if (
+          !vectorValue3072 ||
+          vectorValue3072.length === 0 ||
+          !vectorValue768 ||
+          vectorValue768.length === 0
+        ) {
+          console.warn(`⚠️ Failed to generate embedding for ${m.id}`);
+          continue;
         }
 
         const vectorLiteral3072 = `[${vectorValue3072.join(",")}]`;
@@ -110,20 +113,20 @@ async function main() {
         const costInUsd = calculateCost(AiModel.GEMINI_EMBEDDING_2_PREVIEW, {
           promptTokenCount: promptTokens,
           cachedContentTokenCount: 0,
-          candidatesTokenCount: 0
+          candidatesTokenCount: 0,
         });
-        
+
         await prisma.aiSpend.create({
           data: {
-             jobName: "[Gold] Rollup: General",
-             submissionId: m.submissionId,
-             model: AiModel.GEMINI_EMBEDDING_2_PREVIEW,
-             promptTokens,
-             cachedTokens: 0,
-             responseTokens: 0,
-             totalTokens: promptTokens,
-             costInUsd,
-          }
+            jobName: "[Gold] Rollup: General",
+            submissionId: m.submissionId,
+            model: AiModel.GEMINI_EMBEDDING_2_PREVIEW,
+            promptTokens,
+            cachedTokens: 0,
+            responseTokens: 0,
+            totalTokens: promptTokens,
+            costInUsd,
+          },
         });
       }
 
@@ -134,7 +137,7 @@ async function main() {
         id: string;
         distance: number;
       }
-      
+
       const matches = await prisma.$queryRaw<MatchResult[]>`
         SELECT id, (embedding <=> ${vectorLiteral}::vector) as distance
         FROM "GoldProduct"
@@ -146,7 +149,9 @@ async function main() {
 
       if (matches.length > 0 && matches[0].distance < 0.15) {
         goldId = matches[0].id;
-        console.log(`   🔗 MATCHED existing Gold product: ${goldId} (distance: ${matches[0].distance.toFixed(4)})`);
+        console.log(
+          `   🔗 MATCHED existing Gold product: ${goldId} (distance: ${matches[0].distance.toFixed(4)})`,
+        );
       } else {
         // Did not match or no GoldProducts exist at all
         const created = await prisma.goldProduct.create({
@@ -155,8 +160,8 @@ async function main() {
             goldBrand: {
               connectOrCreate: {
                 where: { canonicalName: m.brand },
-                create: { canonicalName: m.brand }
-              }
+                create: { canonicalName: m.brand },
+              },
             },
             canonicalName: m.productName,
             mentionCount: 0,
@@ -164,7 +169,7 @@ async function main() {
           },
         });
         goldId = created.id;
-        
+
         // Update embedding with raw SQL
         await prisma.$executeRaw`
           UPDATE "GoldProduct" 
@@ -178,8 +183,8 @@ async function main() {
       await prisma.$transaction(async (tx) => {
         // Connect mention to Gold
         await tx.silverProductMention.update({
-           where: { id: m.id },
-           data: { goldProductId: goldId },
+          where: { id: m.id },
+          data: { goldProductId: goldId },
         });
 
         // Recalculate stats for the Gold row
@@ -195,9 +200,9 @@ async function main() {
 
         let totalScore = 0;
         for (const mention of allMentions) {
-           totalScore += getSentimentScore(mention.sentiment);
+          totalScore += getSentimentScore(mention.sentiment);
         }
-        const newAvg = allMentions.length > 0 ? (totalScore / allMentions.length) : 0;
+        const newAvg = allMentions.length > 0 ? totalScore / allMentions.length : 0;
 
         await tx.goldProduct.update({
           where: { id: goldId },
@@ -206,9 +211,10 @@ async function main() {
             avgSentiment: newAvg,
           },
         });
-        console.log(`   📈 Updated GoldProduct stats -> mentions: ${stats._count.id}, avgSentiment: ${newAvg.toFixed(2)}`);
+        console.log(
+          `   📈 Updated GoldProduct stats -> mentions: ${stats._count.id}, avgSentiment: ${newAvg.toFixed(2)}`,
+        );
       });
-
     } catch (err: unknown) {
       console.error(`   ❌ Error processing mention ${m.id}:`, (err as any)?.message);
     }

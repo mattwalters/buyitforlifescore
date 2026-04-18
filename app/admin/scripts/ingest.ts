@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
- 
- 
- 
+
 import "dotenv/config";
 import duckdb from "duckdb";
 import { prisma } from "@mono/db";

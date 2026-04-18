@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
- 
- 
- 
+
 import { prisma } from "@mono/db";
 
 const CORE_DEPARTMENTS = [

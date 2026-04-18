@@ -10,7 +10,7 @@ export default async function SubmissionsPage(props: {
 }) {
   const searchParams = await props.searchParams;
   const tab = typeof searchParams.tab === "string" ? searchParams.tab : "table";
-  
+
   const pageParam = typeof searchParams.page === "string" ? searchParams.page : "1";
   const page = parseInt(pageParam, 10) || 1;
   const sortBy = typeof searchParams.sortBy === "string" ? searchParams.sortBy : "score";
@@ -24,9 +24,15 @@ export default async function SubmissionsPage(props: {
 
   // Conditionally fetch data based on tab to avoid over-fetching
   let tableSubmissions: any[] = [];
-  let tokenData: { chars: number, mentions: number, score: number, comments: number, isProcessed: boolean }[] = [];
-  let specificityData: { name: string, value: number }[] = [];
-  let sentimentData: { name: string, value: number }[] = [];
+  let tokenData: {
+    chars: number;
+    mentions: number;
+    score: number;
+    comments: number;
+    isProcessed: boolean;
+  }[] = [];
+  let specificityData: { name: string; value: number }[] = [];
+  let sentimentData: { name: string; value: number }[] = [];
   let totalPages = 1;
 
   if (tab === "table") {
@@ -39,25 +45,34 @@ export default async function SubmissionsPage(props: {
   } else if (tab === "stats") {
     const submissionsWithTokens = await prisma.bronzeRedditSubmission.findMany({
       where: { charCount: { not: null } },
-      select: { charCount: true, score: true, numComments: true, isProcessed: true, _count: { select: { mentions: true } } }
+      select: {
+        charCount: true,
+        score: true,
+        numComments: true,
+        isProcessed: true,
+        _count: { select: { mentions: true } },
+      },
     });
-    tokenData = submissionsWithTokens.map(s => ({
+    tokenData = submissionsWithTokens.map((s) => ({
       chars: s.charCount as number,
       mentions: s._count.mentions,
       score: s.score,
       comments: s.numComments,
-      isProcessed: s.isProcessed
+      isProcessed: s.isProcessed,
     }));
 
     const rawSpecificity = await prisma.silverProductMention.groupBy({
-      by: ['specificityLevel'],
-      _count: { id: true }
+      by: ["specificityLevel"],
+      _count: { id: true },
     });
-    specificityData = rawSpecificity.map((r: any) => ({ name: r.specificityLevel, value: r._count.id }));
+    specificityData = rawSpecificity.map((r: any) => ({
+      name: r.specificityLevel,
+      value: r._count.id,
+    }));
 
     const rawSentiment = await prisma.silverProductMention.groupBy({
-      by: ['sentiment'],
-      _count: { id: true }
+      by: ["sentiment"],
+      _count: { id: true },
     });
     sentimentData = rawSentiment.map((r: any) => ({ name: r.sentiment, value: r._count.id }));
   }
@@ -76,7 +91,9 @@ export default async function SubmissionsPage(props: {
           <Link
             href="?tab=table"
             className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm ${
-               tab === "table" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
+              tab === "table"
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
             }`}
           >
             Data Browser
@@ -84,7 +101,9 @@ export default async function SubmissionsPage(props: {
           <Link
             href="?tab=stats"
             className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm ${
-               tab === "stats" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
+              tab === "stats"
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
             }`}
           >
             Density Distribution
@@ -143,7 +162,10 @@ export default async function SubmissionsPage(props: {
                       className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
                     >
                       <td className="p-4 align-middle font-medium">
-                        <Link href={`/submissions/${sub.id}`} className="hover:underline text-primary">
+                        <Link
+                          href={`/submissions/${sub.id}`}
+                          className="hover:underline text-primary"
+                        >
                           {sub.title.length > 80 ? sub.title.substring(0, 80) + "..." : sub.title}
                         </Link>
                       </td>
@@ -196,11 +218,11 @@ export default async function SubmissionsPage(props: {
       )}
 
       {tab === "stats" && (
-         <TokenStatsChart 
-            data={tokenData} 
-            specificityData={specificityData} 
-            sentimentData={sentimentData} 
-         />
+        <TokenStatsChart
+          data={tokenData}
+          specificityData={specificityData}
+          sentimentData={sentimentData}
+        />
       )}
     </div>
   );

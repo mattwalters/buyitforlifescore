@@ -1,10 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
- 
- 
- 
+
 import { prisma } from "@mono/db";
 import { GoogleGenAI, Type, Schema } from "@google/genai";
-import { AiModel, calculateCost, ThinkingLevel, getThinkingConfig } from "../../worker/src/pricing.js";
+import {
+  AiModel,
+  calculateCost,
+  ThinkingLevel,
+  getThinkingConfig,
+} from "../../worker/src/pricing.js";
 import { embedWithRetry } from "./local-embedder.js";
 import { z } from "zod";
 import * as dotenv from "dotenv";
@@ -30,10 +33,18 @@ function getSentimentScore(sentiment: string): number {
 const llmResponseSchema: Schema = {
   type: Type.OBJECT,
   properties: {
-    isMatch: { type: Type.BOOLEAN, description: "True if the mention is the exact same corporate brand as one of the candidates." },
-    matchId: { type: Type.STRING, nullable: true, description: "The ID of the matching candidate brand, if any." }
+    isMatch: {
+      type: Type.BOOLEAN,
+      description:
+        "True if the mention is the exact same corporate brand as one of the candidates.",
+    },
+    matchId: {
+      type: Type.STRING,
+      nullable: true,
+      description: "The ID of the matching candidate brand, if any.",
+    },
   },
-  required: ["isMatch"]
+  required: ["isMatch"],
 };
 
 // Hybrid Matcher Helper Functions
@@ -48,7 +59,10 @@ function levenshtein(a: string, b: string): number {
       if (b.charAt(i - 1) == a.charAt(j - 1)) {
         matrix[i][j] = matrix[i - 1][j - 1];
       } else {
-        matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1));
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1,
+          Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1),
+        );
       }
     }
   }
@@ -56,13 +70,17 @@ function levenshtein(a: string, b: string): number {
 }
 
 function normalize(str: string): string {
-  return (str || "").toLowerCase().replace(/[^a-z0-9]/g, '');
+  return (str || "").toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
 function getWords(str: string): Set<string> {
-  return new Set((str || "").toLowerCase().split(/[^a-z0-9]+/).filter(Boolean));
+  return new Set(
+    (str || "")
+      .toLowerCase()
+      .split(/[^a-z0-9]+/)
+      .filter(Boolean),
+  );
 }
-
 
 async function main() {
   if (!ai) {
@@ -90,9 +108,24 @@ async function main() {
   for (const [i, m] of mentions.entries()) {
     const cleanBrandName = m.brand.trim();
     const lowerBrand = cleanBrandName.toLowerCase();
-    
-    if (["unknown", "generic", "unbranded", "homemade", "none", "n/a", "brand not specified", "unspecified", "no brand", ""].includes(lowerBrand)) {
-      console.log(`\n[Rollup] ⏭️  [${i + 1}/${total}] Skipping excluded generic brand: "${cleanBrandName}"`);
+
+    if (
+      [
+        "unknown",
+        "generic",
+        "unbranded",
+        "homemade",
+        "none",
+        "n/a",
+        "brand not specified",
+        "unspecified",
+        "no brand",
+        "",
+      ].includes(lowerBrand)
+    ) {
+      console.log(
+        `\n[Rollup] ⏭️  [${i + 1}/${total}] Skipping excluded generic brand: "${cleanBrandName}"`,
+      );
       continue;
     }
 
@@ -107,14 +140,16 @@ async function main() {
         where: {
           canonicalName: {
             equals: cleanBrandName,
-            mode: "insensitive"
-          }
-        }
+            mode: "insensitive",
+          },
+        },
       });
 
       if (exactMatch) {
-         console.log(`   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand ${exactMatch.id}`);
-         finalGoldBrandId = exactMatch.id;
+        console.log(
+          `   [Rollup] ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches Brand ${exactMatch.id}`,
+        );
+        finalGoldBrandId = exactMatch.id;
       }
 
       if (!finalGoldBrandId) {
@@ -139,7 +174,7 @@ async function main() {
           canonicalName: string;
           distance: number;
         }
-        
+
         const candidates = await prisma.$queryRaw<MatchResult[]>`
           SELECT id, "canonicalName", (embedding <=> ${vectorLiteral}::vector) as distance
           FROM "GoldBrand"
@@ -152,46 +187,54 @@ async function main() {
         const norm1 = normalize(cleanBrandName);
 
         for (const c of candidates) {
-           // 1. Vector Net
-           if (c.distance <= 0.25) {
-              validCandidatesMap.set(c.id, c);
-              continue;
-           }
+          // 1. Vector Net
+          if (c.distance <= 0.25) {
+            validCandidatesMap.set(c.id, c);
+            continue;
+          }
 
-           // 2. Lexical Subset Overlap
-           const candWords = getWords(c.canonicalName);
-           let intersectionCount = 0;
-           for (const word of newWords) {
-             if (candWords.has(word)) intersectionCount++;
-           }
-           if (intersectionCount > 0 && (intersectionCount === newWords.size || intersectionCount === candWords.size)) {
-              validCandidatesMap.set(c.id, c);
-              continue;
-           }
+          // 2. Lexical Subset Overlap
+          const candWords = getWords(c.canonicalName);
+          let intersectionCount = 0;
+          for (const word of newWords) {
+            if (candWords.has(word)) intersectionCount++;
+          }
+          if (
+            intersectionCount > 0 &&
+            (intersectionCount === newWords.size || intersectionCount === candWords.size)
+          ) {
+            validCandidatesMap.set(c.id, c);
+            continue;
+          }
 
-           // 3. Levenshtein Fuzzy Match
-           const norm2 = normalize(c.canonicalName);
-           // Prevent tiny words from false matching (like "GE" and "GM") if lev is up to 3
-           const levLimit = norm1.length <= 3 ? 1 : 3;
-           if (levenshtein(norm1, norm2) <= levLimit) {
-              validCandidatesMap.set(c.id, c);
-           }
+          // 3. Levenshtein Fuzzy Match
+          const norm2 = normalize(c.canonicalName);
+          // Prevent tiny words from false matching (like "GE" and "GM") if lev is up to 3
+          const levLimit = norm1.length <= 3 ? 1 : 3;
+          if (levenshtein(norm1, norm2) <= levLimit) {
+            validCandidatesMap.set(c.id, c);
+          }
         }
 
         const validCandidates = Array.from(validCandidatesMap.values());
-        validCandidates.sort((a,b) => a.distance - b.distance);
+        validCandidates.sort((a, b) => a.distance - b.distance);
 
         if (validCandidates.length > 20) {
-           console.warn(`   [Rollup] ⚠️ WARNING: Sending ${validCandidates.length} generated candidates to LLM! Context window/understanding may degrade.`);
+          console.warn(
+            `   [Rollup] ⚠️ WARNING: Sending ${validCandidates.length} generated candidates to LLM! Context window/understanding may degrade.`,
+          );
         }
-        
+
         // 3. The Gemini Tiebreaker Check (For Typo matching against valid centroids)
         if (validCandidates.length > 0) {
-           const candidateContext = validCandidates.map((c, i) => 
-             `Option ${i+1}: [ID: ${c.id}] Brand Name: ${c.canonicalName} | Distance: ${c.distance.toFixed(3)}`
-           ).join("\n");
+          const candidateContext = validCandidates
+            .map(
+              (c, i) =>
+                `Option ${i + 1}: [ID: ${c.id}] Brand Name: ${c.canonicalName} | Distance: ${c.distance.toFixed(3)}`,
+            )
+            .join("\n");
 
-           const prompt = `You are a corporate brand deduplication expert.
+          const prompt = `You are a corporate brand deduplication expert.
 A user has submitted a new "Buy It For Life" mention that refers ONLY to a brand name (e.g., "Patagonia", "KitchenAid", "Le Creuset").
 We need to determine if this new mention refers to the EXACT SAME company as any of our existing database records.
 
@@ -207,114 +250,120 @@ ${candidateContext}
 
 Return a JSON object. If one of the candidate options is unambiguously the exact same brand as the new mention, set "isMatch" to true and return its ID. If none match perfectly, set "isMatch" to false and "matchId" to null.`;
 
-           const response = await ai.models.generateContent({
-             model: ACTIVE_MODEL,
-             contents: prompt,
-             config: {
-               responseMimeType: "application/json",
-               responseSchema: llmResponseSchema,
-               thinkingConfig: getThinkingConfig(ACTIVE_MODEL, ACTIVE_THINKING_LEVEL) as any
-             }
-           });
+          const response = await ai.models.generateContent({
+            model: ACTIVE_MODEL,
+            contents: prompt,
+            config: {
+              responseMimeType: "application/json",
+              responseSchema: llmResponseSchema,
+              thinkingConfig: getThinkingConfig(ACTIVE_MODEL, ACTIVE_THINKING_LEVEL) as any,
+            },
+          });
 
-           if (response.text) {
-             const result = JSON.parse(response.text);
-             if (result.isMatch && result.matchId) {
-                const verifiedId = validCandidates.find(c => c.id === result.matchId);
-                if (verifiedId) {
-                   finalGoldBrandId = verifiedId.id;
-                   console.log(`   [Rollup] 🤖 LLM MATCHED TYPO: Option -> ${verifiedId.id} (${verifiedId.canonicalName})`);
-                }
-             } else {
-                console.log(`   [Rollup] 🤖 LLM REJECTED all candidates. Must be a novel brand.`);
-             }
+          if (response.text) {
+            const result = JSON.parse(response.text);
+            if (result.isMatch && result.matchId) {
+              const verifiedId = validCandidates.find((c) => c.id === result.matchId);
+              if (verifiedId) {
+                finalGoldBrandId = verifiedId.id;
+                console.log(
+                  `   [Rollup] 🤖 LLM MATCHED TYPO: Option -> ${verifiedId.id} (${verifiedId.canonicalName})`,
+                );
+              }
+            } else {
+              console.log(`   [Rollup] 🤖 LLM REJECTED all candidates. Must be a novel brand.`);
+            }
 
-             const usage = response.usageMetadata;
-             if (usage) {
-               const cost = calculateCost(ACTIVE_MODEL, {
-                 promptTokenCount: usage.promptTokenCount,
-                 cachedContentTokenCount: 0,
-                 candidatesTokenCount: usage.candidatesTokenCount,
-               });
-               await prisma.aiSpend.create({
-                 data: {
-                   jobName: "[Gold] Rollup: Brands",
-                   submissionId: m.submissionId,
-                   model: ACTIVE_MODEL,
-                   promptTokens: usage.promptTokenCount,
-                   responseTokens: usage.candidatesTokenCount || 0,
-                   thinkingTokens: usage.thoughtsTokenCount || (usage as any).thoughts_token_count || 0,
-                   totalTokens: usage.totalTokenCount,
-                   costInUsd: cost
-                 }
-               });
-             }
-           }
+            const usage = response.usageMetadata;
+            if (usage) {
+              const cost = calculateCost(ACTIVE_MODEL, {
+                promptTokenCount: usage.promptTokenCount,
+                cachedContentTokenCount: 0,
+                candidatesTokenCount: usage.candidatesTokenCount,
+              });
+              await prisma.aiSpend.create({
+                data: {
+                  jobName: "[Gold] Rollup: Brands",
+                  submissionId: m.submissionId,
+                  model: ACTIVE_MODEL,
+                  promptTokens: usage.promptTokenCount,
+                  responseTokens: usage.candidatesTokenCount || 0,
+                  thinkingTokens:
+                    usage.thoughtsTokenCount || (usage as any).thoughts_token_count || 0,
+                  totalTokens: usage.totalTokenCount,
+                  costInUsd: cost,
+                },
+              });
+            }
+          }
         } else {
-             console.log(`   [Rollup] 📉 No valid PGVector candidates found within distance threshold.`);
+          console.log(
+            `   [Rollup] 📉 No valid PGVector candidates found within distance threshold.`,
+          );
         }
 
         if (!finalGoldBrandId) {
-           generateNewCentroid = true;
+          generateNewCentroid = true;
         }
       }
 
       // 4. Execution Phase: Create Brand + Embed Pure Centroid
       if (generateNewCentroid || !finalGoldBrandId) {
-         // Generate a PURE CENTROID embedding of just the Brand Name
-         // This ensures typos naturally cluster to this pure vector!
-         let pureVec: number[] = [];
-         try {
-            pureVec = await embedWithRetry(cleanBrandName);
-         } catch(e: unknown) {
-            console.error("   [Rollup] Failed to generate centroid vector:", e);
-         }
+        // Generate a PURE CENTROID embedding of just the Brand Name
+        // This ensures typos naturally cluster to this pure vector!
+        let pureVec: number[] = [];
+        try {
+          pureVec = await embedWithRetry(cleanBrandName);
+        } catch (e: unknown) {
+          console.error("   [Rollup] Failed to generate centroid vector:", e);
+        }
 
-         const created = await prisma.goldBrand.create({
-           data: {
-             canonicalName: cleanBrandName,
-             mentionCount: 0,
-             avgSentiment: 0,
-           },
-         });
-         finalGoldBrandId = created.id;
-         
-         if (pureVec.length > 0) {
-            const vParam = `[${pureVec.join(",")}]`;
-            await prisma.$executeRaw`
+        const created = await prisma.goldBrand.create({
+          data: {
+            canonicalName: cleanBrandName,
+            mentionCount: 0,
+            avgSentiment: 0,
+          },
+        });
+        finalGoldBrandId = created.id;
+
+        if (pureVec.length > 0) {
+          const vParam = `[${pureVec.join(",")}]`;
+          await prisma.$executeRaw`
               UPDATE "GoldBrand" 
               SET embedding = ${vParam}::vector 
               WHERE id = ${finalGoldBrandId};
             `;
-         }
-         console.log(`   [Rollup] ✨ CREATED new GoldBrand: ${finalGoldBrandId} (${cleanBrandName}) with pure centroid.`);
+        }
+        console.log(
+          `   [Rollup] ✨ CREATED new GoldBrand: ${finalGoldBrandId} (${cleanBrandName}) with pure centroid.`,
+        );
       }
 
       // Link Mention and calculate stats
       await prisma.$transaction(async (tx) => {
-         await tx.silverProductMention.update({
-            where: { id: m.id },
-            data: { goldBrandId: finalGoldBrandId },
-         });
+        await tx.silverProductMention.update({
+          where: { id: m.id },
+          data: { goldBrandId: finalGoldBrandId },
+        });
 
-         const allMentions = await tx.silverProductMention.findMany({
-           where: { goldBrandId: finalGoldBrandId },
-           select: { sentiment: true },
-         });
+        const allMentions = await tx.silverProductMention.findMany({
+          where: { goldBrandId: finalGoldBrandId },
+          select: { sentiment: true },
+        });
 
-         let totalScore = 0;
-         allMentions.forEach(mention => totalScore += getSentimentScore(mention.sentiment));
-         const newAvg = allMentions.length > 0 ? (totalScore / allMentions.length) : 0;
+        let totalScore = 0;
+        allMentions.forEach((mention) => (totalScore += getSentimentScore(mention.sentiment)));
+        const newAvg = allMentions.length > 0 ? totalScore / allMentions.length : 0;
 
-         await tx.goldBrand.update({
-           where: { id: finalGoldBrandId },
-           data: {
-             mentionCount: allMentions.length,
-             avgSentiment: newAvg,
-           },
-         });
+        await tx.goldBrand.update({
+          where: { id: finalGoldBrandId },
+          data: {
+            mentionCount: allMentions.length,
+            avgSentiment: newAvg,
+          },
+        });
       });
-      
     } catch (err: unknown) {
       console.error(`   [Rollup] ❌ Error processing mention ${m.id}:`, (err as any)?.message);
     }

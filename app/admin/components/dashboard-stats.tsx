@@ -11,7 +11,7 @@ export async function DashboardStats() {
     lineCount,
     modelCount,
     orphanedModelCount,
-    spendResult
+    spendResult,
   ] = await Promise.all([
     prisma.bronzeRedditSubmission.count(),
     prisma.bronzeRedditSubmission.count({ where: { isProcessed: false } }),
@@ -38,47 +38,93 @@ export async function DashboardStats() {
       color: "border-orange-500/50",
       iconColor: "text-orange-500",
       metrics: [
-        { label: "Total Submissions", value: submissionCount.toLocaleString(), icon: <MessageSquare className="h-4 w-4" /> },
-        { label: "Total Comments", value: commentCount.toLocaleString(), icon: <MessageSquare className="h-4 w-4" /> },
-        { label: "Unprocessed Threads", value: unprocessedSubmissions.toLocaleString(), icon: <Database className="h-4 w-4" /> },
-      ]
+        {
+          label: "Total Submissions",
+          value: submissionCount.toLocaleString(),
+          icon: <MessageSquare className="h-4 w-4" />,
+        },
+        {
+          label: "Total Comments",
+          value: commentCount.toLocaleString(),
+          icon: <MessageSquare className="h-4 w-4" />,
+        },
+        {
+          label: "Unprocessed Threads",
+          value: unprocessedSubmissions.toLocaleString(),
+          icon: <Database className="h-4 w-4" />,
+        },
+      ],
     },
     {
       title: "Silver Layer (AI Extractions)",
       color: "border-slate-400/50",
       iconColor: "text-slate-400",
       metrics: [
-        { label: "Total Mentions", value: mentionCount.toLocaleString(), icon: <Package className="h-4 w-4" /> },
-        { label: "Mentions Per Thread", value: avgMentions, icon: <Activity className="h-4 w-4" /> },
-      ]
+        {
+          label: "Total Mentions",
+          value: mentionCount.toLocaleString(),
+          icon: <Package className="h-4 w-4" />,
+        },
+        {
+          label: "Mentions Per Thread",
+          value: avgMentions,
+          icon: <Activity className="h-4 w-4" />,
+        },
+      ],
     },
     {
       title: "Gold Layer (Canonical Taxonomy)",
       color: "border-yellow-500/50",
       iconColor: "text-yellow-500",
       metrics: [
-        { label: "Canonical Brands", value: brandCount.toLocaleString(), icon: <Trophy className="h-4 w-4" /> },
-        { label: "Product Lines", value: lineCount.toLocaleString(), icon: <Layers className="h-4 w-4" /> },
-        { label: "Exact Models", value: modelCount.toLocaleString(), icon: <Shapes className="h-4 w-4" /> },
-        { label: "Orphaned Models", value: orphanedModelCount.toLocaleString(), icon: <Activity className="h-4 w-4" /> },
-      ]
+        {
+          label: "Canonical Brands",
+          value: brandCount.toLocaleString(),
+          icon: <Trophy className="h-4 w-4" />,
+        },
+        {
+          label: "Product Lines",
+          value: lineCount.toLocaleString(),
+          icon: <Layers className="h-4 w-4" />,
+        },
+        {
+          label: "Exact Models",
+          value: modelCount.toLocaleString(),
+          icon: <Shapes className="h-4 w-4" />,
+        },
+        {
+          label: "Orphaned Models",
+          value: orphanedModelCount.toLocaleString(),
+          icon: <Activity className="h-4 w-4" />,
+        },
+      ],
     },
     {
       title: "System",
       color: "border-primary/20",
       iconColor: "text-primary",
       metrics: [
-        { label: "Total AI Spend", value: `$${totalSpend.toFixed(4)}`, icon: <Activity className="h-4 w-4" /> },
-        { label: "Est. Cost to Finish", value: `$${estimatedCost.toFixed(2)}`, icon: <Activity className="h-4 w-4" /> },
-      ]
-    }
+        {
+          label: "Total AI Spend",
+          value: `$${totalSpend.toFixed(4)}`,
+          icon: <Activity className="h-4 w-4" />,
+        },
+        {
+          label: "Est. Cost to Finish",
+          value: `$${estimatedCost.toFixed(2)}`,
+          icon: <Activity className="h-4 w-4" />,
+        },
+      ],
+    },
   ];
 
   return (
     <div className="space-y-8">
       {sections.map((section) => (
         <div key={section.title} className="space-y-3">
-          <h3 className={`text-lg font-bold tracking-tight flex items-center gap-2 ${section.iconColor}`}>
+          <h3
+            className={`text-lg font-bold tracking-tight flex items-center gap-2 ${section.iconColor}`}
+          >
             {section.title}
           </h3>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

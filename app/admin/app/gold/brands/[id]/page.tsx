@@ -4,9 +4,7 @@ import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
-export default async function GoldBrandPage(props: {
-  params: Promise<{ id: string }>
-}) {
+export default async function GoldBrandPage(props: { params: Promise<{ id: string }> }) {
   const { id } = await props.params;
 
   const brand = await prisma.goldBrand.findUnique({
@@ -18,9 +16,9 @@ export default async function GoldBrandPage(props: {
         select: {
           id: true,
           submissionId: true,
-        }
-      }
-    }
+        },
+      },
+    },
   });
 
   if (!brand) {
@@ -28,48 +26,54 @@ export default async function GoldBrandPage(props: {
   }
 
   // Cost Allocation Logic
-  const submissionIds = Array.from(new Set(brand.mentions.map(m => m.submissionId).filter(Boolean))) as string[];
+  const submissionIds = Array.from(
+    new Set(brand.mentions.map((m) => m.submissionId).filter(Boolean)),
+  ) as string[];
 
   let totalApportionedSourceCost = 0;
   let totalApportionedRollupCost = 0;
 
   if (submissionIds.length > 0) {
-     // Fetch denominators
-     const allSiblingMentions = await prisma.silverProductMention.findMany({
-       where: { submissionId: { in: submissionIds } },
-       select: { id: true, submissionId: true }
-     });
+    // Fetch denominators
+    const allSiblingMentions = await prisma.silverProductMention.findMany({
+      where: { submissionId: { in: submissionIds } },
+      select: { id: true, submissionId: true },
+    });
 
-     const mentionCounts: Record<string, number> = {};
-     for (const m of allSiblingMentions) {
-       if (m.submissionId) {
-         mentionCounts[m.submissionId] = (mentionCounts[m.submissionId] || 0) + 1;
-       }
-     }
+    const mentionCounts: Record<string, number> = {};
+    for (const m of allSiblingMentions) {
+      if (m.submissionId) {
+        mentionCounts[m.submissionId] = (mentionCounts[m.submissionId] || 0) + 1;
+      }
+    }
 
-     const spends = await prisma.aiSpend.findMany({
-       where: { submissionId: { in: submissionIds } }
-     });
+    const spends = await prisma.aiSpend.findMany({
+      where: { submissionId: { in: submissionIds } },
+    });
 
-     for (const spend of spends) {
-        if (!spend.submissionId) continue;
-        const denominator = mentionCounts[spend.submissionId] || 1;
-        const myMentionsInThisSubmission = brand.mentions.filter(m => m.submissionId === spend.submissionId).length;
-        
-        const apportionedCost = (spend.costInUsd / denominator) * myMentionsInThisSubmission;
+    for (const spend of spends) {
+      if (!spend.submissionId) continue;
+      const denominator = mentionCounts[spend.submissionId] || 1;
+      const myMentionsInThisSubmission = brand.mentions.filter(
+        (m) => m.submissionId === spend.submissionId,
+      ).length;
 
-        if (spend.jobName.startsWith("SILVER_")) {
-           totalApportionedSourceCost += apportionedCost;
-        } else if (spend.jobName.startsWith("GOLD_")) {
-           totalApportionedRollupCost += apportionedCost;
-        }
-     }
+      const apportionedCost = (spend.costInUsd / denominator) * myMentionsInThisSubmission;
+
+      if (spend.jobName.startsWith("SILVER_")) {
+        totalApportionedSourceCost += apportionedCost;
+      } else if (spend.jobName.startsWith("GOLD_")) {
+        totalApportionedRollupCost += apportionedCost;
+      }
+    }
   }
 
   return (
     <div className="container mx-auto p-8 space-y-8">
       <div className="flex flex-col gap-2">
-        <Link href="/gold/brands" className="text-sm text-primary hover:underline">&larr; Back to Brands</Link>
+        <Link href="/gold/brands" className="text-sm text-primary hover:underline">
+          &larr; Back to Brands
+        </Link>
         <h1 className="text-3xl font-bold tracking-tight">{brand.canonicalName}</h1>
         <p className="text-muted-foreground text-sm font-mono">{brand.id}</p>
       </div>
@@ -81,21 +85,24 @@ export default async function GoldBrandPage(props: {
             <dl className="grid grid-cols-2 gap-y-4 text-sm">
               <dt className="text-muted-foreground">Canonical Status</dt>
               <dd className="font-medium text-emerald-600">Gold Tier Verified</dd>
-              
+
               <dt className="text-muted-foreground">Overall Sentiment</dt>
               <dd className="font-medium">{brand.avgSentiment.toFixed(2)} / 10</dd>
 
               <dt className="text-muted-foreground">Child Sub-Lines</dt>
               <dd className="font-medium">{brand.productLines.length}</dd>
-              
+
               <dt className="text-muted-foreground">Child Exact Models</dt>
               <dd className="font-medium">{brand.products.length}</dd>
 
               <dt className="text-muted-foreground">Total Gathered Mentions</dt>
               <dd className="font-medium">
-                 <Link href={`/silver?goldBrandId=${brand.id}`} className="hover:underline text-primary">
-                    {brand.mentionCount} Mentions
-                 </Link>
+                <Link
+                  href={`/silver?goldBrandId=${brand.id}`}
+                  className="hover:underline text-primary"
+                >
+                  {brand.mentionCount} Mentions
+                </Link>
               </dd>
             </dl>
           </div>
@@ -105,7 +112,7 @@ export default async function GoldBrandPage(props: {
             <dl className="grid grid-cols-2 gap-y-4 text-sm">
               <dt className="text-muted-foreground">Titled?</dt>
               <dd className="font-medium">{brand.isTitled ? "Yes" : "No"}</dd>
-              
+
               <dt className="text-muted-foreground">Discovered On</dt>
               <dd className="font-medium">{brand.createdAt.toLocaleDateString()}</dd>
             </dl>
@@ -114,19 +121,30 @@ export default async function GoldBrandPage(props: {
 
         <div className="space-y-6">
           <div className="rounded-xl border border-orange-500/20 bg-orange-500/5 p-6 shadow-sm">
-            <h2 className="font-semibold text-orange-600 mb-4 border-b border-orange-500/10 pb-2">AI Total Investment</h2>
+            <h2 className="font-semibold text-orange-600 mb-4 border-b border-orange-500/10 pb-2">
+              AI Total Investment
+            </h2>
             <p className="text-xs text-muted-foreground mb-4">
-              Represents the apportioned cost to surface {brand.mentionCount} child mentions and deductually evaluate them into a canonical record.
+              Represents the apportioned cost to surface {brand.mentionCount} child mentions and
+              deductually evaluate them into a canonical record.
             </p>
             <dl className="grid grid-cols-2 gap-y-4 text-sm">
               <dt className="text-muted-foreground">Apportioned Harvesting</dt>
-              <dd className="font-medium font-mono text-amber-700">${totalApportionedSourceCost.toFixed(6)}</dd>
-              
-              <dt className="text-muted-foreground">LLM Classification Rollups</dt>
-              <dd className="font-medium font-mono text-amber-700">${totalApportionedRollupCost.toFixed(6)}</dd>
+              <dd className="font-medium font-mono text-amber-700">
+                ${totalApportionedSourceCost.toFixed(6)}
+              </dd>
 
-              <dt className="text-muted-foreground font-semibold pt-2 border-t border-orange-500/10">Total Pipeline Spend</dt>
-              <dd className="font-bold font-mono text-orange-700 pt-2 border-t border-orange-500/10 text-lg">${(totalApportionedSourceCost + totalApportionedRollupCost).toFixed(6)}</dd>
+              <dt className="text-muted-foreground">LLM Classification Rollups</dt>
+              <dd className="font-medium font-mono text-amber-700">
+                ${totalApportionedRollupCost.toFixed(6)}
+              </dd>
+
+              <dt className="text-muted-foreground font-semibold pt-2 border-t border-orange-500/10">
+                Total Pipeline Spend
+              </dt>
+              <dd className="font-bold font-mono text-orange-700 pt-2 border-t border-orange-500/10 text-lg">
+                ${(totalApportionedSourceCost + totalApportionedRollupCost).toFixed(6)}
+              </dd>
             </dl>
           </div>
         </div>

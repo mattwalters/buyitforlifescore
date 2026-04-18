@@ -43,14 +43,14 @@ export async function POST(req: NextRequest) {
     if (!result.success) {
       return NextResponse.json(
         { error: "Invalid payload", details: result.error.format() },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const payload = result.data;
 
     if (payload.type === "submissions") {
-      const submissions = payload.data.map(sub => ({
+      const submissions = payload.data.map((sub) => ({
         ...sub,
         isProcessed: false,
       }));
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, count: submissions.length });
     } else if (payload.type === "comments") {
       const redditIds = [...new Set(payload.data.map((d) => d.linkId.replace("t3_", "")))];
-      
+
       const subs = await prisma.bronzeRedditSubmission.findMany({
         where: { redditId: { in: redditIds } },
         select: { id: true, redditId: true },

@@ -1,9 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
- 
+
 import { prisma } from "@mono/db";
 import { GoogleGenAI, Type, Schema } from "@google/genai";
-import { AiModel, calculateCost, ThinkingLevel, getThinkingConfig } from "../../worker/src/pricing.js";
+import {
+  AiModel,
+  calculateCost,
+  ThinkingLevel,
+  getThinkingConfig,
+} from "../../worker/src/pricing.js";
 import { embedWithRetry } from "./local-embedder.js";
 import { z } from "zod";
 import * as dotenv from "dotenv";
@@ -23,9 +28,12 @@ const ACTIVE_THINKING_LEVEL: ThinkingLevel = "low";
 const llmResponseSchema: Schema = {
   type: Type.OBJECT,
   properties: {
-    canonicalName: { type: Type.STRING, description: "The single, precise, official marketing name." }
+    canonicalName: {
+      type: Type.STRING,
+      description: "The single, precise, official marketing name.",
+    },
   },
-  required: ["canonicalName"]
+  required: ["canonicalName"],
 };
 
 // Retry wrapper for Gemini Generation
@@ -33,26 +41,25 @@ const generateWithRetry = async (prompt: string, retries = 3) => {
   if (!ai) return null;
   for (let i = 0; i < retries; i++) {
     try {
-      await new Promise(r => setTimeout(r, 1000)); // Rate limit buffer
+      await new Promise((r) => setTimeout(r, 1000)); // Rate limit buffer
       const response = await ai.models.generateContent({
         model: ACTIVE_MODEL,
         contents: prompt,
         config: {
           responseMimeType: "application/json",
           responseSchema: llmResponseSchema,
-          thinkingConfig: getThinkingConfig(ACTIVE_MODEL, ACTIVE_THINKING_LEVEL) as any
-        }
+          thinkingConfig: getThinkingConfig(ACTIVE_MODEL, ACTIVE_THINKING_LEVEL) as any,
+        },
       });
       return response;
     } catch (e: unknown) {
       console.warn(`   ⚠️ LLM failed (attempt ${i + 1}/${retries}):`, (e as any).message || e);
       if (i === retries - 1) return null;
-      await new Promise(r => setTimeout(r, 2000));
+      await new Promise((r) => setTimeout(r, 2000));
     }
   }
   return null;
 };
-
 
 async function main() {
   if (!ai) {
@@ -70,40 +77,40 @@ async function main() {
   console.log(`[Titling] 🧹 Fetching [${target}] for Titling phase...`);
 
   let items: any[] = [];
-  
+
   if (target === "brands") {
-     items = await prisma.goldBrand.findMany({
-        where: { isTitled: false },
-        include: {
-           mentions: {
-              take: 15,
-              include: { submission: true, comment: true }
-           }
-        }
-     });
+    items = await prisma.goldBrand.findMany({
+      where: { isTitled: false },
+      include: {
+        mentions: {
+          take: 15,
+          include: { submission: true, comment: true },
+        },
+      },
+    });
   } else if (target === "lines") {
-     items = await prisma.goldProductLine.findMany({
-        where: { isTitled: false },
-        include: {
-           mentions: {
-              take: 15,
-              include: { submission: true, comment: true }
-           }
-        }
-     });
+    items = await prisma.goldProductLine.findMany({
+      where: { isTitled: false },
+      include: {
+        mentions: {
+          take: 15,
+          include: { submission: true, comment: true },
+        },
+      },
+    });
   } else if (target === "models") {
-     items = await prisma.goldProduct.findMany({
-        where: { isTitled: false },
-        include: {
-           mentions: {
-              take: 15,
-              include: { submission: true, comment: true }
-           }
-        }
-     });
+    items = await prisma.goldProduct.findMany({
+      where: { isTitled: false },
+      include: {
+        mentions: {
+          take: 15,
+          include: { submission: true, comment: true },
+        },
+      },
+    });
   } else {
-     console.error("❌ Invalid target.");
-     process.exit(1);
+    console.error("❌ Invalid target.");
+    process.exit(1);
   }
 
   if (items.length === 0) {
@@ -120,31 +127,42 @@ async function main() {
     : 10;
 
   let processIndex = 0;
-  
+
   const worker = async () => {
     while (processIndex < items.length) {
       const i = processIndex++;
       const item = items[i];
 
-      console.log(`\n[Titling] 🔍 [${i + 1}/${total}] Inspecting Canonical Name: "${item.canonicalName}"`);
+      console.log(
+        `\n[Titling] 🔍 [${i + 1}/${total}] Inspecting Canonical Name: "${item.canonicalName}"`,
+      );
 
       const extractText = (m: any) => m.quote || "";
-      const quotes = item.mentions.map(extractText).filter((text: string) => text.trim().length > 0);
+      const quotes = item.mentions
+        .map(extractText)
+        .filter((text: string) => text.trim().length > 0);
 
       if (quotes.length === 0) {
-         console.log(`   [Titling] ⏭️ Skipping: No readable quote text found in attached mentions.`);
-         continue;
+        console.log(`   [Titling] ⏭️ Skipping: No readable quote text found in attached mentions.`);
+        continue;
       }
 
-      const typeStr = target === "brands" ? "Corporate Brand" : target === "lines" ? "Product Line / Family" : "Exact Product Model";
+      const typeStr =
+        target === "brands"
+          ? "Corporate Brand"
+          : target === "lines"
+            ? "Product Line / Family"
+            : "Exact Product Model";
 
-      const brandRule = target !== "brands" && item.brand 
-         ? `\nCRITICAL RULE: The parent brand is "${item.brand}". DO NOT include the brand name in your output! We already store the brand separately. Only output the pure ${typeStr} name.`
-         : "";
+      const brandRule =
+        target !== "brands" && item.brand
+          ? `\nCRITICAL RULE: The parent brand is "${item.brand}". DO NOT include the brand name in your output! We already store the brand separately. Only output the pure ${typeStr} name.`
+          : "";
 
-      const skuRule = target === "models"
-         ? `\nCRITICAL RULE: Actively strip meaningless SKUs, arbitrary alphanumeric tracking numbers, and raw physical sizing/weight measurements (e.g., oz, lbs, inches). However, you MUST PRESERVE defining feature metrics or version numbers that define the core product identity.`
-         : "";
+      const skuRule =
+        target === "models"
+          ? `\nCRITICAL RULE: Actively strip meaningless SKUs, arbitrary alphanumeric tracking numbers, and raw physical sizing/weight measurements (e.g., oz, lbs, inches). However, you MUST PRESERVE defining feature metrics or version numbers that define the core product identity.`
+          : "";
 
       const prompt = `You are a master e-commerce ontologist and brand marketer.
 We have grouped several Reddit mentions into a product cluster currently labeled as: "${item.canonicalName}".
@@ -183,68 +201,90 @@ ${quotes.map((q: string) => `- "${q}"`).join("\n")}
       const response = await generateWithRetry(prompt);
 
       if (response && response.text) {
-         try {
-            const result = JSON.parse(response.text);
-            if (result.canonicalName && result.canonicalName.trim()) {
-               const newName = result.canonicalName.trim();
-               
-               if (newName !== item.canonicalName) {
-                  console.log(`   [Titling] ✨ RENAMING: "${item.canonicalName}"  ➡️  "${newName}"`);
-                  renamedCount++;
+        try {
+          const result = JSON.parse(response.text);
+          if (result.canonicalName && result.canonicalName.trim()) {
+            const newName = result.canonicalName.trim();
 
-                  const embedText = target === "brands" ? newName.toLowerCase() : `${item.brand} ${newName}`.toLowerCase();
-                  const newVector = await embedWithRetry(embedText);
-                  let vParam = "";
-                  if (newVector.length > 0) {
-                     vParam = `[${newVector.join(",")}]`;
-                  }
+            if (newName !== item.canonicalName) {
+              console.log(`   [Titling] ✨ RENAMING: "${item.canonicalName}"  ➡️  "${newName}"`);
+              renamedCount++;
 
-                  if (target === "brands") {
-                     await prisma.goldBrand.update({ where: { id: item.id }, data: { canonicalName: newName, isTitled: true }});
-                     if (vParam) await prisma.$executeRaw`UPDATE "GoldBrand" SET embedding = ${vParam}::vector WHERE id = ${item.id};`;
-                  } else if (target === "lines") {
-                     await prisma.goldProductLine.update({ where: { id: item.id }, data: { canonicalName: newName, isTitled: true }});
-                     if (vParam) await prisma.$executeRaw`UPDATE "GoldProductLine" SET embedding = ${vParam}::vector WHERE id = ${item.id};`;
-                  } else if (target === "models") {
-                     await prisma.goldProduct.update({ where: { id: item.id }, data: { canonicalName: newName, isTitled: true }});
-                     if (vParam) await prisma.$executeRaw`UPDATE "GoldProduct" SET embedding = ${vParam}::vector WHERE id = ${item.id};`;
-                  }
-               } else {
-                  console.log(`   [Titling] 👍 Name is already perfect. [${item.canonicalName}]`);
-                  
-                  if (target === "brands") {
-                     await prisma.goldBrand.update({ where: { id: item.id }, data: { isTitled: true }});
-                  } else if (target === "lines") {
-                     await prisma.goldProductLine.update({ where: { id: item.id }, data: { isTitled: true }});
-                  } else if (target === "models") {
-                     await prisma.goldProduct.update({ where: { id: item.id }, data: { isTitled: true }});
-                  }
-               }
+              const embedText =
+                target === "brands"
+                  ? newName.toLowerCase()
+                  : `${item.brand} ${newName}`.toLowerCase();
+              const newVector = await embedWithRetry(embedText);
+              let vParam = "";
+              if (newVector.length > 0) {
+                vParam = `[${newVector.join(",")}]`;
+              }
 
-               // Log AI Spend
-               const usage = response.usageMetadata;
-               if (usage) {
-                 const cost = calculateCost(ACTIVE_MODEL, {
-                   promptTokenCount: usage.promptTokenCount,
-                   cachedContentTokenCount: 0,
-                   candidatesTokenCount: usage.candidatesTokenCount,
-                 });
-                 await prisma.aiSpend.create({
-                   data: {
-                     jobName: `[Gold] Titling: ${target.charAt(0).toUpperCase() + target.slice(1)}`,
-                     model: ACTIVE_MODEL,
-                     promptTokens: usage.promptTokenCount,
-                     responseTokens: usage.candidatesTokenCount || 0,
-                     thinkingTokens: usage.thoughtsTokenCount || (usage as any).thoughts_token_count || 0,
-                     totalTokens: usage.totalTokenCount,
-                     costInUsd: cost
-                   }
-                 });
-               }
+              if (target === "brands") {
+                await prisma.goldBrand.update({
+                  where: { id: item.id },
+                  data: { canonicalName: newName, isTitled: true },
+                });
+                if (vParam)
+                  await prisma.$executeRaw`UPDATE "GoldBrand" SET embedding = ${vParam}::vector WHERE id = ${item.id};`;
+              } else if (target === "lines") {
+                await prisma.goldProductLine.update({
+                  where: { id: item.id },
+                  data: { canonicalName: newName, isTitled: true },
+                });
+                if (vParam)
+                  await prisma.$executeRaw`UPDATE "GoldProductLine" SET embedding = ${vParam}::vector WHERE id = ${item.id};`;
+              } else if (target === "models") {
+                await prisma.goldProduct.update({
+                  where: { id: item.id },
+                  data: { canonicalName: newName, isTitled: true },
+                });
+                if (vParam)
+                  await prisma.$executeRaw`UPDATE "GoldProduct" SET embedding = ${vParam}::vector WHERE id = ${item.id};`;
+              }
+            } else {
+              console.log(`   [Titling] 👍 Name is already perfect. [${item.canonicalName}]`);
+
+              if (target === "brands") {
+                await prisma.goldBrand.update({ where: { id: item.id }, data: { isTitled: true } });
+              } else if (target === "lines") {
+                await prisma.goldProductLine.update({
+                  where: { id: item.id },
+                  data: { isTitled: true },
+                });
+              } else if (target === "models") {
+                await prisma.goldProduct.update({
+                  where: { id: item.id },
+                  data: { isTitled: true },
+                });
+              }
             }
-         } catch (err: unknown) {
-            console.error(`   [Titling] ❌ Failed to parse LLM response:`, response.text);
-         }
+
+            // Log AI Spend
+            const usage = response.usageMetadata;
+            if (usage) {
+              const cost = calculateCost(ACTIVE_MODEL, {
+                promptTokenCount: usage.promptTokenCount,
+                cachedContentTokenCount: 0,
+                candidatesTokenCount: usage.candidatesTokenCount,
+              });
+              await prisma.aiSpend.create({
+                data: {
+                  jobName: `[Gold] Titling: ${target.charAt(0).toUpperCase() + target.slice(1)}`,
+                  model: ACTIVE_MODEL,
+                  promptTokens: usage.promptTokenCount,
+                  responseTokens: usage.candidatesTokenCount || 0,
+                  thinkingTokens:
+                    usage.thoughtsTokenCount || (usage as any).thoughts_token_count || 0,
+                  totalTokens: usage.totalTokenCount,
+                  costInUsd: cost,
+                },
+              });
+            }
+          }
+        } catch (err: unknown) {
+          console.error(`   [Titling] ❌ Failed to parse LLM response:`, response.text);
+        }
       }
     }
   };

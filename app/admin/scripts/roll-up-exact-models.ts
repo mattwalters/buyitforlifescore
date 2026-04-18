@@ -1,10 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
- 
- 
- 
+
 import { prisma } from "@mono/db";
 import { GoogleGenAI, Type, Schema } from "@google/genai";
-import { AiModel, calculateCost, ThinkingLevel, getThinkingConfig } from "../../worker/src/pricing.js";
+import {
+  AiModel,
+  calculateCost,
+  ThinkingLevel,
+  getThinkingConfig,
+} from "../../worker/src/pricing.js";
 import { embedWithRetry } from "./local-embedder.js";
 import { z } from "zod";
 import * as dotenv from "dotenv";
@@ -30,10 +33,17 @@ function getSentimentScore(sentiment: string): number {
 const llmResponseSchema: Schema = {
   type: Type.OBJECT,
   properties: {
-    isMatch: { type: Type.BOOLEAN, description: "True if the mention is the exact same product model as one of the candidates." },
-    matchId: { type: Type.STRING, nullable: true, description: "The ID of the matching candidate, if any." }
+    isMatch: {
+      type: Type.BOOLEAN,
+      description: "True if the mention is the exact same product model as one of the candidates.",
+    },
+    matchId: {
+      type: Type.STRING,
+      nullable: true,
+      description: "The ID of the matching candidate, if any.",
+    },
   },
-  required: ["isMatch"]
+  required: ["isMatch"],
 };
 
 // Helper to guarantee a brand exists
@@ -49,7 +59,10 @@ function levenshtein(a: string, b: string): number {
       if (b.charAt(i - 1) == a.charAt(j - 1)) {
         matrix[i][j] = matrix[i - 1][j - 1];
       } else {
-        matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1));
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1,
+          Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1),
+        );
       }
     }
   }
@@ -57,11 +70,16 @@ function levenshtein(a: string, b: string): number {
 }
 
 function normalize(str: string): string {
-  return (str || "").toLowerCase().replace(/[^a-z0-9]/g, '');
+  return (str || "").toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
 function getWords(str: string): Set<string> {
-  return new Set((str || "").toLowerCase().split(/[^a-z0-9]+/).filter(Boolean));
+  return new Set(
+    (str || "")
+      .toLowerCase()
+      .split(/[^a-z0-9]+/)
+      .filter(Boolean),
+  );
 }
 
 // No getOrCreateBrand. We strictly rely on the parent Brand script mapping first.
@@ -100,8 +118,10 @@ async function main() {
 
       // START STRICT DEPENDENCY CHECK
       if (!m.goldBrandId) {
-         console.warn(`   [Rollup] ⚠️ Skipped: Parent Brand not mapped. (Run brands script first, or it was an excluded generic brand.)`);
-         continue;
+        console.warn(
+          `   [Rollup] ⚠️ Skipped: Parent Brand not mapped. (Run brands script first, or it was an excluded generic brand.)`,
+        );
+        continue;
       }
       const brandId = m.goldBrandId;
 
@@ -111,14 +131,14 @@ async function main() {
           goldBrandId: brandId,
           canonicalName: {
             equals: m.productName.trim(),
-            mode: "insensitive"
-          }
-        }
+            mode: "insensitive",
+          },
+        },
       });
 
       if (exactMatch) {
-         console.log(`   ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches ${exactMatch.id}`);
-         finalGoldId = exactMatch.id;
+        console.log(`   ⚡ GLOBAL LEXICAL BYPASS: Perfectly matches ${exactMatch.id}`);
+        finalGoldId = exactMatch.id;
       }
 
       if (!finalGoldId) {
@@ -134,7 +154,9 @@ async function main() {
         if (rawSilver.length > 0 && rawSilver[0].vec) {
           vectorLiteral = rawSilver[0].vec;
         } else {
-          console.warn(`⚠️ Skipped ${m.id} because it has no vector. Data pipeline should guarantee this.`);
+          console.warn(
+            `⚠️ Skipped ${m.id} because it has no vector. Data pipeline should guarantee this.`,
+          );
           continue;
         }
 
@@ -144,7 +166,7 @@ async function main() {
           canonicalName: string;
           distance: number;
         }
-        
+
         const candidates = await prisma.$queryRaw<MatchResult[]>`
           SELECT id, brand, "canonicalName", (embedding <=> ${vectorLiteral}::vector) as distance
           FROM "GoldProduct"
@@ -159,42 +181,50 @@ async function main() {
         const norm1 = normalize(modelName);
 
         for (const c of candidates) {
-           if (c.distance <= 0.25) {
-              validCandidatesMap.set(c.id, c);
-              continue;
-           }
+          if (c.distance <= 0.25) {
+            validCandidatesMap.set(c.id, c);
+            continue;
+          }
 
-           const candWords = getWords(c.canonicalName);
-           let intersectionCount = 0;
-           for (const word of newWords) {
-             if (candWords.has(word)) intersectionCount++;
-           }
-           if (intersectionCount > 0 && (intersectionCount === newWords.size || intersectionCount === candWords.size)) {
-              validCandidatesMap.set(c.id, c);
-              continue;
-           }
+          const candWords = getWords(c.canonicalName);
+          let intersectionCount = 0;
+          for (const word of newWords) {
+            if (candWords.has(word)) intersectionCount++;
+          }
+          if (
+            intersectionCount > 0 &&
+            (intersectionCount === newWords.size || intersectionCount === candWords.size)
+          ) {
+            validCandidatesMap.set(c.id, c);
+            continue;
+          }
 
-           const norm2 = normalize(c.canonicalName);
-           const levLimit = norm1.length <= 3 ? 1 : 3;
-           if (levenshtein(norm1, norm2) <= levLimit) {
-              validCandidatesMap.set(c.id, c);
-           }
+          const norm2 = normalize(c.canonicalName);
+          const levLimit = norm1.length <= 3 ? 1 : 3;
+          if (levenshtein(norm1, norm2) <= levLimit) {
+            validCandidatesMap.set(c.id, c);
+          }
         }
 
         const validCandidates = Array.from(validCandidatesMap.values());
-        validCandidates.sort((a,b) => a.distance - b.distance);
+        validCandidates.sort((a, b) => a.distance - b.distance);
 
         if (validCandidates.length > 20) {
-           console.warn(`   [Rollup] ⚠️ WARNING: Sending ${validCandidates.length} generated candidates to LLM! Context window/understanding may degrade.`);
+          console.warn(
+            `   [Rollup] ⚠️ WARNING: Sending ${validCandidates.length} generated candidates to LLM! Context window/understanding may degrade.`,
+          );
         }
-        
+
         // 3. The Gemini Tiebreaker Check
         if (validCandidates.length > 0) {
-           const candidateContext = validCandidates.map((c, i) => 
-             `Option ${i+1}: [ID: ${c.id}] Brand: ${c.brand} | Canonical Name: ${c.canonicalName} | Distance: ${c.distance.toFixed(3)}`
-           ).join("\n");
+          const candidateContext = validCandidates
+            .map(
+              (c, i) =>
+                `Option ${i + 1}: [ID: ${c.id}] Brand: ${c.brand} | Canonical Name: ${c.canonicalName} | Distance: ${c.distance.toFixed(3)}`,
+            )
+            .join("\n");
 
-           const prompt = `You are a database deduplication expert.
+          const prompt = `You are a database deduplication expert.
 A user has submitted a new "Buy It For Life" product mention. We need to determine if this new mention refers to the EXACT SAME canonical product model as any of our existing database records.
 
 # RULES FOR MATCHING
@@ -212,114 +242,120 @@ ${candidateContext}
 
 Return a JSON object. If one of the candidate options is unambiguously the exact same core product model as the new mention, set "isMatch" to true and return its ID. If none match perfectly, set "isMatch" to false and "matchId" to null.`;
 
-           const response = await ai.models.generateContent({
-             model: ACTIVE_MODEL,
-             contents: prompt,
-             config: {
-               responseMimeType: "application/json",
-               responseSchema: llmResponseSchema,
-               thinkingConfig: getThinkingConfig(ACTIVE_MODEL, ACTIVE_THINKING_LEVEL) as any
-             }
-           });
+          const response = await ai.models.generateContent({
+            model: ACTIVE_MODEL,
+            contents: prompt,
+            config: {
+              responseMimeType: "application/json",
+              responseSchema: llmResponseSchema,
+              thinkingConfig: getThinkingConfig(ACTIVE_MODEL, ACTIVE_THINKING_LEVEL) as any,
+            },
+          });
 
-           if (response.text) {
-             const result = JSON.parse(response.text);
-             if (result.isMatch && result.matchId) {
-                const verifiedId = validCandidates.find(c => c.id === result.matchId);
-                if (verifiedId) {
-                   finalGoldId = verifiedId.id;
-                   console.log(`   [Rollup] 🤖 LLM MATCHED TYPO: Option -> ${verifiedId.id} (${verifiedId.canonicalName})`);
-                }
-             } else {
-               console.log(`   [Rollup] 🤖 LLM REJECTED all candidates. Must be a novel product.`);
-             }
+          if (response.text) {
+            const result = JSON.parse(response.text);
+            if (result.isMatch && result.matchId) {
+              const verifiedId = validCandidates.find((c) => c.id === result.matchId);
+              if (verifiedId) {
+                finalGoldId = verifiedId.id;
+                console.log(
+                  `   [Rollup] 🤖 LLM MATCHED TYPO: Option -> ${verifiedId.id} (${verifiedId.canonicalName})`,
+                );
+              }
+            } else {
+              console.log(`   [Rollup] 🤖 LLM REJECTED all candidates. Must be a novel product.`);
+            }
 
-             const usage = response.usageMetadata;
-             if (usage) {
-               const cost = calculateCost(ACTIVE_MODEL, {
-                 promptTokenCount: usage.promptTokenCount,
-                 cachedContentTokenCount: 0,
-                 candidatesTokenCount: usage.candidatesTokenCount,
-               });
-               await prisma.aiSpend.create({
-                 data: {
-                   jobName: "[Gold] Rollup: Exact Models",
-                   submissionId: m.submissionId,
-                   model: ACTIVE_MODEL,
-                   promptTokens: usage.promptTokenCount,
-                   responseTokens: usage.candidatesTokenCount || 0,
-                   thinkingTokens: usage.thoughtsTokenCount || (usage as any).thoughts_token_count || 0,
-                   totalTokens: usage.totalTokenCount,
-                   costInUsd: cost
-                 }
-               });
-             }
-           }
+            const usage = response.usageMetadata;
+            if (usage) {
+              const cost = calculateCost(ACTIVE_MODEL, {
+                promptTokenCount: usage.promptTokenCount,
+                cachedContentTokenCount: 0,
+                candidatesTokenCount: usage.candidatesTokenCount,
+              });
+              await prisma.aiSpend.create({
+                data: {
+                  jobName: "[Gold] Rollup: Exact Models",
+                  submissionId: m.submissionId,
+                  model: ACTIVE_MODEL,
+                  promptTokens: usage.promptTokenCount,
+                  responseTokens: usage.candidatesTokenCount || 0,
+                  thinkingTokens:
+                    usage.thoughtsTokenCount || (usage as any).thoughts_token_count || 0,
+                  totalTokens: usage.totalTokenCount,
+                  costInUsd: cost,
+                },
+              });
+            }
+          }
         } else {
-           console.log(`   [Rollup] 📉 No valid PGVector candidates found within distance threshold.`);
+          console.log(
+            `   [Rollup] 📉 No valid PGVector candidates found within distance threshold.`,
+          );
         }
 
         if (!finalGoldId) {
-           generateNewCentroid = true;
+          generateNewCentroid = true;
         }
       }
 
       // 4. Execution Phase: Create Product + Embed Pure Centroid
       if (generateNewCentroid || !finalGoldId) {
-         let pureVec: number[] = [];
-         try {
-            pureVec = await embedWithRetry(canonicalStr);
-         } catch(e) {
-            console.error("   [Rollup] Failed to generate centroid vector:", e);
-         }
+        let pureVec: number[] = [];
+        try {
+          pureVec = await embedWithRetry(canonicalStr);
+        } catch (e) {
+          console.error("   [Rollup] Failed to generate centroid vector:", e);
+        }
 
-         const created = await prisma.goldProduct.create({
-           data: {
-             goldBrandId: brandId,
-             brand: m.brand.trim(),
-             canonicalName: m.productName.trim(),
-             mentionCount: 0,
-             avgSentiment: 0,
-           },
-         });
-         finalGoldId = created.id;
-         
-         if (pureVec.length > 0) {
-            const vParam = `[${pureVec.join(",")}]`;
-            await prisma.$executeRaw`
+        const created = await prisma.goldProduct.create({
+          data: {
+            goldBrandId: brandId,
+            brand: m.brand.trim(),
+            canonicalName: m.productName.trim(),
+            mentionCount: 0,
+            avgSentiment: 0,
+          },
+        });
+        finalGoldId = created.id;
+
+        if (pureVec.length > 0) {
+          const vParam = `[${pureVec.join(",")}]`;
+          await prisma.$executeRaw`
               UPDATE "GoldProduct" 
               SET embedding = ${vParam}::vector 
               WHERE id = ${finalGoldId};
             `;
-         }
-         console.log(`   ✨ CREATED new GoldProduct: ${finalGoldId} (${m.productName.trim()}) with pure centroid.`);
+        }
+        console.log(
+          `   ✨ CREATED new GoldProduct: ${finalGoldId} (${m.productName.trim()}) with pure centroid.`,
+        );
       }
 
       // Link Mention and calculate stats
       await prisma.$transaction(async (tx) => {
-         await tx.silverProductMention.update({
-            where: { id: m.id },
-            data: { goldProductId: finalGoldId },
-         });
+        await tx.silverProductMention.update({
+          where: { id: m.id },
+          data: { goldProductId: finalGoldId },
+        });
 
-         const allMentions = await tx.silverProductMention.findMany({
-           where: { goldProductId: finalGoldId },
-           select: { sentiment: true },
-         });
+        const allMentions = await tx.silverProductMention.findMany({
+          where: { goldProductId: finalGoldId },
+          select: { sentiment: true },
+        });
 
-         let totalScore = 0;
-         allMentions.forEach(mention => totalScore += getSentimentScore(mention.sentiment));
-         const newAvg = allMentions.length > 0 ? (totalScore / allMentions.length) : 0;
+        let totalScore = 0;
+        allMentions.forEach((mention) => (totalScore += getSentimentScore(mention.sentiment)));
+        const newAvg = allMentions.length > 0 ? totalScore / allMentions.length : 0;
 
-         await tx.goldProduct.update({
-           where: { id: finalGoldId },
-           data: {
-             mentionCount: allMentions.length,
-             avgSentiment: newAvg,
-           },
-         });
+        await tx.goldProduct.update({
+          where: { id: finalGoldId },
+          data: {
+            mentionCount: allMentions.length,
+            avgSentiment: newAvg,
+          },
+        });
       });
-      
     } catch (err: unknown) {
       console.error(`   [Rollup] ❌ Error processing mention ${m.id}:`, (err as any)?.message);
     }

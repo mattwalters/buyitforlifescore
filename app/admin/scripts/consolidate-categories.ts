@@ -1,10 +1,14 @@
- 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
- 
+
 import { prisma } from "@mono/db";
 import { GoogleGenAI, Type, Schema } from "@google/genai";
-import { AiModel, calculateCost, ThinkingLevel, getThinkingConfig } from "../../worker/src/pricing.js";
+import {
+  AiModel,
+  calculateCost,
+  ThinkingLevel,
+  getThinkingConfig,
+} from "../../worker/src/pricing.js";
 import { embedWithRetry } from "./local-embedder.js";
 import * as dotenv from "dotenv";
 import { z } from "zod";
@@ -22,15 +26,20 @@ const llmResponseSchema: Schema = {
   items: {
     type: Type.OBJECT,
     properties: {
-      canonicalName: { type: Type.STRING, description: "The single best, cleanest, capitalized version of this category (e.g. 'Leather Work Boots')." },
-      rawNames: { 
-        type: Type.ARRAY, 
+      canonicalName: {
+        type: Type.STRING,
+        description:
+          "The single best, cleanest, capitalized version of this category (e.g. 'Leather Work Boots').",
+      },
+      rawNames: {
+        type: Type.ARRAY,
         items: { type: Type.STRING },
-        description: "The list of raw input names from the batch that map exactly to this canonical name." 
-      }
+        description:
+          "The list of raw input names from the batch that map exactly to this canonical name.",
+      },
     },
-    required: ["canonicalName", "rawNames"]
-  }
+    required: ["canonicalName", "rawNames"],
+  },
 };
 
 async function withRetry<T>(fn: () => Promise<T>, maxRetries = 3, delayMs = 2000): Promise<T> {
@@ -41,8 +50,10 @@ async function withRetry<T>(fn: () => Promise<T>, maxRetries = 3, delayMs = 2000
     } catch (err: unknown) {
       attempt++;
       if (attempt >= maxRetries) throw err;
-      console.warn(`   [Retry] API Error: ${(err as any)?.message}. Retrying in ${delayMs}ms (Attempt ${attempt}/${maxRetries})...`);
-      await new Promise(r => setTimeout(r, delayMs));
+      console.warn(
+        `   [Retry] API Error: ${(err as any)?.message}. Retrying in ${delayMs}ms (Attempt ${attempt}/${maxRetries})...`,
+      );
+      await new Promise((r) => setTimeout(r, delayMs));
       delayMs *= 2; // exponential backoff
     }
   }
@@ -61,8 +72,8 @@ async function main() {
   const ideas = await prisma.silverCategoryIdea.findMany({
     where: { isProcessed: false },
     select: { rawName: true },
-    distinct: ['rawName'],
-    take: 100
+    distinct: ["rawName"],
+    take: 100,
   });
 
   if (ideas.length === 0) {
@@ -70,7 +81,7 @@ async function main() {
     return;
   }
 
-  const rawNamesList = ideas.map(i => i.rawName);
+  const rawNamesList = ideas.map((i) => i.rawName);
   console.log(`[Consolidation] 📦 Consolidating a batch of ${rawNamesList.length} raw ideas...`);
 
   const prompt = `You are an expert e-commerce catalog manager.
@@ -78,7 +89,7 @@ I am providing you with a list of RAW category strings generated dynamically by 
 Your task is to aggressively group highly specific niche synonyms and long-tail variations into a single, perfectly formatted Canonical Category Hub.
 
 # RAW LIST
-${rawNamesList.map((n, i) => `${i+1}. ${n}`).join("\n")}
+${rawNamesList.map((n, i) => `${i + 1}. ${n}`).join("\n")}
 
 # RULES
 1. MERGE long-tail variations into their broader Head Term hub. (e.g., "Airtight Glass Food Storage Containers", "Heat Resistant Glass Food Bowls", and "Microwave Safe Food Containers" should ALL be grouped into a single canonical hub called "Glass Food Storage").
@@ -103,56 +114,62 @@ BAD Output: Kitchen Utensils
 GOOD Output: "Kitchen Tongs" and "Spatulas" must remain separate specific tool hubs.`;
 
   try {
-    const response = await withRetry(() => ai.models.generateContent({
-      model: ACTIVE_MODEL,
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: llmResponseSchema,
-        thinkingConfig: getThinkingConfig(ACTIVE_MODEL, ACTIVE_THINKING_LEVEL) as any
-      }
-    }));
+    const response = await withRetry(() =>
+      ai.models.generateContent({
+        model: ACTIVE_MODEL,
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: llmResponseSchema,
+          thinkingConfig: getThinkingConfig(ACTIVE_MODEL, ACTIVE_THINKING_LEVEL) as any,
+        },
+      }),
+    );
 
     if (response.text) {
-      const groupings: Array<{ canonicalName: string, rawNames: string[] }> = JSON.parse(response.text);
+      const groupings: Array<{ canonicalName: string; rawNames: string[] }> = JSON.parse(
+        response.text,
+      );
       let categoriesCreated = 0;
 
       for (const group of groupings) {
-         if (!group.canonicalName || group.rawNames.length === 0) continue;
-         
-         // 1. Upsert Canonical Category
-         const category = await prisma.goldCategory.upsert({
-            where: { canonicalName: group.canonicalName },
-            update: {},
-            create: { canonicalName: group.canonicalName }
-         });
+        if (!group.canonicalName || group.rawNames.length === 0) continue;
 
-         // 2. Add Vector Embedding
-         // We do this immediately so Phase 3 matrix routing can find it
-         try {
-            const pureVec = await embedWithRetry(group.canonicalName);
-            if (pureVec.length > 0) {
-               const vParam = `[${pureVec.join(",")}]`;
-               await prisma.$executeRaw`
+        // 1. Upsert Canonical Category
+        const category = await prisma.goldCategory.upsert({
+          where: { canonicalName: group.canonicalName },
+          update: {},
+          create: { canonicalName: group.canonicalName },
+        });
+
+        // 2. Add Vector Embedding
+        // We do this immediately so Phase 3 matrix routing can find it
+        try {
+          const pureVec = await embedWithRetry(group.canonicalName);
+          if (pureVec.length > 0) {
+            const vParam = `[${pureVec.join(",")}]`;
+            await prisma.$executeRaw`
                  UPDATE "GoldCategory" 
                  SET embedding = ${vParam}::vector 
                  WHERE id = ${category.id};
                `;
-            }
-         } catch(e) {
-            console.error(`   [Consolidation] Failed to embed ${group.canonicalName}`);
-         }
+          }
+        } catch (e) {
+          console.error(`   [Consolidation] Failed to embed ${group.canonicalName}`);
+        }
 
-         // 3. Mark the raw ideas as processed
-         await prisma.silverCategoryIdea.updateMany({
-            where: {
-               rawName: { in: group.rawNames }
-            },
-            data: { isProcessed: true }
-         });
+        // 3. Mark the raw ideas as processed
+        await prisma.silverCategoryIdea.updateMany({
+          where: {
+            rawName: { in: group.rawNames },
+          },
+          data: { isProcessed: true },
+        });
 
-         categoriesCreated++;
-         console.log(`   [Consolidation] ✨ Grouped [${group.rawNames.join(", ")}] -> ${group.canonicalName}`);
+        categoriesCreated++;
+        console.log(
+          `   [Consolidation] ✨ Grouped [${group.rawNames.join(", ")}] -> ${group.canonicalName}`,
+        );
       }
 
       // Track spend
@@ -171,8 +188,8 @@ GOOD Output: "Kitchen Tongs" and "Spatulas" must remain separate specific tool h
             responseTokens: usage.candidatesTokenCount || 0,
             thinkingTokens: usage.thoughtsTokenCount || (usage as any).thoughts_token_count || 0,
             totalTokens: usage.totalTokenCount,
-            costInUsd: cost
-          }
+            costInUsd: cost,
+          },
         });
       }
     }

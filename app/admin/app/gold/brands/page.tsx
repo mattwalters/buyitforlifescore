@@ -44,7 +44,7 @@ export default async function BrandsPage(props: {
             href="/api/export?type=goldTaxonomy"
             className="rounded-md bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground hover:bg-secondary/80 transition-colors"
           >
-            Download Full Taxonomy 
+            Download Full Taxonomy
           </a>
           <a
             href="/api/export?type=goldBrands"

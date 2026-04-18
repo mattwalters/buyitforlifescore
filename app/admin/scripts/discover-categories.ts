@@ -1,10 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
- 
- 
- 
+
 import { prisma } from "@mono/db";
 import { GoogleGenAI, Type, Schema } from "@google/genai";
-import { AiModel, calculateCost, ThinkingLevel, getThinkingConfig } from "../../worker/src/pricing.js";
+import {
+  AiModel,
+  calculateCost,
+  ThinkingLevel,
+  getThinkingConfig,
+} from "../../worker/src/pricing.js";
 import * as dotenv from "dotenv";
 import { z } from "zod";
 
@@ -19,9 +22,10 @@ const ACTIVE_THINKING_LEVEL: ThinkingLevel = "low";
 const llmResponseSchema: Schema = {
   type: Type.ARRAY,
   items: {
-    type: Type.STRING
+    type: Type.STRING,
   },
-  description: "An array of 2 to 3 broad, high-volume Head-Term e-commerce hub categories (2-3 words maximum)."
+  description:
+    "An array of 2 to 3 broad, high-volume Head-Term e-commerce hub categories (2-3 words maximum).",
 };
 
 async function withRetry<T>(fn: () => Promise<T>, maxRetries = 3, delayMs = 2000): Promise<T> {
@@ -32,8 +36,10 @@ async function withRetry<T>(fn: () => Promise<T>, maxRetries = 3, delayMs = 2000
     } catch (err: unknown) {
       attempt++;
       if (attempt >= maxRetries) throw err;
-      console.warn(`   [Retry] API Error: ${(err as any)?.message}. Retrying in ${delayMs}ms (Attempt ${attempt}/${maxRetries})...`);
-      await new Promise(r => setTimeout(r, delayMs));
+      console.warn(
+        `   [Retry] API Error: ${(err as any)?.message}. Retrying in ${delayMs}ms (Attempt ${attempt}/${maxRetries})...`,
+      );
+      await new Promise((r) => setTimeout(r, delayMs));
       delayMs *= 2; // exponential backoff
     }
   }
@@ -51,16 +57,16 @@ async function main() {
   // We find product lines that do not have any SilverCategoryIdeas yet
   const lines = await prisma.goldProductLine.findMany({
     where: {
-      categoryIdeas: { none: {} }
+      categoryIdeas: { none: {} },
     },
     include: {
-      mentions: { 
+      mentions: {
         take: 3,
         include: {
-          submission: { select: { title: true } }
-        }
-      }
-    }
+          submission: { select: { title: true } },
+        },
+      },
+    },
   });
 
   if (lines.length === 0) {
@@ -74,19 +80,23 @@ async function main() {
   const args = process.argv.slice(2);
   const concurrencyIndex = args.indexOf("--concurrency");
   const CONCURRENCY = concurrencyIndex !== -1 ? parseInt(args[concurrencyIndex + 1], 10) || 10 : 10;
-  
+
   console.log(`[Discovery] 🚀 Using concurrency: ${CONCURRENCY}`);
 
-  const processLine = async (line: typeof lines[0], i: number) => {
-    console.log(`[Discovery] 🧠 [${i + 1}/${total}] Brainstorming: ${line.brand} -> ${line.canonicalName}`);
+  const processLine = async (line: (typeof lines)[0], i: number) => {
+    console.log(
+      `[Discovery] 🧠 [${i + 1}/${total}] Brainstorming: ${line.brand} -> ${line.canonicalName}`,
+    );
 
     try {
       let contextStr = "No additional context.";
       if (line.mentions && line.mentions.length > 0) {
-         contextStr = line.mentions.map(m => {
+        contextStr = line.mentions
+          .map((m) => {
             const topic = m.submission?.title ? `Original Topic: "${m.submission.title}"\n` : "";
             return `${topic}Quote: "${m.quote}"`;
-         }).join("\n\n");
+          })
+          .join("\n\n");
       }
 
       const prompt = `You are a world-class e-commerce SEO strategist.
@@ -106,35 +116,39 @@ ${contextStr}
 5. DO return focused Head-Term hubs like "Work Boots", "Cast Iron Skillets", "Gaming Keyboards".
 6. Return only the array of strings.`;
 
-      const response = await withRetry(() => ai!.models.generateContent({
-        model: ACTIVE_MODEL,
-        contents: prompt,
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: llmResponseSchema,
-          thinkingConfig: getThinkingConfig(ACTIVE_MODEL, ACTIVE_THINKING_LEVEL) as any
-        }
-      }));
+      const response = await withRetry(() =>
+        ai!.models.generateContent({
+          model: ACTIVE_MODEL,
+          contents: prompt,
+          config: {
+            responseMimeType: "application/json",
+            responseSchema: llmResponseSchema,
+            thinkingConfig: getThinkingConfig(ACTIVE_MODEL, ACTIVE_THINKING_LEVEL) as any,
+          },
+        }),
+      );
 
       if (response.text) {
         const generatedCategories: string[] = JSON.parse(response.text);
         let savedCount = 0;
 
         for (const cat of generatedCategories) {
-          if (!cat || typeof cat !== 'string') continue;
+          if (!cat || typeof cat !== "string") continue;
           const cleanName = cat.trim();
           if (cleanName.length < 3) continue;
 
           await prisma.silverCategoryIdea.create({
             data: {
               rawName: cleanName,
-              goldProductLineId: line.id
-            }
+              goldProductLineId: line.id,
+            },
           });
           savedCount++;
         }
 
-        console.log(`   [Discovery] ✨ Generated ${savedCount} SEO categories! (e.g. ${generatedCategories[0]})`);
+        console.log(
+          `   [Discovery] ✨ Generated ${savedCount} SEO categories! (e.g. ${generatedCategories[0]})`,
+        );
 
         const usage = response.usageMetadata;
         if (usage) {
@@ -151,8 +165,8 @@ ${contextStr}
               responseTokens: usage.candidatesTokenCount || 0,
               thinkingTokens: usage.thoughtsTokenCount || (usage as any).thoughts_token_count || 0,
               totalTokens: usage.totalTokenCount,
-              costInUsd: cost
-            }
+              costInUsd: cost,
+            },
           });
         }
       }

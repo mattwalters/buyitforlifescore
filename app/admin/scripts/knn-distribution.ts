@@ -1,4 +1,3 @@
- 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable prefer-const */
@@ -15,13 +14,15 @@ const env = envSchema.parse(process.env);
 const ai = env.GEMINI_API_KEY ? new GoogleGenAI({ apiKey: env.GEMINI_API_KEY }) : null;
 
 function cosineDistance(u: number[], v: number[]): number {
-  let dot = 0, normU = 0, normV = 0;
+  let dot = 0,
+    normU = 0,
+    normV = 0;
   for (let i = 0; i < u.length; i++) {
     dot += u[i] * v[i];
     normU += u[i] * u[i];
     normV += v[i] * v[i];
   }
-  return 1 - (dot / (Math.sqrt(normU) * Math.sqrt(normV)));
+  return 1 - dot / (Math.sqrt(normU) * Math.sqrt(normV));
 }
 
 async function main() {
@@ -31,14 +32,14 @@ async function main() {
   }
 
   console.log("🔍 Running K-NN Distribution Analysis (3072 vs 768)...\n");
-  
+
   // 1. Get a sample of Silver mentions that share a brand
   const popularBrands = await prisma.silverProductMention.groupBy({
-    by: ['brand'],
+    by: ["brand"],
     _count: { brand: true },
     having: { brand: { _count: { gt: 3 } } },
-    orderBy: { _count: { brand: 'desc' } },
-    take: 10
+    orderBy: { _count: { brand: "desc" } },
+    take: 10,
   });
 
   const cache3072 = new Map<string, number[]>();
@@ -49,7 +50,9 @@ async function main() {
   console.log("Fetching embeddings from the database for sample clusters...");
 
   for (const b of popularBrands) {
-    const mentions = await prisma.$queryRaw<Array<{ brand: string, productName: string, emb3: string, emb7: string }>>`
+    const mentions = await prisma.$queryRaw<
+      Array<{ brand: string; productName: string; emb3: string; emb7: string }>
+    >`
       SELECT 
         brand, 
         "productName", 
@@ -72,7 +75,7 @@ async function main() {
         try {
           vectors3072.push(JSON.parse(m.emb3));
           vectors768.push(JSON.parse(m.emb7));
-        } catch(e) {
+        } catch (e) {
           console.warn(`Failed to parse embeddings for ${str}`);
         }
       }
@@ -90,24 +93,24 @@ async function main() {
   }
 
   if (distances3072.length === 0) {
-      console.log("Not enough varied data to plot.");
-      return;
+    console.log("Not enough varied data to plot.");
+    return;
   }
 
   // 2. Bin the distances and plot histograms
   const binSize = 0.02;
-  const maxDist = 0.40;
-  const binCount = Math.ceil(maxDist / binSize) + 1; 
-  
+  const maxDist = 0.4;
+  const binCount = Math.ceil(maxDist / binSize) + 1;
+
   const bins3072 = new Array(binCount).fill(0);
   const bins768 = new Array(binCount).fill(0);
-  
+
   for (let i = 0; i < distances3072.length; i++) {
     const d3 = distances3072[i];
     const d7 = distances768[i];
-    
-    if (d3 <= 0.40) bins3072[Math.floor(d3 / binSize)]++;
-    if (d7 <= 0.40) bins768[Math.floor(d7 / binSize)]++;
+
+    if (d3 <= 0.4) bins3072[Math.floor(d3 / binSize)]++;
+    if (d7 <= 0.4) bins768[Math.floor(d7 / binSize)]++;
   }
 
   const maxBinValue = Math.max(...bins3072, ...bins768) || 1;
@@ -120,16 +123,18 @@ async function main() {
   for (let i = 0; i < binCount; i++) {
     const binStart = (i * binSize).toFixed(2);
     const binEnd = ((i + 1) * binSize).toFixed(2);
-    
+
     const count3072 = bins3072[i];
     const len3072 = Math.round((count3072 / maxBinValue) * maxBarLength);
-    const bar3072 = "█".repeat(len3072).padEnd(maxBarLength, ' ');
-    
+    const bar3072 = "█".repeat(len3072).padEnd(maxBarLength, " ");
+
     const count768 = bins768[i];
     const len768 = Math.round((count768 / maxBinValue) * maxBarLength);
-    const bar768 = "█".repeat(len768).padEnd(maxBarLength, ' ');
-    
-    console.log(`[${binStart}-${binEnd}): | ${count3072.toString().padStart(3)} ${bar3072} | ${count768.toString().padStart(3)} ${bar768}`);
+    const bar768 = "█".repeat(len768).padEnd(maxBarLength, " ");
+
+    console.log(
+      `[${binStart}-${binEnd}): | ${count3072.toString().padStart(3)} ${bar3072} | ${count768.toString().padStart(3)} ${bar768}`,
+    );
   }
 
   console.log("\n💡 Analysis:");

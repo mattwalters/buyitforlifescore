@@ -23,8 +23,8 @@ export default async function CategoryIdeasPage(props: {
     },
     include: {
       goldProductLine: {
-        select: { brand: true, canonicalName: true }
-      }
+        select: { brand: true, canonicalName: true },
+      },
     },
     take: pageSize,
     skip: Math.max(0, (page - 1) * pageSize),
@@ -38,10 +38,11 @@ export default async function CategoryIdeasPage(props: {
       <div className="flex items-start justify-between">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-bold tracking-tight text-slate-300 flex items-center gap-2">
-             Silver: Category Hallucinations
+            Silver: Category Hallucinations
           </h1>
           <p className="text-muted-foreground">
-            View all {total.toLocaleString()} raw AI-generated category ideas awaiting deduplication.
+            View all {total.toLocaleString()} raw AI-generated category ideas awaiting
+            deduplication.
           </p>
         </div>
       </div>

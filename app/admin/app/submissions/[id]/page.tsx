@@ -17,9 +17,9 @@ export default async function SubmissionDetailPage(props: { params: Promise<{ id
       },
       mentions: {
         include: {
-          goldBrand: { select: { canonicalName: true } }
-        }
-      }
+          goldBrand: { select: { canonicalName: true } },
+        },
+      },
     },
   });
 
@@ -151,8 +151,11 @@ export default async function SubmissionDetailPage(props: { params: Promise<{ id
                 </tr>
               </thead>
               <tbody>
-                {submission.mentions.map(m => (
-                  <tr key={m.id} className="border-b transition-colors hover:bg-muted/50 whitespace-nowrap">
+                {submission.mentions.map((m) => (
+                  <tr
+                    key={m.id}
+                    className="border-b transition-colors hover:bg-muted/50 whitespace-nowrap"
+                  >
                     <td className="p-4 align-middle font-medium">
                       <Link href={`/silver/${m.id}`} className="text-foreground hover:underline">
                         {m.brand}
@@ -160,16 +163,23 @@ export default async function SubmissionDetailPage(props: { params: Promise<{ id
                     </td>
                     <td className="p-4 align-middle text-muted-foreground">{m.productName}</td>
                     <td className="p-4 align-middle">
-                      <div className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${m.sentiment === 'POSITIVE' ? 'bg-primary text-primary-foreground border-transparent' : m.sentiment === 'NEGATIVE' ? 'bg-destructive text-destructive-foreground border-transparent' : 'bg-secondary text-secondary-foreground border-transparent'}`}>
+                      <div
+                        className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${m.sentiment === "POSITIVE" ? "bg-primary text-primary-foreground border-transparent" : m.sentiment === "NEGATIVE" ? "bg-destructive text-destructive-foreground border-transparent" : "bg-secondary text-secondary-foreground border-transparent"}`}
+                      >
                         {m.sentiment}
                       </div>
                     </td>
                     <td className="p-4 align-middle text-muted-foreground">
                       {m.goldBrand ? (
-                        <Link href={`/gold/brands/${m.goldBrandId}`} className="text-orange-600 hover:underline">
+                        <Link
+                          href={`/gold/brands/${m.goldBrandId}`}
+                          className="text-orange-600 hover:underline"
+                        >
                           {m.goldBrand.canonicalName}
                         </Link>
-                      ) : "-"}
+                      ) : (
+                        "-"
+                      )}
                     </td>
                   </tr>
                 ))}

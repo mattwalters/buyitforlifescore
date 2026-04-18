@@ -2,7 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Activity, MessageSquare, Package, Trophy, Layers, FolderTree, Tags, Lightbulb } from "lucide-react";
+import {
+  LayoutDashboard,
+  Activity,
+  MessageSquare,
+  Package,
+  Trophy,
+  Layers,
+  FolderTree,
+  Tags,
+  Lightbulb,
+} from "lucide-react";
 
 export function Sidebar() {
   const pathname = usePathname();

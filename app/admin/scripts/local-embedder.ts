@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
- 
- 
- 
+
 import { pipeline, env } from "@xenova/transformers";
 
 // Optional: Don't load local remote models if not found, pull straight from HuggingFace
@@ -34,7 +32,10 @@ export const embedWithRetry = async (text: string, _dim: number = 1024): Promise
   }
 };
 
-export const embedBatchWithRetry = async (texts: string[], _dim: number = 1024): Promise<number[][]> => {
+export const embedBatchWithRetry = async (
+  texts: string[],
+  _dim: number = 1024,
+): Promise<number[][]> => {
   if (texts.length === 0) return [];
   try {
     const extractor = await EmbedderPipeline.getInstance();

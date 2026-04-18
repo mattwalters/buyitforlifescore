@@ -10,7 +10,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend
+  Legend,
 } from "recharts";
 
 interface TokenChartProps {
@@ -19,9 +19,9 @@ interface TokenChartProps {
 
 // Ensure stable colors for tracking over time. Distinct from spend tracking colors.
 const COLOR_PALETTE = {
-  Input: "#3b82f6",     // blue-500
-  Thinking: "#f59e0b",  // yellow-500
-  Output: "#10b981",    // emerald-500
+  Input: "#3b82f6", // blue-500
+  Thinking: "#f59e0b", // yellow-500
+  Output: "#10b981", // emerald-500
 };
 
 export function TokenChart({ data }: TokenChartProps) {
@@ -47,7 +47,9 @@ export function TokenChart({ data }: TokenChartProps) {
   if (data.length === 0) {
     return (
       <div className="flex h-[350px] items-center justify-center rounded-lg border border-dashed bg-muted/20">
-        <span className="text-muted-foreground text-sm">No recorded AI token usage in the last 7 days.</span>
+        <span className="text-muted-foreground text-sm">
+          No recorded AI token usage in the last 7 days.
+        </span>
       </div>
     );
   }
@@ -64,31 +66,44 @@ export function TokenChart({ data }: TokenChartProps) {
             bottom: 5,
           }}
         >
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--muted-foreground)/0.2)" />
-          <XAxis 
-            dataKey="date" 
-            tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} 
+          <CartesianGrid
+            strokeDasharray="3 3"
+            vertical={false}
+            stroke="hsl(var(--muted-foreground)/0.2)"
+          />
+          <XAxis
+            dataKey="date"
+            tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
             tickLine={false}
             axisLine={false}
           />
-          <YAxis 
-            tickFormatter={formatters.number} 
+          <YAxis
+            tickFormatter={formatters.number}
             tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
             tickLine={false}
             axisLine={false}
             width={70}
           />
-          <Tooltip 
-            formatter={(value: any, name: any) => [formatters.number(value as number), name as string]}
-            contentStyle={{ 
-              backgroundColor: "hsl(var(--card))", 
+          <Tooltip
+            formatter={(value: any, name: any) => [
+              formatters.number(value as number),
+              name as string,
+            ]}
+            contentStyle={{
+              backgroundColor: "hsl(var(--card))",
               borderColor: "hsl(var(--border))",
               borderRadius: "0.5rem",
-              color: "hsl(var(--foreground))"
+              color: "hsl(var(--foreground))",
             }}
             itemStyle={{ color: "hsl(var(--foreground))" }}
           />
-          <Legend wrapperStyle={{ paddingTop: "20px", fontSize: "12px", color: "hsl(var(--muted-foreground))" }} />
+          <Legend
+            wrapperStyle={{
+              paddingTop: "20px",
+              fontSize: "12px",
+              color: "hsl(var(--muted-foreground))",
+            }}
+          />
           <Bar dataKey="Input" stackId="a" fill={COLOR_PALETTE.Input} />
           <Bar dataKey="Thinking" stackId="a" fill={COLOR_PALETTE.Thinking} />
           <Bar dataKey="Output" stackId="a" fill={COLOR_PALETTE.Output} />

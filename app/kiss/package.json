@@ -1,0 +1,41 @@
+{
+  "name": "@mono/kiss",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "dotenv -e ../../.env -- bash -c 'AUTH_URL=http://kiss.buyitforlifeclub.localhost NEXT_PUBLIC_APP_URL=http://kiss.buyitforlifeclub.localhost next dev -H ${HOST:-127.0.0.1} -p 3008'",
+    "build": "dotenv -e ../../.env -- next build",
+    "start": "dotenv -e ../../.env -- next start",
+    "lint": "eslint .",
+    "format": "prettier --check .",
+    "format:write": "prettier --write .",
+    "test": "vitest run",
+    "test:unit": "vitest run",
+    "ingest": "dotenv -e ../../.env -- tsx scripts/ingest.ts"
+  },
+  "dependencies": {
+    "@auth/prisma-adapter": "^2.11.1",
+    "@mono/db": "*",
+    "@t3-oss/env-nextjs": "^0.13.11",
+    "duckdb": "^1.4.4",
+    "lucide-react": "^0.577.0",
+    "next": "16.2.2",
+    "next-auth": "^5.0.0-beta.30",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "recharts": "^3.8.1",
+    "tsx": "^4.21.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@mono/eslint-config": "*",
+    "@tailwindcss/postcss": "^4",
+    "@testing-library/react": "^16.3.2",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^5.2.0",
+    "jsdom": "^27.4.0",
+    "prettier": "^3.8.1",
+    "tailwindcss": "^4"
+  }
+}

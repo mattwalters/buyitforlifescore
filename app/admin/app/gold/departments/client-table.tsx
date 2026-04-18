@@ -21,10 +21,9 @@ export default function DepartmentClientTable({
   sortBy: string;
   dir: string;
 }) {
-
   // We could add Client sorting like in the other tables if we want.
   // For now, these are usually fetched pre-sorted from Server Components.
-  
+
   const getSortLink = (colKey: string) => {
     const p = new URLSearchParams();
     p.set("sortBy", colKey);
@@ -67,13 +66,14 @@ export default function DepartmentClientTable({
           </thead>
           <tbody className="[&_tr:last-child]:border-0 bg-background">
             {departments.map((dept) => (
-              <tr key={dept.id} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+              <tr
+                key={dept.id}
+                className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+              >
                 <td className="p-4 align-middle text-xs font-mono text-muted-foreground">
                   {dept.id.slice(-6)}
                 </td>
-                <td className="p-4 align-middle font-medium">
-                  {dept.canonicalName}
-                </td>
+                <td className="p-4 align-middle font-medium">{dept.canonicalName}</td>
                 <td className="p-4 align-middle text-center">
                   <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-primary/10 text-primary">
                     {dept._count.productLines}
