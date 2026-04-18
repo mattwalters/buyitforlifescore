@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "dotenv -e ../../.env -- bash -c 'AUTH_URL=http://kiss.buyitforlifeclub.localhost NEXT_PUBLIC_APP_URL=http://kiss.buyitforlifeclub.localhost next dev -H ${HOST:-127.0.0.1} -p 3008'",
+    "dev": "dotenv -e ../../.env -- bash -c 'AUTH_URL=http://kiss.buyitforlifeclub.localhost NEXT_PUBLIC_APP_URL=http://kiss.buyitforlifeclub.localhost next dev -H ${HOST:-127.0.0.1} -p 3000'",
     "build": "dotenv -e ../../.env -- next build",
     "start": "dotenv -e ../../.env -- next start",
     "lint": "eslint .",
