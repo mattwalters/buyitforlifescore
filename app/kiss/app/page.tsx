@@ -9,7 +9,7 @@ export default function Page() {
           Visualizing DuckDB Parquet aggregations directly from R2 partitions.
         </p>
       </div>
-      
+
       <QualityChart />
     </div>
   );

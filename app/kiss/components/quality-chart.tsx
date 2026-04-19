@@ -1,18 +1,18 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { fetchQualityMetrics } from "../app/actions";
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
   ResponsiveContainer,
   LineChart,
-  Line
+  Line,
 } from "recharts";
 
 type MetricRow = {
@@ -21,7 +21,7 @@ type MetricRow = {
   avg_processing_time: number;
   error_count: number;
   total_runs: number;
-}
+};
 
 export function QualityChart() {
   const [data, setData] = useState<MetricRow[]>([]);
@@ -37,8 +37,9 @@ export function QualityChart() {
         } else {
           setError(response.error || "Failed to load");
         }
-      } catch (e: any) {
-        setError(e.message);
+      } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : String(e);
+        setError(message);
       } finally {
         setLoading(false);
       }
@@ -46,9 +47,24 @@ export function QualityChart() {
     load();
   }, []);
 
-  if (loading) return <div className="p-8 text-center text-muted-foreground animate-pulse">Loading Parquet Metrics via DuckDB...</div>;
-  if (error) return <div className="p-8 text-center text-destructive">Error: {error}. Hint: Did you run the ingest script to generate the Parquet file first?</div>;
-  if (!data.length) return <div className="p-8 text-center text-muted-foreground">No data available. Run the ingest script first.</div>;
+  if (loading)
+    return (
+      <div className="p-8 text-center text-muted-foreground animate-pulse">
+        Loading Parquet Metrics via DuckDB...
+      </div>
+    );
+  if (error)
+    return (
+      <div className="p-8 text-center text-destructive">
+        Error: {error}. Hint: Did you run the ingest script to generate the Parquet file first?
+      </div>
+    );
+  if (!data.length)
+    return (
+      <div className="p-8 text-center text-muted-foreground">
+        No data available. Run the ingest script first.
+      </div>
+    );
 
   return (
     <div className="space-y-8">
@@ -73,9 +89,20 @@ export function QualityChart() {
               <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
               <XAxis dataKey="source_node" />
               <YAxis />
-              <Tooltip cursor={{ fill: 'rgba(255,255,255,0.1)' }} contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))' }}/>
+              <Tooltip
+                cursor={{ fill: "rgba(255,255,255,0.1)" }}
+                contentStyle={{
+                  backgroundColor: "hsl(var(--card))",
+                  borderColor: "hsl(var(--border))",
+                }}
+              />
               <Legend />
-              <Bar dataKey="avg_quality" fill="hsl(var(--primary))" name="Quality Score" radius={[4, 4, 0, 0]} />
+              <Bar
+                dataKey="avg_quality"
+                fill="hsl(var(--primary))"
+                name="Quality Score"
+                radius={[4, 4, 0, 0]}
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -87,9 +114,20 @@ export function QualityChart() {
               <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
               <XAxis dataKey="source_node" />
               <YAxis />
-              <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))' }}/>
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "hsl(var(--card))",
+                  borderColor: "hsl(var(--border))",
+                }}
+              />
               <Legend />
-              <Line type="monotone" dataKey="error_count" stroke="hsl(var(--destructive))" name="Errors" strokeWidth={2} />
+              <Line
+                type="monotone"
+                dataKey="error_count"
+                stroke="hsl(var(--destructive))"
+                name="Errors"
+                strokeWidth={2}
+              />
             </LineChart>
           </ResponsiveContainer>
         </div>
