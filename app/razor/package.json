@@ -1,0 +1,32 @@
+{
+  "name": "@mono/razor",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "dotenv -e ../../.env -- bash -c 'NEXT_PUBLIC_APP_URL=http://razor.mono.localhost next dev -H ${HOST:-127.0.0.1} -p 3008'",
+    "build": "dotenv -e ../../.env -- next build",
+    "start": "dotenv -e ../../.env -- next start",
+    "lint": "eslint .",
+    "format": "prettier --check .",
+    "format:write": "prettier --write .",
+    "test": "vitest run",
+    "test:unit": "vitest run"
+  },
+  "dependencies": {
+    "@mono/db": "*",
+    "@t3-oss/env-nextjs": "*",
+    "lucide-react": "^0.577.0",
+    "next": "16.2.2",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@mono/eslint-config": "*",
+    "@tailwindcss/postcss": "^4",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "prettier": "^3.8.1",
+    "tailwindcss": "^4"
+  }
+}

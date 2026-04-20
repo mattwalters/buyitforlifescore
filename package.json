@@ -6,7 +6,7 @@
     "lib/*"
   ],
   "scripts": {
-    "dev": "concurrently --kill-others --names \"DOCKER,KISS\" -c \"blue,magenta\" \"docker compose up\" \"dotenv -e .env -- npm run dev -w @mono/kiss\"",
+    "dev": "concurrently --kill-others --names \"DOCKER,RAZOR\" -c \"blue,magenta\" \"docker compose up\" \"dotenv -e .env -- npm run dev -w @mono/razor\"",
     "dev:admin": "dotenv -e .env -- npm run dev -w @mono/admin",
     "build:admin": "dotenv -e .env -- npm run build -w @mono/admin",
     "start:admin": "dotenv -e .env -- npm run start -w @mono/admin",
