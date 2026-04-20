@@ -8,3 +8,48 @@ datasource db {
   extensions = [vector]
 }
 
+// -----------------------------------------------------------------------------
+// Kiss Analytics Pipeline & Metadata Engine
+// -----------------------------------------------------------------------------
+
+model KissJob {
+  id              String    @id @default(cuid())
+  assetId         String    // e.g. "reddit_buyitforlife_comments"
+  partitionKey    String?   // e.g. "2024-04" or null for global
+  status          JobStatus @default(QUEUED)
+  
+  requestedAt     DateTime  @default(now())
+  startedAt       DateTime?
+  completedAt     DateTime?
+  
+  errorTrace      String?   @db.Text
+  
+  materialization KissMaterialization?
+  
+  @@index([assetId, partitionKey])
+  @@index([status])
+}
+
+model KissMaterialization {
+  id              String   @id @default(cuid())
+  
+  jobId           String   @unique
+  job             KissJob  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  
+  assetId         String
+  partitionKey    String?
+  
+  // Storing DuckDB SUMMARIZE output and QA engine results schemalessly
+  summaryPayload  Json     @db.JsonB
+  
+  createdAt       DateTime @default(now())
+  
+  @@index([assetId, partitionKey, createdAt(sort: Desc)])
+}
+
+enum JobStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+}

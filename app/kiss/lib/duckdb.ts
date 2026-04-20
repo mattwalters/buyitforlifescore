@@ -12,9 +12,10 @@ export async function getDuckDB() {
 
     // We must run sequentially to ensure extensions are loaded before setting variables
     db.serialize(() => {
+      // Install httpfs unconditionally as requested
       db.run("INSTALL httpfs;");
       db.run("LOAD httpfs;");
-      // Set R2 credentials if they exist
+
       if (env.CLOUDFLARE_ACCOUNT_ID && env.R2_ACCESS_KEY_ID && env.R2_SECRET_ACCESS_KEY) {
         db.run(`SET s3_endpoint='${env.CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com';`);
         db.run("SET s3_region='auto';");
@@ -22,7 +23,7 @@ export async function getDuckDB() {
         db.run(`SET s3_secret_access_key='${env.R2_SECRET_ACCESS_KEY}';`);
         db.run("SET s3_url_style='vhost';");
       } else {
-        console.warn("⚠️ Missing Cloudflare R2 Credentials in ENV. S3 integration might fail.");
+        console.warn("⚠️ Missing Cloudflare R2 Credentials in ENV. Using local files. Skipping S3 SET config.");
       }
 
       resolve(db);

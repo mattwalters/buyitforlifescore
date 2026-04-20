@@ -11,11 +11,12 @@
     "format:write": "prettier --write .",
     "test": "vitest run",
     "test:unit": "vitest run",
-    "ingest": "dotenv -e ../../.env -- tsx scripts/ingest.ts"
+    "ingest": "dotenv -e ../../.env -- tsx scripts/ingest.ts",
+    "summarize": "dotenv -e ../../.env -- tsx scripts/summarize.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",
-    "@mono/db": "*",
+    "@mono/db": "^0.1.0",
     "@t3-oss/env-nextjs": "^0.13.11",
     "duckdb": "^1.4.4",
     "lucide-react": "^0.577.0",
@@ -23,6 +24,7 @@
     "next-auth": "^5.0.0-beta.30",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "reactflow": "^11.11.4",
     "recharts": "^3.8.1",
     "tsx": "^4.21.0",
     "zod": "^4.3.6"
