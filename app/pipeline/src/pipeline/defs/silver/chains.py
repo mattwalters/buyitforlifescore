@@ -10,12 +10,10 @@ from dagster import (
     AssetExecutionContext,
     Config,
     MaterializeResult,
-    AssetMaterialization,
     MetadataValue,
     MonthlyPartitionsDefinition,
     MultiPartitionsDefinition,
     MultiToSingleDimensionPartitionMapping,
-    BackfillPolicy,
     asset,
     define_asset_job,
     multiprocess_executor,
@@ -102,7 +100,6 @@ def build_thread_chains(
 @asset(
     group_name="silver",
     partitions_def=chains_partitions_def,
-    backfill_policy=BackfillPolicy.single_run(),
     description="Extract isolated linear paths from the Reddit submission-comment trees.",
     deps=[
         AssetDep(
@@ -115,112 +112,102 @@ def build_thread_chains(
         ),
     ],
 )
-def silver_reddit_chains(context: AssetExecutionContext, config: SilverRedditChainsConfig):
-    failed_partitions = []
+def silver_reddit_chains(context: AssetExecutionContext, config: SilverRedditChainsConfig) -> MaterializeResult:
+    partition_keys_dict = context.partition_key.keys_by_dimension
+    date_key = partition_keys_dict["date"]
+    subreddit_key = partition_keys_dict["subreddit"]
+    sub_lower = subreddit_key.lower()
 
-    for partition_key in context.partition_keys:
-        try:
-            date_key, subreddit_key = partition_key.split("|")
-            sub_lower = subreddit_key.lower()
+    context.log.info(f"[START] silver_reddit_chains — {subreddit_key} / {date_key}")
 
-            # Calculate partition boundaries for DuckDB Parquet metadata pushdown
-            dt = datetime.strptime(date_key, "%Y-%m-%d").replace(tzinfo=timezone.utc)
-            start_utc = int(dt.timestamp())
-            _, num_days = calendar.monthrange(dt.year, dt.month)
-            end_utc = start_utc + (num_days * 86400)
+    # Calculate partition boundaries for DuckDB Parquet metadata pushdown
+    dt = datetime.strptime(date_key, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+    start_utc = int(dt.timestamp())
+    _, num_days = calendar.monthrange(dt.year, dt.month)
+    end_utc = start_utc + (num_days * 86400)
 
-            # Generate partitioned write path using Hive-style partitions
-            target_parquet = get_write_path(f"silver/chains/subreddit={sub_lower}/date={date_key}/chains.parquet")
+    # Generate partitioned write path using Hive-style partitions
+    target_parquet = get_write_path(f"silver/chains/subreddit={sub_lower}/date={date_key}/chains.parquet")
 
-            source_submissions = get_read_path(f"bronze/reddit_{sub_lower}_submissions.parquet")
-            source_comments = get_read_path(f"bronze/reddit_{sub_lower}_comments.parquet")
+    source_submissions = get_read_path(f"bronze/reddit_{sub_lower}_submissions.parquet")
+    source_comments = get_read_path(f"bronze/reddit_{sub_lower}_comments.parquet")
 
-            sub_query = f"""
-                SELECT
-                    CAST(s.id AS VARCHAR) AS submission_id,
-                    CAST(s.id AS VARCHAR) AS id,
-                    COALESCE(CAST(s.name AS VARCHAR), 't3_' || CAST(s.id AS VARCHAR)) AS name,
-                    CAST(s.created_utc AS BIGINT) AS created_utc,
-                    COALESCE(CAST(s.name AS VARCHAR), 't3_' || CAST(s.id AS VARCHAR)) AS reddit_node_id,
-                    CAST(s.subreddit AS VARCHAR) AS subreddit
-                FROM read_parquet('{source_submissions}') s
-                WHERE lower(CAST(s.subreddit AS VARCHAR)) = '{sub_lower}'
-                AND CAST(s.created_utc AS BIGINT) >= {start_utc}
-                AND CAST(s.created_utc AS BIGINT) < {end_utc}
-            """
+    sub_query = f"""
+        SELECT
+            CAST(s.id AS VARCHAR) AS submission_id,
+            CAST(s.id AS VARCHAR) AS id,
+            COALESCE(CAST(s.name AS VARCHAR), 't3_' || CAST(s.id AS VARCHAR)) AS name,
+            CAST(s.created_utc AS BIGINT) AS created_utc,
+            COALESCE(CAST(s.name AS VARCHAR), 't3_' || CAST(s.id AS VARCHAR)) AS reddit_node_id,
+            CAST(s.subreddit AS VARCHAR) AS subreddit
+        FROM read_parquet('{source_submissions}') s
+        WHERE lower(CAST(s.subreddit AS VARCHAR)) = '{sub_lower}'
+        AND CAST(s.created_utc AS BIGINT) >= {start_utc}
+        AND CAST(s.created_utc AS BIGINT) < {end_utc}
+    """
 
-            com_query = f"""
-                WITH target_submissions AS (
-                    {sub_query}
-                )
-                SELECT
-                    CAST(c.id AS VARCHAR) AS comment_id,
-                    CAST(c.id AS VARCHAR) AS id,
-                    COALESCE(CAST(c.name AS VARCHAR), 't1_' || CAST(c.id AS VARCHAR)) AS name,
-                    CAST(c.created_utc AS BIGINT) AS created_utc,
-                    COALESCE(CAST(c.name AS VARCHAR), 't1_' || CAST(c.id AS VARCHAR)) AS reddit_node_id,
-                    trim(CAST(c.parent_id AS VARCHAR), '"') AS parent_id,
-                    trim(CAST(c.link_id AS VARCHAR), '"') AS link_id,
-                    CAST(c.subreddit AS VARCHAR) AS subreddit
-                FROM read_parquet('{source_comments}') c
-                SEMI JOIN target_submissions s
-                  ON trim(CAST(c.link_id AS VARCHAR), '"') = s.reddit_node_id
-            """
+    com_query = f"""
+        WITH target_submissions AS (
+            {sub_query}
+        )
+        SELECT
+            CAST(c.id AS VARCHAR) AS comment_id,
+            CAST(c.id AS VARCHAR) AS id,
+            COALESCE(CAST(c.name AS VARCHAR), 't1_' || CAST(c.id AS VARCHAR)) AS name,
+            CAST(c.created_utc AS BIGINT) AS created_utc,
+            COALESCE(CAST(c.name AS VARCHAR), 't1_' || CAST(c.id AS VARCHAR)) AS reddit_node_id,
+            trim(CAST(c.parent_id AS VARCHAR), '"') AS parent_id,
+            trim(CAST(c.link_id AS VARCHAR), '"') AS link_id,
+            CAST(c.subreddit AS VARCHAR) AS subreddit
+        FROM read_parquet('{source_comments}') c
+        SEMI JOIN target_submissions s
+          ON trim(CAST(c.link_id AS VARCHAR), '"') = s.reddit_node_id
+    """
 
-            context.log.info(f"Generating chains for {subreddit_key} on {date_key}")
+    context.log.info(f"Generating chains for {subreddit_key} on {date_key}")
 
-            with get_duckdb_connection() as con:
-                submissions_df = con.execute(sub_query).fetchdf()
-                comments_df = con.execute(com_query).fetchdf()
+    with get_duckdb_connection() as con:
+        submissions_df = con.execute(sub_query).fetchdf()
+        comments_df = con.execute(com_query).fetchdf()
 
-            submissions = submissions_df.to_dict("records")
-            comments = comments_df.to_dict("records")
+    submissions = submissions_df.to_dict("records")
+    comments = comments_df.to_dict("records")
 
-            # Bronze Payload Validation Gate
-            if config.validation_sample_size is not None:
-                context.log.info(f"Validating upstream sample of {config.validation_sample_size} rows")
-                TypeAdapter(list[BronzeSubmission]).validate_python(submissions[: config.validation_sample_size])
-                TypeAdapter(list[BronzeComment]).validate_python(comments[: config.validation_sample_size])
-            else:
-                context.log.info("Validating 100% of upstream rows")
-                TypeAdapter(list[BronzeSubmission]).validate_python(submissions)
-                TypeAdapter(list[BronzeComment]).validate_python(comments)
+    # Bronze Payload Validation Gate
+    if config.validation_sample_size is not None:
+        context.log.info(f"Validating upstream sample of {config.validation_sample_size} rows")
+        TypeAdapter(list[BronzeSubmission]).validate_python(submissions[: config.validation_sample_size])
+        TypeAdapter(list[BronzeComment]).validate_python(comments[: config.validation_sample_size])
+    else:
+        context.log.info("Validating 100% of upstream rows")
+        TypeAdapter(list[BronzeSubmission]).validate_python(submissions)
+        TypeAdapter(list[BronzeComment]).validate_python(comments)
 
-            records = build_thread_chains(submissions, comments)
+    records = build_thread_chains(submissions, comments)
 
-            # Pydantic Validation Gate
-            if config.validation_sample_size is not None:
-                context.log.info(f"Validating sample of {config.validation_sample_size} rows")
-                TypeAdapter(list[SilverChain]).validate_python(records[: config.validation_sample_size])
-            else:
-                context.log.info("Validating 100% of generated rows")
-                TypeAdapter(list[SilverChain]).validate_python(records)
-            context.log.info("Schema validation strictly passed!")
+    # Pydantic Validation Gate
+    if config.validation_sample_size is not None:
+        context.log.info(f"Validating sample of {config.validation_sample_size} rows")
+        TypeAdapter(list[SilverChain]).validate_python(records[: config.validation_sample_size])
+    else:
+        context.log.info("Validating 100% of generated rows")
+        TypeAdapter(list[SilverChain]).validate_python(records)
+    context.log.info("Schema validation strictly passed!")
 
-            # Write back to Parquet via DuckDB
-            output_df = pd.DataFrame(records, columns=list(SilverChain.model_fields.keys()))  # noqa: F841
-            with get_duckdb_connection() as con:
-                # Load into duckdb and export to partitioned parquet file
-                con.execute(f"COPY (SELECT * FROM output_df) TO '{target_parquet}' (FORMAT PARQUET)")
-                preview_df = con.execute(f"SELECT * FROM '{target_parquet}' LIMIT 10").fetchdf()
-                preview_md = preview_df.to_markdown()
+    # Write back to Parquet via DuckDB
+    output_df = pd.DataFrame(records, columns=list(SilverChain.model_fields.keys()))  # noqa: F841
+    with get_duckdb_connection() as con:
+        # Load into duckdb and export to partitioned parquet file
+        con.execute(f"COPY (SELECT * FROM output_df) TO '{target_parquet}' (FORMAT PARQUET)")
+        preview_df = con.execute(f"SELECT * FROM '{target_parquet}' LIMIT 10").fetchdf()
+        preview_md = preview_df.to_markdown()
 
-            yield AssetMaterialization(
-                asset_key=context.asset_key,
-                partition=partition_key,
-                metadata={
-                    "target_file": target_parquet,
-                    "data_preview": MetadataValue.md(preview_md),
-                }
-            )
-
-        except Exception as e:
-            context.log.error(f"Partition {partition_key} failed: {e}")
-            failed_partitions.append(partition_key)
-            continue
-
-    if failed_partitions:
-        raise Exception(f"Failed to process partitions: {failed_partitions}")
+    return MaterializeResult(
+        metadata={
+            "target_file": target_parquet,
+            "data_preview": MetadataValue.md(preview_md),
+        }
+    )
 
 
 silver_chains_job = define_asset_job(

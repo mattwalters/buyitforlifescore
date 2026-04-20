@@ -7,10 +7,8 @@ from dagster import (
     AssetExecutionContext,
     Config,
     MaterializeResult,
-    AssetMaterialization,
     MetadataValue,
     MultiToSingleDimensionPartitionMapping,
-    BackfillPolicy,
     asset,
     define_asset_job,
     multiprocess_executor,
@@ -134,7 +132,6 @@ def build_chain_bundles(
 @asset(
     group_name="silver",
     partitions_def=chains_partitions_def,
-    backfill_policy=BackfillPolicy.single_run(),
     description="Bundle linear Reddit chains into LLM-sized chunks based on character length budgets.",
     deps=[
         AssetDep(
@@ -150,88 +147,81 @@ def build_chain_bundles(
         ),
     ],
 )
-def silver_reddit_chain_bundles(context: AssetExecutionContext, config: SilverChainBundlesConfig):
-    failed_partitions = []
+def silver_reddit_chain_bundles(
+    context: AssetExecutionContext, config: SilverChainBundlesConfig
+) -> MaterializeResult:
+    partition_keys_dict = context.partition_key.keys_by_dimension
+    date_key = partition_keys_dict["date"]
+    subreddit_key = partition_keys_dict["subreddit"]
+    sub_lower = subreddit_key.lower()
 
-    for partition_key in context.partition_keys:
-        try:
-            date_key, subreddit_key = partition_key.split("|")
-            sub_lower = subreddit_key.lower()
+    context.log.info(f"[START] silver_reddit_chain_bundles — {subreddit_key} / {date_key}")
 
-            source_chains = get_read_path(f"silver/chains/subreddit={sub_lower}/date={date_key}/chains.parquet")
-            source_submissions = get_read_path(f"bronze/reddit_{sub_lower}_submissions.parquet")
-            source_comments = get_read_path(f"bronze/reddit_{sub_lower}_comments.parquet")
-            target_parquet = get_write_path(f"silver/chain_bundles/subreddit={sub_lower}/date={date_key}/bundles.parquet")
+    source_chains = get_read_path(f"silver/chains/subreddit={sub_lower}/date={date_key}/chains.parquet")
+    source_submissions = get_read_path(f"bronze/reddit_{sub_lower}_submissions.parquet")
+    source_comments = get_read_path(f"bronze/reddit_{sub_lower}_comments.parquet")
+    target_parquet = get_write_path(f"silver/chain_bundles/subreddit={sub_lower}/date={date_key}/bundles.parquet")
 
-            # Read chains
-            with get_duckdb_connection() as con:
-                chains_df = con.execute(f"SELECT * FROM read_parquet('{source_chains}') ORDER BY submission_id, chain_id, sequence_order").fetchdf()
+    # Read chains
+    with get_duckdb_connection() as con:
+        chains_df = con.execute(
+            f"SELECT * FROM read_parquet('{source_chains}') ORDER BY submission_id, chain_id, sequence_order"
+        ).fetchdf()
 
-                if chains_df.empty:
-                    context.log.info(f"No chains found for {subreddit_key} on {date_key}. Skipping bundle generation.")
-                    # Touch an empty parquet to satisfy downstream dependencies, ensuring correct schema
-                    empty_df = pd.DataFrame(columns=list(SilverChainBundle.model_fields.keys()))
-                    con.execute(f"COPY (SELECT * FROM empty_df) TO '{target_parquet}' (FORMAT PARQUET)")
-                    yield AssetMaterialization(
-                        asset_key=context.asset_key,
-                        partition=partition_key,
-                        metadata={
-                            "target_file": target_parquet,
-                            "data_preview": MetadataValue.md("No data generated (empty upstream)."),
-                        }
-                    )
-                    continue
-
-                lengths_query = f"""
-                    WITH target_nodes AS (
-                        SELECT DISTINCT reddit_node_id FROM read_parquet('{source_chains}')
-                    )
-                    SELECT n.reddit_node_id, CAST(length(COALESCE(s.selftext, '')) AS BIGINT) AS text_length
-                    FROM read_parquet('{source_submissions}') s
-                    JOIN target_nodes n ON COALESCE(CAST(s.name AS VARCHAR), 't3_' || CAST(s.id AS VARCHAR)) = n.reddit_node_id
-                    UNION ALL
-                    SELECT n.reddit_node_id, CAST(length(COALESCE(c.body, '')) AS BIGINT) AS text_length
-                    FROM read_parquet('{source_comments}') c
-                    JOIN target_nodes n ON COALESCE(CAST(c.name AS VARCHAR), 't1_' || CAST(c.id AS VARCHAR)) = n.reddit_node_id
-                """
-                raw_lengths_df = con.execute(lengths_query).fetchdf()
-
-                lengths_map = dict(zip(raw_lengths_df["reddit_node_id"], raw_lengths_df["text_length"]))
-
-                chains_records = chains_df.to_dict("records")
-
-                context.log.info(f"Generating chain bundles for {subreddit_key} on {date_key}")
-
-            records = build_chain_bundles(chains_records, lengths_map, config)
-
-            # Pydantic Validation
-            if config.validation_sample_size is not None:
-                TypeAdapter(list[SilverChainBundle]).validate_python(records[: config.validation_sample_size])
-            else:
-                TypeAdapter(list[SilverChainBundle]).validate_python(records)
-
-            output_df = pd.DataFrame(records, columns=list(SilverChainBundle.model_fields.keys()))  # noqa: F841
-            with get_duckdb_connection() as con:
-                con.execute(f"COPY (SELECT * FROM output_df) TO '{target_parquet}' (FORMAT PARQUET)")
-                preview_df = con.execute(f"SELECT * FROM '{target_parquet}' LIMIT 10").fetchdf()
-                preview_md = preview_df.to_markdown()
-
-            yield AssetMaterialization(
-                asset_key=context.asset_key,
-                partition=partition_key,
+        if chains_df.empty:
+            context.log.info(
+                f"No chains found for {subreddit_key} on {date_key}. Skipping bundle generation."
+            )
+            # Touch an empty parquet to satisfy downstream dependencies, ensuring correct schema
+            empty_df = pd.DataFrame(columns=list(SilverChainBundle.model_fields.keys()))
+            con.execute(f"COPY (SELECT * FROM empty_df) TO '{target_parquet}' (FORMAT PARQUET)")
+            return MaterializeResult(
                 metadata={
                     "target_file": target_parquet,
-                    "data_preview": MetadataValue.md(preview_md),
+                    "data_preview": MetadataValue.md("No data generated (empty upstream)."),
                 }
             )
 
-        except Exception as e:
-            context.log.error(f"Partition {partition_key} failed: {e}")
-            failed_partitions.append(partition_key)
-            continue
+        lengths_query = f"""
+            WITH target_nodes AS (
+                SELECT DISTINCT reddit_node_id FROM read_parquet('{source_chains}')
+            )
+            SELECT n.reddit_node_id, CAST(length(COALESCE(s.selftext, '')) AS BIGINT) AS text_length
+            FROM read_parquet('{source_submissions}') s
+            JOIN target_nodes n ON COALESCE(CAST(s.name AS VARCHAR), 't3_' || CAST(s.id AS VARCHAR)) = n.reddit_node_id
+            UNION ALL
+            SELECT n.reddit_node_id, CAST(length(COALESCE(c.body, '')) AS BIGINT) AS text_length
+            FROM read_parquet('{source_comments}') c
+            JOIN target_nodes n ON COALESCE(CAST(c.name AS VARCHAR), 't1_' || CAST(c.id AS VARCHAR)) = n.reddit_node_id
+        """
+        raw_lengths_df = con.execute(lengths_query).fetchdf()
 
-    if failed_partitions:
-        raise Exception(f"Failed to process partitions: {failed_partitions}")
+        lengths_map = dict(zip(raw_lengths_df["reddit_node_id"], raw_lengths_df["text_length"]))
+
+        chains_records = chains_df.to_dict("records")
+
+        context.log.info(f"Generating chain bundles for {subreddit_key} on {date_key}")
+
+    records = build_chain_bundles(chains_records, lengths_map, config)
+
+    # Pydantic Validation
+    if config.validation_sample_size is not None:
+        TypeAdapter(list[SilverChainBundle]).validate_python(records[: config.validation_sample_size])
+    else:
+        TypeAdapter(list[SilverChainBundle]).validate_python(records)
+
+    output_df = pd.DataFrame(records, columns=list(SilverChainBundle.model_fields.keys()))  # noqa: F841
+    with get_duckdb_connection() as con:
+        con.execute(f"COPY (SELECT * FROM output_df) TO '{target_parquet}' (FORMAT PARQUET)")
+        preview_df = con.execute(f"SELECT * FROM '{target_parquet}' LIMIT 10").fetchdf()
+        preview_md = preview_df.to_markdown()
+
+    return MaterializeResult(
+        metadata={
+            "target_file": target_parquet,
+            "data_preview": MetadataValue.md(preview_md),
+        }
+    )
 
 
 silver_chain_bundles_job = define_asset_job(

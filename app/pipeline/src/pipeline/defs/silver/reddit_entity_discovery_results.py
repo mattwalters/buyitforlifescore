@@ -28,6 +28,8 @@ def silver_reddit_entity_discovery_results(context: AssetExecutionContext) -> Ma
     subreddit_key = partition_keys_dict["subreddit"]
     sub_lower = subreddit_key.lower()
 
+    context.log.info(f"[START] silver_reddit_entity_discovery_results — {subreddit_key} / {date_key}")
+
     source_path = get_read_path(f"silver/reddit_entity_discovery/subreddit={sub_lower}/date={date_key}/entities.parquet")
     target_path = get_write_path(f"silver/reddit_entity_discovery_results/subreddit={sub_lower}/date={date_key}/results.parquet")
 

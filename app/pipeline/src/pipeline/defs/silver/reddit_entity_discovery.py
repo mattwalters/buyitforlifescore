@@ -38,6 +38,8 @@ def silver_reddit_entity_discovery(context: AssetExecutionContext) -> Materializ
     subreddit_key = partition_keys_dict["subreddit"]
     sub_lower = subreddit_key.lower()
 
+    context.log.info(f"[START] silver_reddit_entity_discovery — {subreddit_key} / {date_key}")
+
     source_payloads = get_read_path(f"silver/reddit_llm_payloads/subreddit={sub_lower}/date={date_key}/payloads.parquet")
     target_parquet = get_write_path(
         f"silver/reddit_entity_discovery/subreddit={sub_lower}/date={date_key}/entities.parquet"

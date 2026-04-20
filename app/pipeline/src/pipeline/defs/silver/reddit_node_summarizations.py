@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any
 
 import pandas as pd
@@ -7,13 +8,11 @@ from dagster import (
     MaterializeResult,
     MetadataValue,
     MultiToSingleDimensionPartitionMapping,
-    BackfillPolicy,
     asset,
     define_asset_job,
     multiprocess_executor,
 )
 from pydantic import TypeAdapter
-from tqdm import tqdm
 
 from pipeline.defs.silver.chains import chains_partitions_def
 from pipeline.schemas.reddit_node_summarizations import SilverRedditNodeSummarization
@@ -45,6 +44,8 @@ def silver_reddit_node_summarizations(context: AssetExecutionContext) -> Materia
     date_key = partition_keys_dict["date"]
     subreddit_key = partition_keys_dict["subreddit"]
     sub_lower = subreddit_key.lower()
+
+    context.log.info(f"[START] silver_reddit_node_summarizations — {subreddit_key} / {date_key}")
 
     source_bundles = get_read_path(f"silver/chain_bundles/subreddit={sub_lower}/date={date_key}/bundles.parquet")
     source_submissions = get_read_path(f"bronze/reddit_{sub_lower}_submissions.parquet")
@@ -108,37 +109,41 @@ def silver_reddit_node_summarizations(context: AssetExecutionContext) -> Materia
 
     total_cost = 0.0
 
-    for idx, row in enumerate(tqdm(records, desc="Summarizing nodes")):
+    def _summarize_node(row: dict[str, Any]) -> dict[str, Any]:
+        """Invoke the Gemini summarization for a single node. Thread-safe."""
         try:
             sum_res = invoke_summarize_node(client, row["full_text"])
-
-            results.append({
+            return {
                 "reddit_node_id": row["reddit_node_id"],
                 "summary": sum_res["summary"],
                 "prompt_tokens": sum_res["prompt_tokens"],
                 "completion_tokens": sum_res["completion_tokens"],
                 "cost_usd": sum_res["cost_usd"],
-            })
-            total_cost += sum_res["cost_usd"]
-
+            }
         except Exception as e:
             context.log.error(f"Failed to summarize node {row['reddit_node_id']}: {e}")
-            # If an error happens on one node due to API issue or safety blocking, insert empty but capture cost.
-            # Here we might simply drop it, or insert a fallback. We'll fallback to original truncated.
-            results.append({
+            # Fallback to original truncated text
+            return {
                 "reddit_node_id": row["reddit_node_id"],
                 "summary": row["full_text"][:500] + "... [SUMMARIZATION_FAILED]",
                 "prompt_tokens": 0,
                 "completion_tokens": 0,
                 "cost_usd": 0.0,
-            })
+            }
+
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        futures = {executor.submit(_summarize_node, row): row for row in records}
+        for future in as_completed(futures):
+            result = future.result()
+            results.append(result)
+            total_cost += result["cost_usd"]
 
     context.log.info(f"Summarization complete. Total cost for this partition: ${total_cost:.6f}")
 
     # Pydantic Validation
     TypeAdapter(list[SilverRedditNodeSummarization]).validate_python(results)
 
-    output_df = pd.DataFrame(results, columns=list(SilverRedditNodeSummarization.model_fields.keys())) # noqa: F841
+    output_df = pd.DataFrame(results, columns=list(SilverRedditNodeSummarization.model_fields.keys()))  # noqa: F841
     with get_duckdb_connection() as con:
         con.execute(f"COPY (SELECT * FROM output_df) TO '{target_parquet}' (FORMAT PARQUET)")
         preview_df = con.execute(f"SELECT reddit_node_id, summary, cost_usd FROM '{target_parquet}' LIMIT 10").fetchdf()
