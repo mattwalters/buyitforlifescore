@@ -161,5 +161,5 @@ def silver_reddit_llm_payloads(context: AssetExecutionContext):
 silver_reddit_llm_payloads_job = define_asset_job(
     name="silver_reddit_llm_payloads_job",
     selection="silver_reddit_llm_payloads",
-    executor_def=multiprocess_executor.configured({"max_concurrent": 64}),
+    executor_def=multiprocess_executor.configured({"max_concurrent": 8}),
 )

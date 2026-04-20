@@ -1,3 +1,4 @@
+import calendar
 import hashlib
 from collections import defaultdict
 from datetime import datetime, timezone
@@ -8,10 +9,10 @@ from dagster import (
     AssetDep,
     AssetExecutionContext,
     Config,
-    DailyPartitionsDefinition,
     MaterializeResult,
     AssetMaterialization,
     MetadataValue,
+    MonthlyPartitionsDefinition,
     MultiPartitionsDefinition,
     MultiToSingleDimensionPartitionMapping,
     BackfillPolicy,
@@ -31,7 +32,7 @@ class SilverRedditChainsConfig(Config):
     validation_sample_size: Optional[int] = None
 
 
-date_partitions = DailyPartitionsDefinition(start_date="2011-01-01")
+date_partitions = MonthlyPartitionsDefinition(start_date="2011-01-01")
 
 chains_partitions_def = MultiPartitionsDefinition(
     {
@@ -125,8 +126,8 @@ def silver_reddit_chains(context: AssetExecutionContext, config: SilverRedditCha
             # Calculate partition boundaries for DuckDB Parquet metadata pushdown
             dt = datetime.strptime(date_key, "%Y-%m-%d").replace(tzinfo=timezone.utc)
             start_utc = int(dt.timestamp())
-            end_utc = start_utc + 86400
-            cutoff_utc = start_utc + (45 * 86400)  # 45 day comment window
+            _, num_days = calendar.monthrange(dt.year, dt.month)
+            end_utc = start_utc + (num_days * 86400)
 
             # Generate partitioned write path using Hive-style partitions
             target_parquet = get_write_path(f"silver/chains/subreddit={sub_lower}/date={date_key}/chains.parquet")
@@ -164,8 +165,6 @@ def silver_reddit_chains(context: AssetExecutionContext, config: SilverRedditCha
                 FROM read_parquet('{source_comments}') c
                 SEMI JOIN target_submissions s
                   ON trim(CAST(c.link_id AS VARCHAR), '"') = s.reddit_node_id
-                WHERE CAST(c.created_utc AS BIGINT) >= {start_utc}
-                AND CAST(c.created_utc AS BIGINT) < {cutoff_utc}
             """
 
             context.log.info(f"Generating chains for {subreddit_key} on {date_key}")
@@ -227,5 +226,5 @@ def silver_reddit_chains(context: AssetExecutionContext, config: SilverRedditCha
 silver_chains_job = define_asset_job(
     name="silver_chains_job",
     selection="silver_reddit_chains",
-    executor_def=multiprocess_executor.configured({"max_concurrent": 64}),
+    executor_def=multiprocess_executor.configured({"max_concurrent": 8}),
 )

@@ -113,5 +113,5 @@ def silver_reddit_entity_discovery(context: AssetExecutionContext) -> Materializ
 silver_reddit_entity_discovery_job = define_asset_job(
     name="silver_reddit_entity_discovery_job",
     selection="silver_reddit_entity_discovery",
-    executor_def=multiprocess_executor.configured({"max_concurrent": 32}),
+    executor_def=multiprocess_executor.configured({"max_concurrent": 8}),
 )
