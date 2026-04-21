@@ -166,6 +166,8 @@ def invoke_entity_discovery(client: genai.Client, payload: SilverRedditLlmPayloa
     def _attempt_call() -> str:
         nonlocal accumulated_prompt_tokens, accumulated_completion_tokens, accumulated_cost_usd
 
+        logger.info(f"[LLM] ▶ Calling {model.value} for bundle {payload.bundle_id} ({len(prompt_text)} chars)")
+
         response = client.models.generate_content(
             model=model.value,
             contents=prompt_text,
@@ -183,6 +185,8 @@ def invoke_entity_discovery(client: genai.Client, payload: SilverRedditLlmPayloa
         accumulated_prompt_tokens += prompt_tokens
         accumulated_completion_tokens += completion_tokens
         accumulated_cost_usd += cost_usd
+
+        logger.info(f"[LLM] ◀ Response for {payload.bundle_id}: {prompt_tokens}p/{completion_tokens}c tokens, ${cost_usd:.6f}")
 
         out_text = response.text
         if not out_text:
@@ -213,6 +217,8 @@ def invoke_entity_discovery(client: genai.Client, payload: SilverRedditLlmPayloa
                     )
                 )
 
+        logger.info(f"[LLM] ✅ {payload.bundle_id}: extracted {len(hydrated_items)} entities")
+
     except ValidationError as e:
         safe_err = str(e).splitlines()[0] if str(e) else "Invalid JSON EOF"
         preview_len = 250
@@ -221,7 +227,7 @@ def invoke_entity_discovery(client: genai.Client, payload: SilverRedditLlmPayloa
         raw_json = "[]"
         hydrated_items = []
     except Exception as e:
-        logger.error(f"Failed to extract entities after retries: {e}")
+        logger.error(f"[LLM] ❌ {payload.bundle_id}: failed after retries: {e}")
         raw_json = "[]"
         hydrated_items = []
 

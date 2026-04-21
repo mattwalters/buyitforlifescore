@@ -76,15 +76,22 @@ def silver_reddit_entity_discovery(context: AssetExecutionContext) -> Materializ
     client = get_client()
 
     results: list[DiscoveryResult] = []
+    total_payloads = len(payloads)
+
+    context.log.info(f"Processing {total_payloads} payloads with ThreadPoolExecutor (max_workers=2)")
 
     with ThreadPoolExecutor(max_workers=2) as executor:
         futures = {executor.submit(invoke_entity_discovery, client, payload): payload for payload in payloads}
-        for future in as_completed(futures):
+        for i, future in enumerate(as_completed(futures), 1):
+            payload = futures[future]
             try:
                 res = future.result()
                 results.append(res)
+                context.log.info(
+                    f"[{i}/{total_payloads}] ✅ {payload.bundle_id} — {len(res.items)} entities, ${res.cost_usd:.6f}"
+                )
             except Exception as e:
-                context.log.error(f"Error processing payload: {e}")
+                context.log.error(f"[{i}/{total_payloads}] ❌ {payload.bundle_id} — {e}")
 
     # Convert results back to dicts for duckdb
     out_records = [r.model_dump() for r in results]
