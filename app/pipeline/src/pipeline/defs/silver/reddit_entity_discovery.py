@@ -78,9 +78,9 @@ def silver_reddit_entity_discovery(context: AssetExecutionContext) -> Materializ
     results: list[DiscoveryResult] = []
     total_payloads = len(payloads)
 
-    context.log.info(f"Processing {total_payloads} payloads with ThreadPoolExecutor (max_workers=2)")
+    context.log.info(f"Processing {total_payloads} payloads with ThreadPoolExecutor (max_workers=10)")
 
-    with ThreadPoolExecutor(max_workers=2) as executor:
+    with ThreadPoolExecutor(max_workers=10) as executor:
         futures = {executor.submit(invoke_entity_discovery, client, payload): payload for payload in payloads}
         for i, future in enumerate(as_completed(futures), 1):
             payload = futures[future]
