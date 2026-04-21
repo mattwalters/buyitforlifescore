@@ -9,6 +9,7 @@ from pydantic import TypeAdapter, ValidationError
 from tenacity import before_sleep_log, retry, retry_if_not_exception_type, stop_after_attempt, wait_exponential
 
 from pipeline.schemas.reddit_entity_discovery import DiscoveredEntity, DiscoveryResult, LlmDiscoveredEntity
+from pipeline.schemas.reddit_entity_resolution import EntityResolutionResult, LlmResolvedEntity
 from pipeline.schemas.reddit_llm_payloads import SilverRedditLlmPayload
 
 logger = logging.getLogger(__name__)
@@ -241,3 +242,141 @@ def invoke_entity_discovery(client: genai.Client, payload: SilverRedditLlmPayloa
         completion_tokens=accumulated_completion_tokens,
         prompt_text=prompt_text,
     )
+
+
+def invoke_entity_resolution(
+    client: genai.Client,
+    node_id: str,
+    submission_id: str,
+    node_text: str,
+    verbatim_quotes: list[str],
+    model: AiModel = AiModel.GEMINI_2_5_FLASH_LITE,
+) -> EntityResolutionResult:
+    """Classifies a batch of verbatim quotes from a single Reddit node
+    into brand / product_line / product_model / specificity_level."""
+
+    quotes_list = "\n".join(f'- "{q}"' for q in verbatim_quotes)
+
+    prompt_text = f"""<node_text>
+{node_text}
+</node_text>
+
+<verbatim_quotes>
+{quotes_list}
+</verbatim_quotes>"""
+
+    system_instruction = (
+        'You are a product classification expert analyzing "Buy It For Life" product mentions from Reddit.\n\n'
+        "You will be given the full text of a Reddit post or comment inside <node_text> tags, along with a list of "
+        "verbatim quotes inside <verbatim_quotes> tags that were previously identified as potential commercial "
+        "product or brand references.\n\n"
+        "For EACH verbatim quote, classify it into:\n"
+        "- brand: The brand or manufacturer name. Return null if this is NOT a real commercial brand "
+        '(e.g., generic materials like "cast iron", "wood", "copper", or generic objects like "adapter", "propane tank").\n'
+        '- product_line: The marketed product family or series name (e.g., "Baggies", "Artisan", "D5"). '
+        "Return null if only a brand is mentioned with no specific product family.\n"
+        '- product_model: A specific identifiable unit or model (e.g., "Iron Ranger 8111", "iPad 3 64GB"). '
+        "Return null if no specific model is identified.\n"
+        "- specificity_level: One of:\n"
+        '  - "BRAND_ONLY": Only a brand is mentioned with no specific product '
+        '(e.g., "I love KitchenAid", "buy an Acura")\n'
+        '  - "PRODUCT_LINE": A marketed product family is named '
+        '(e.g., "MacBook", "Camry", "Artisan", "Neuro Fuzzy")\n'
+        '  - "EXACT_MODEL": A specific model/variant is named '
+        '(e.g., "MacBook Pro M2", "Camry XSE 2024", "Higgins Mill boot")\n\n'
+        "RULES:\n"
+        "1. Do NOT classify generic product categories as product_line or product_model. "
+        '"KitchenAid mixer" → brand="KitchenAid", product_line=null, specificity="BRAND_ONLY". '
+        "Only use PRODUCT_LINE or EXACT_MODEL for proper nouns / marketing names.\n"
+        "2. If the verbatim quote is not a real commercial brand at all, return brand=null and "
+        'specificity_level="BRAND_ONLY".\n'
+        "3. You MUST return exactly one classification object per verbatim quote provided."
+    )
+
+    config = types.GenerateContentConfig(
+        system_instruction=system_instruction,
+        temperature=0.0,
+        response_mime_type="application/json",
+        response_schema=list[LlmResolvedEntity],
+        thinking_config=types.ThinkingConfig(thinking_budget=1024),
+    )
+
+    accumulated_prompt_tokens = 0
+    accumulated_completion_tokens = 0
+    accumulated_cost_usd = 0.0
+
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=2, max=10),
+        retry=retry_if_not_exception_type(ValueError),
+        before_sleep=before_sleep_log(logger, logging.WARNING),
+        reraise=True,
+    )
+    def _attempt_call() -> str:
+        nonlocal accumulated_prompt_tokens, accumulated_completion_tokens, accumulated_cost_usd
+
+        logger.info(f"[LLM] ▶ Calling {model.value} for entity resolution on node {node_id} ({len(prompt_text)} chars)")
+
+        response = client.models.generate_content(
+            model=model.value,
+            contents=prompt_text,
+            config=config,
+        )
+
+        prompt_tokens = 0
+        completion_tokens = 0
+        if response.usage_metadata:
+            prompt_tokens = response.usage_metadata.prompt_token_count or 0
+            completion_tokens = response.usage_metadata.candidates_token_count or 0
+
+        cost_usd = calculate_cost(model, prompt_tokens, completion_tokens)
+
+        accumulated_prompt_tokens += prompt_tokens
+        accumulated_completion_tokens += completion_tokens
+        accumulated_cost_usd += cost_usd
+
+        logger.info(
+            f"[LLM] ◀ Response for {node_id}: {prompt_tokens}p/{completion_tokens}c tokens, ${cost_usd:.6f}"
+        )
+
+        out_text = response.text
+        if not out_text:
+            raise ValueError("Empty response text from LLM")
+
+        return out_text
+
+    try:
+        raw_json = _attempt_call()
+        resolved_items = TypeAdapter(list[LlmResolvedEntity]).validate_json(raw_json)
+
+        logger.info(f"[LLM] ✅ {node_id}: resolved {len(resolved_items)} entities")
+
+    except ValidationError as e:
+        safe_err = str(e).splitlines()[0] if str(e) else "Invalid JSON EOF"
+        preview_len = 250
+        preview = (
+            f"{raw_json[:preview_len]}...\n\n...[SNIP ({len(raw_json)} chars total)]...\n\n...{raw_json[-preview_len:]}"
+            if len(raw_json) > preview_len * 2
+            else raw_json
+        )
+        logger.warning(
+            f"[TRUNCATED] Node {node_id} exceeded JSON limits. Returning []. Err: {safe_err}\n"
+            f"--- JSON PREVIEW ---\n{preview}\n--------------------"
+        )
+        raw_json = "[]"
+        resolved_items = []
+    except Exception as e:
+        logger.error(f"[LLM] ❌ {node_id}: failed after retries: {e}")
+        raw_json = "[]"
+        resolved_items = []
+
+    return EntityResolutionResult(
+        node_id=node_id,
+        submission_id=submission_id,
+        items=resolved_items,
+        raw_json=raw_json,
+        cost_usd=accumulated_cost_usd,
+        prompt_tokens=accumulated_prompt_tokens,
+        completion_tokens=accumulated_completion_tokens,
+    )
+

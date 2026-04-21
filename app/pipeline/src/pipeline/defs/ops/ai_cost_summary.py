@@ -20,12 +20,14 @@ from pipeline.utils.paths import get_read_path, get_write_path
     deps=[
         AssetDep("silver_reddit_node_summarizations"),
         AssetDep("silver_reddit_entity_discovery"),
+        AssetDep("silver_reddit_entity_resolution"),
     ],
 )
 def ops_ai_cost_summary(context: AssetExecutionContext) -> MaterializeResult:
     target_parquet = get_write_path("ops/ai_cost_summary/summary.parquet")
     source_summarizations = get_read_path("silver/reddit_node_summarizations/*/*/*.parquet")
     source_discovery = get_read_path("silver/reddit_entity_discovery/*/*/*.parquet")
+    source_resolution = get_read_path("silver/reddit_entity_resolution/*/*/*.parquet")
 
     with get_duckdb_connection() as con:
         # Check if upstream parquets exist
@@ -39,7 +41,12 @@ def ops_ai_cost_summary(context: AssetExecutionContext) -> MaterializeResult:
         except Exception:
             has_disc_data = False
 
-        if not has_sum_data and not has_disc_data:
+        try:
+            has_res_data = not con.execute(f"SELECT 1 FROM read_parquet('{source_resolution}', union_by_name=True) LIMIT 1").fetchdf().empty
+        except Exception:
+            has_res_data = False
+
+        if not has_sum_data and not has_disc_data and not has_res_data:
             context.log.info("No upstream AI inference data found. Outputting empty cost table.")
             empty_df = pd.DataFrame(columns=list(OpsAiCostSummary.model_fields.keys()))
             con.execute(f"COPY (SELECT * FROM empty_df) TO '{target_parquet}' (FORMAT PARQUET)")
@@ -71,6 +78,17 @@ def ops_ai_cost_summary(context: AssetExecutionContext) -> MaterializeResult:
                     COALESCE(SUM(completion_tokens), 0) AS total_completion_tokens,
                     COUNT(bundle_id) AS total_nodes_processed
                 FROM read_parquet('{source_discovery}', union_by_name=True)
+            """)
+
+        if has_res_data:
+            queries.append(f"""
+                SELECT 
+                    'entity_resolution' AS service_name,
+                    COALESCE(SUM(cost_usd), 0.0) AS total_cost_usd,
+                    COALESCE(SUM(prompt_tokens), 0) AS total_prompt_tokens,
+                    COALESCE(SUM(completion_tokens), 0) AS total_completion_tokens,
+                    COUNT(node_id) AS total_nodes_processed
+                FROM read_parquet('{source_resolution}', union_by_name=True)
             """)
 
         union_query = " UNION ALL ".join(queries)
