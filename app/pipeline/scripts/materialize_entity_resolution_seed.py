@@ -48,10 +48,14 @@ def main():
         return
 
     # Group by node_id
-    grouped = discovery_df.groupby("node_id").agg(
-        submission_id=("submission_id", "first"),
-        verbatim_quotes=("verbatim_quote", list),
-    ).reset_index()
+    grouped = (
+        discovery_df.groupby("node_id")
+        .agg(
+            submission_id=("submission_id", "first"),
+            verbatim_quotes=("verbatim_quote", list),
+        )
+        .reset_index()
+    )
 
     unique_node_ids = grouped["node_id"].tolist()
     print(f"Sampled {len(unique_node_ids)} unique nodes with {len(discovery_df)} total quotes.")

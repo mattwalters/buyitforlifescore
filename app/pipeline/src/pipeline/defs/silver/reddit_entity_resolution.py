@@ -154,9 +154,7 @@ def silver_reddit_entity_resolution(context: AssetExecutionContext) -> Materiali
                 result = future.result()
                 results.append(result)
                 total_cost += result.cost_usd
-                context.log.info(
-                    f"[{i}/{total_nodes}] ✅ {nid} — {len(result.items)} entities, ${result.cost_usd:.6f}"
-                )
+                context.log.info(f"[{i}/{total_nodes}] ✅ {nid} — {len(result.items)} entities, ${result.cost_usd:.6f}")
             except Exception as e:
                 context.log.error(f"[{i}/{total_nodes}] ❌ {nid} — {e}")
 
@@ -174,9 +172,7 @@ def silver_reddit_entity_resolution(context: AssetExecutionContext) -> Materiali
     with get_duckdb_connection() as con:
         con.execute(f"COPY (SELECT * FROM out_df) TO '{target_parquet}' (FORMAT PARQUET)")
 
-        preview_df = con.execute(
-            f"SELECT node_id, submission_id, cost_usd FROM '{target_parquet}' LIMIT 10"
-        ).fetchdf()
+        preview_df = con.execute(f"SELECT node_id, submission_id, cost_usd FROM '{target_parquet}' LIMIT 10").fetchdf()
         preview_md = preview_df.to_markdown()
 
     return MaterializeResult(

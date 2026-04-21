@@ -86,9 +86,7 @@ def main():
         )
 
         judge_prompt = (
-            f"### ORIGINAL NODE TEXT\n{result.raw_json}\n\n"
-            f"### CLASSIFICATION JSON\n{result.raw_json}\n\n"
-            f"Evaluate."
+            f"### ORIGINAL NODE TEXT\n{result.raw_json}\n\n### CLASSIFICATION JSON\n{result.raw_json}\n\nEvaluate."
         )
 
         # We need to reconstruct the prompt context — use raw_json which contains the LLM output

@@ -51,7 +51,9 @@ def calculate_cost(model: AiModel, prompt_tokens: int, completion_tokens: int) -
     return (prompt_tokens * pricing["input"]) + (completion_tokens * pricing["output"])
 
 
-def invoke_summarize_node(client: genai.Client, text: str, model: AiModel = AiModel.GEMINI_2_5_FLASH_LITE) -> dict[str, Any]:
+def invoke_summarize_node(
+    client: genai.Client, text: str, model: AiModel = AiModel.GEMINI_2_5_FLASH_LITE
+) -> dict[str, Any]:
     """Summarizes text into under 500 chars context."""
     system_instruction = (
         "You are an expert summarizer for internet discussion threads. Summarize the provided text to under 500 "
@@ -120,7 +122,9 @@ def invoke_summarize_node(client: genai.Client, text: str, model: AiModel = AiMo
     }
 
 
-def invoke_entity_discovery(client: genai.Client, payload: SilverRedditLlmPayload, model: AiModel = AiModel.GEMINI_2_5_FLASH_LITE) -> DiscoveryResult:
+def invoke_entity_discovery(
+    client: genai.Client, payload: SilverRedditLlmPayload, model: AiModel = AiModel.GEMINI_2_5_FLASH_LITE
+) -> DiscoveryResult:
     """Invokes LLM entity discovery using mapped indexes and XML scoping."""
     index_to_node_id = {}
     xml_blocks = []
@@ -187,7 +191,9 @@ def invoke_entity_discovery(client: genai.Client, payload: SilverRedditLlmPayloa
         accumulated_completion_tokens += completion_tokens
         accumulated_cost_usd += cost_usd
 
-        logger.info(f"[LLM] ◀ Response for {payload.bundle_id}: {prompt_tokens}p/{completion_tokens}c tokens, ${cost_usd:.6f}")
+        logger.info(
+            f"[LLM] ◀ Response for {payload.bundle_id}: {prompt_tokens}p/{completion_tokens}c tokens, ${cost_usd:.6f}"
+        )
 
         out_text = response.text
         if not out_text:
@@ -198,7 +204,7 @@ def invoke_entity_discovery(client: genai.Client, payload: SilverRedditLlmPayloa
     try:
         raw_json = _attempt_call()
         llm_entities = TypeAdapter(list[LlmDiscoveredEntity]).validate_json(raw_json)
-        
+
         # Re-hydrate the integers back into system node IDs
         hydrated_items = []
         for entity in llm_entities:
@@ -206,10 +212,10 @@ def invoke_entity_discovery(client: genai.Client, payload: SilverRedditLlmPayloa
             for idx in entity.block_indexes:
                 if idx in index_to_node_id:
                     mapped_node_ids.append(index_to_node_id[idx])
-            
+
             # Deduplicate just in case
             mapped_node_ids = list(set(mapped_node_ids))
-            
+
             if mapped_node_ids:
                 hydrated_items.append(
                     DiscoveredEntity(
@@ -223,8 +229,14 @@ def invoke_entity_discovery(client: genai.Client, payload: SilverRedditLlmPayloa
     except ValidationError as e:
         safe_err = str(e).splitlines()[0] if str(e) else "Invalid JSON EOF"
         preview_len = 250
-        preview = f"{raw_json[:preview_len]}...\n\n...[SNIP ({len(raw_json)} chars total)]...\n\n...{raw_json[-preview_len:]}" if len(raw_json) > preview_len * 2 else raw_json
-        logger.warning(f"[TRUNCATED] Payload {payload.bundle_id} exceeded JSON limits. Returning []. Err: {safe_err}\n--- JSON PREVIEW ---\n{preview}\n--------------------")
+        preview = (
+            f"{raw_json[:preview_len]}...\n\n...[SNIP ({len(raw_json)} chars total)]...\n\n...{raw_json[-preview_len:]}"
+            if len(raw_json) > preview_len * 2
+            else raw_json
+        )
+        logger.warning(
+            f"[TRUNCATED] Payload {payload.bundle_id} exceeded JSON limits. Returning []. Err: {safe_err}\n--- JSON PREVIEW ---\n{preview}\n--------------------"
+        )
         raw_json = "[]"
         hydrated_items = []
     except Exception as e:
@@ -271,8 +283,10 @@ def invoke_entity_resolution(
         "verbatim quotes inside <verbatim_quotes> tags that were previously identified as potential commercial "
         "product or brand references.\n\n"
         "For EACH verbatim quote, classify it into:\n"
-        "- brand: The brand or manufacturer name. Return null if this is NOT a real commercial brand "
-        '(e.g., generic materials like "cast iron", "wood", "copper", or generic objects like "adapter", "propane tank").\n'
+        "- brand: The brand or manufacturer name. "
+        "Return null if this is NOT a real commercial brand "
+        '(e.g., generic materials like "cast iron", "wood", "copper", '
+        'or generic objects like "adapter", "propane tank").\n'
         '- product_line: The marketed product family or series name (e.g., "Baggies", "Artisan", "D5"). '
         "Return null if only a brand is mentioned with no specific product family.\n"
         '- product_model: A specific identifiable unit or model (e.g., "Iron Ranger 8111", "iPad 3 64GB"). '
@@ -335,9 +349,7 @@ def invoke_entity_resolution(
         accumulated_completion_tokens += completion_tokens
         accumulated_cost_usd += cost_usd
 
-        logger.info(
-            f"[LLM] ◀ Response for {node_id}: {prompt_tokens}p/{completion_tokens}c tokens, ${cost_usd:.6f}"
-        )
+        logger.info(f"[LLM] ◀ Response for {node_id}: {prompt_tokens}p/{completion_tokens}c tokens, ${cost_usd:.6f}")
 
         out_text = response.text
         if not out_text:
@@ -379,4 +391,3 @@ def invoke_entity_resolution(
         prompt_tokens=accumulated_prompt_tokens,
         completion_tokens=accumulated_completion_tokens,
     )
-
