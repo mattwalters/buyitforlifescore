@@ -99,14 +99,14 @@ def silver_reddit_entity_discovery(context: AssetExecutionContext) -> Materializ
         con.execute(f"COPY (SELECT * FROM out_df) TO '{target_parquet}' (FORMAT PARQUET)")
 
         preview_df = con.execute(
-            f"SELECT bundle_id, submission_id, length(items) as entity_count, cost_usd FROM '{target_parquet}' LIMIT 10"
+            f"SELECT bundle_id, submission_id, cost_usd FROM '{target_parquet}' LIMIT 10"
         ).fetchdf()
         preview_md = preview_df.to_markdown()
 
     return MaterializeResult(
         metadata={
             "target_file": target_parquet,
-            "cost_usd": MetadataValue.float(total_cost),
+            "cost_usd": MetadataValue.float(float(total_cost)),
             "data_preview": MetadataValue.md(preview_md),
         }
     )

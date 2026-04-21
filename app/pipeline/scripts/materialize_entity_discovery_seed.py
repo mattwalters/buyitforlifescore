@@ -1,15 +1,15 @@
 import json
 import os
 
-import duckdb
 from pydantic import TypeAdapter
 
 from pipeline.schemas.reddit_llm_payloads import SilverRedditLlmPayload
+from pipeline.utils.db import get_duckdb_connection
 from pipeline.utils.paths import get_read_path
 
 
 def main():
-    con = duckdb.connect()
+    con = get_duckdb_connection()
 
     # Attempt to load a sample of existing payloads
     source_payloads = get_read_path("silver/reddit_llm_payloads/*/*/*.parquet")
