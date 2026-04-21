@@ -5,7 +5,7 @@ from typing import Any
 
 from google import genai
 from google.genai import types
-from pydantic import TypeAdapter
+from pydantic import TypeAdapter, ValidationError
 from tenacity import before_sleep_log, retry, retry_if_not_exception_type, stop_after_attempt, wait_exponential
 
 from pipeline.schemas.reddit_entity_discovery import DiscoveredEntity, DiscoveryResult, LlmDiscoveredEntity
@@ -140,7 +140,8 @@ def invoke_entity_discovery(client: genai.Client, payload: SilverRedditLlmPayloa
         "- Principle 3: Irrelevant Context. Extract regardless of sentiment (hates it, bought it, asking about it).\n"
         "- Principle 4: STRICT XML SCOPING. You must ONLY extract entities mentioned inside <analysis_block> tags! Submissions/comments nested within <context_block> tags are strictly OFF LIMITS.\n"
         "- Exclusion: Do NOT extract generic physical objects, raw materials, accessories, or categories. For example, explicitly skip 'cast iron', 'cedar shoe horns', 'giant wok', 'copper', 'adapter', 'propane tank', 'sedan'.\n"
-        "- Aggregation: Output exactly ONE extraction per unique brand/product. List all block_index integers where this exact product was discussed."
+        "- Aggregation: Output exactly ONE extraction per unique brand/product. List all block_index integers where this exact product was discussed.\n"
+        "- TRUNCATION LIMIT: Do NOT extract more than 100 entities total. If there are massive lists of brands, only extract the 100 most prominent ones and ignore the rest to prevent JSON token overflow."
     )
 
     config = types.GenerateContentConfig(
@@ -212,6 +213,13 @@ def invoke_entity_discovery(client: genai.Client, payload: SilverRedditLlmPayloa
                     )
                 )
 
+    except ValidationError as e:
+        safe_err = str(e).splitlines()[0] if str(e) else "Invalid JSON EOF"
+        preview_len = 250
+        preview = f"{raw_json[:preview_len]}...\n\n...[SNIP ({len(raw_json)} chars total)]...\n\n...{raw_json[-preview_len:]}" if len(raw_json) > preview_len * 2 else raw_json
+        logger.warning(f"[TRUNCATED] Payload {payload.bundle_id} exceeded JSON limits. Returning []. Err: {safe_err}\n--- JSON PREVIEW ---\n{preview}\n--------------------")
+        raw_json = "[]"
+        hydrated_items = []
     except Exception as e:
         logger.error(f"Failed to extract entities after retries: {e}")
         raw_json = "[]"
