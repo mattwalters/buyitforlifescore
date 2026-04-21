@@ -154,6 +154,7 @@ def invoke_entity_discovery(
         temperature=0.0,
         response_mime_type="application/json",
         response_schema=list[LlmDiscoveredEntity],
+        max_output_tokens=9216,  # 8192 content + 1024 thinking budget ceiling
         thinking_config=types.ThinkingConfig(thinking_budget=512) if model == AiModel.GEMINI_2_5_FLASH_LITE else None,
     )
 
@@ -385,6 +386,7 @@ def invoke_entity_resolution(
     return EntityResolutionResult(
         node_id=node_id,
         submission_id=submission_id,
+        node_text=node_text,
         items=resolved_items,
         raw_json=raw_json,
         cost_usd=accumulated_cost_usd,

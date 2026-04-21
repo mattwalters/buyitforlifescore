@@ -86,11 +86,8 @@ def main():
         )
 
         judge_prompt = (
-            f"### ORIGINAL NODE TEXT\n{result.raw_json}\n\n### CLASSIFICATION JSON\n{result.raw_json}\n\nEvaluate."
+            f"### ORIGINAL NODE TEXT\n{result.node_text}\n\n### CLASSIFICATION JSON\n{result.raw_json}\n\nEvaluate."
         )
-
-        # We need to reconstruct the prompt context — use raw_json which contains the LLM output
-        # For a complete judge, we'd ideally pass the original node text too, but we work with what's stored
 
         config = types.GenerateContentConfig(
             system_instruction=system_instruction,
