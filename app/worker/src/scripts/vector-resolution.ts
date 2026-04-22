@@ -4,13 +4,13 @@ import { env } from "../env.js";
 const ai = new GoogleGenAI({ apiKey: env.GEMINI_API_KEY });
 const SIMILARITY_THRESHOLD = 0.85;
 
-async function embedText(text: string): Promise<{ vector: number[], estimatedTokens: number }> {
+async function embedText(text: string): Promise<{ vector: number[]; estimatedTokens: number }> {
   const response = await ai.models.embedContent({
     model: "gemini-embedding-2-preview",
     contents: text,
     config: {
       outputDimensionality: 256,
-    }
+    },
   });
 
   if (!response.embeddings || response.embeddings.length === 0 || !response.embeddings[0].values) {
@@ -20,9 +20,9 @@ async function embedText(text: string): Promise<{ vector: number[], estimatedTok
   // Gemini SDK might not expose usage on embedContent, so we'll estimate: ~4 chars per token
   const estimatedTokens = Math.ceil(text.length / 4);
 
-  return { 
+  return {
     vector: response.embeddings[0].values,
-    estimatedTokens
+    estimatedTokens,
   };
 }
 
@@ -32,7 +32,7 @@ async function runResolution() {
   // 1. Fetch Silver records needing an embedding or resolution
   const unmapped = await prisma.silverProductMention.findMany({
     where: { goldProductId: null },
-    take: 1000 // Batch size
+    take: 1000, // Batch size
   });
 
   console.log(`Found ${unmapped.length} unmapped Silver mentions.`);
@@ -41,13 +41,15 @@ async function runResolution() {
     try {
       // 2. Construct canonical identity string
       const identityString = `Brand: ${mention.brand}. Product: ${mention.productName}.`;
-      
+
       console.log(`\nProcessing [${mention.id}]: ${identityString}`);
-      
+
       // Let's check via raw sql if the embedding exists first (since Prisma doesn't return `Unsupported` fields in standard `.findMany`)
-      const rawQueryResult = await prisma.$queryRaw<{ embedding: string | null }[]>`SELECT embedding::text FROM "SilverProductMention" WHERE id = ${mention.id}`;
+      const rawQueryResult = await prisma.$queryRaw<
+        { embedding: string | null }[]
+      >`SELECT embedding::text FROM "SilverProductMention" WHERE id = ${mention.id}`;
       const existingEmbeddingStr = rawQueryResult[0]?.embedding;
-      
+
       let vector: number[] = [];
 
       if (!existingEmbeddingStr) {
@@ -59,7 +61,7 @@ async function runResolution() {
         // Log spend
         const { calculateCost, AiModel } = await import("../pricing.js");
         const modelEnum = AiModel.GEMINI_EMBEDDING_2_PREVIEW;
-        
+
         // Calculate cost manually based on token estimate
         // The calculateCost function takes a usage object `{ promptTokenCount: X }`.
         const usage = { promptTokenCount: result.estimatedTokens };
@@ -72,7 +74,7 @@ async function runResolution() {
             model: "gemini-embedding-2-preview",
             promptTokens: result.estimatedTokens,
             costInUsd: cost,
-          }
+          },
         });
 
         // Update the mention with the new embedding
@@ -90,7 +92,7 @@ async function runResolution() {
       // E.g. Similarity > 0.85 means Distance < 0.15
       const maxDistance = 1.0 - SIMILARITY_THRESHOLD;
 
-      const candidates = await prisma.$queryRaw<{ id: string, name: string, dist: number }[]>`
+      const candidates = await prisma.$queryRaw<{ id: string; name: string; dist: number }[]>`
         SELECT id, "canonicalName" as name, embedding <=> ${JSON.stringify(vector)}::vector AS dist
         FROM "GoldProduct"
         WHERE embedding <=> ${JSON.stringify(vector)}::vector <= ${maxDistance}
@@ -100,58 +102,61 @@ async function runResolution() {
 
       if (candidates.length > 0) {
         const match = candidates[0];
-        console.log(`  ✅ MATCHED: GoldProduct [${match.id}] '${match.name}' (Distance: ${match.dist.toFixed(4)})`);
-        
+        console.log(
+          `  ✅ MATCHED: GoldProduct [${match.id}] '${match.name}' (Distance: ${match.dist.toFixed(4)})`,
+        );
+
         // Link it
         await prisma.silverProductMention.update({
           where: { id: mention.id },
-          data: { goldProductId: match.id }
+          data: { goldProductId: match.id },
         });
 
         // Optionally, update mention counts
         await prisma.goldProduct.update({
           where: { id: match.id },
           data: {
-            mentionCount: { increment: 1 }
-          }
+            mentionCount: { increment: 1 },
+          },
         });
-
       } else {
         console.log(`  🌟 NEW CANONICAL ENTRY: Creating GoldProduct...`);
-        
+
         // Ensure canonical names are clean
         const newCanonicalName = `${mention.brand} ${mention.productName}`;
-        
+
         // Insert GoldProduct with embedding via Raw SQL to support pgvector typing properly if Prisma doesn't map it.
-        const pgId = (await prisma.goldProduct.create({
-          data: {
-            canonicalName: newCanonicalName,
-            brand: mention.brand,
-            goldBrand: {
-              connectOrCreate: {
-                where: { canonicalName: mention.brand },
-                create: { canonicalName: mention.brand }
-              }
+        const pgId = (
+          await prisma.goldProduct.create({
+            data: {
+              canonicalName: newCanonicalName,
+              brand: mention.brand,
+              goldBrand: {
+                connectOrCreate: {
+                  where: { canonicalName: mention.brand },
+                  create: { canonicalName: mention.brand },
+                },
+              },
+              mentionCount: 1,
+              avgSentiment:
+                mention.sentiment === "POSITIVE" ? 1 : mention.sentiment === "NEGATIVE" ? -1 : 0,
             },
-            mentionCount: 1,
-            avgSentiment: mention.sentiment === 'POSITIVE' ? 1 : mention.sentiment === 'NEGATIVE' ? -1 : 0
-          }
-        })).id;
-        
+          })
+        ).id;
+
         // Update its vector
         await prisma.$executeRaw`
           UPDATE "GoldProduct"
           SET embedding = ${JSON.stringify(vector)}::vector
           WHERE id = ${pgId}
         `;
-        
+
         // Link Silver
         await prisma.silverProductMention.update({
           where: { id: mention.id },
-          data: { goldProductId: pgId }
+          data: { goldProductId: pgId },
         });
       }
-
     } catch (e) {
       console.error(`Error processing ${mention.id}:`, e);
     }
@@ -161,7 +166,7 @@ async function runResolution() {
 }
 
 runResolution()
-  .catch(e => {
+  .catch((e) => {
     console.error(e);
     process.exit(1);
   })

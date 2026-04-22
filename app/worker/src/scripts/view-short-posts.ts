@@ -5,7 +5,13 @@ async function viewShortPosts() {
 
   // Fetch the top 10 scoring posts that are under 100 characters in total length
   const shortSubmissions = await prisma.$queryRaw<
-    { id: string; title: string | null; selftext: string | null; score: number; total_length: bigint }[]
+    {
+      id: string;
+      title: string | null;
+      selftext: string | null;
+      score: number;
+      total_length: bigint;
+    }[]
   >`
     SELECT 
       s.id,
@@ -38,14 +44,14 @@ async function viewShortPosts() {
     // Fetch comments to display alongside
     const comments = await prisma.bronzeRedditComment.findMany({
       where: { submissionId: sub.id },
-      select: { body: true, score: true }
+      select: { body: true, score: true },
     });
 
     console.log(`===============================================`);
     console.log(`Score: ${sub.score} | Total Chars: ${sub.total_length}`);
     console.log(`Title: ${sub.title}`);
-    console.log(`Body:  ${sub.selftext ? sub.selftext : '(empty)'}`);
-    
+    console.log(`Body:  ${sub.selftext ? sub.selftext : "(empty)"}`);
+
     if (comments.length > 0) {
       console.log(`\n--- Comments (${comments.length}) ---`);
       for (const c of comments) {
@@ -59,7 +65,7 @@ async function viewShortPosts() {
 }
 
 viewShortPosts()
-  .catch(e => {
+  .catch((e) => {
     console.error(e);
     process.exit(1);
   })

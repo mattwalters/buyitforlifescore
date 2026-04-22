@@ -56,19 +56,35 @@ def silver_reddit_entity_discovery(context: AssetExecutionContext) -> Materializ
             }
         )
 
+    empty_columns = list(DiscoveryResult.model_fields.keys())
+
     with get_duckdb_connection() as con:
         try:
             df = con.execute(f"SELECT * FROM '{source_payloads}'").fetchdf()
-        except Exception as e:
-            raise RuntimeError(
-                f"Upstream asset missing: No LLM payloads found at '{source_payloads}' "
-                f"for {subreddit_key} on {date_key}. Materialize silver_reddit_llm_payloads first."
-            ) from e
+        except Exception:
+            context.log.info(
+                f"No LLM payloads found for {subreddit_key} on {date_key}. Writing empty parquet."
+            )
+            empty_df = pd.DataFrame(columns=empty_columns)  # noqa: F841
+            con.execute(f"COPY (SELECT * FROM empty_df) TO '{target_parquet}' (FORMAT PARQUET)")
+            return MaterializeResult(
+                metadata={
+                    "target_file": target_parquet,
+                    "data_preview": MetadataValue.md("No data generated (missing upstream)."),
+                }
+            )
 
         if df.empty:
-            raise RuntimeError(
-                f"Upstream asset empty: LLM payloads parquet exists but contains no rows "
-                f"for {subreddit_key} on {date_key}. Check silver_reddit_llm_payloads."
+            context.log.info(
+                f"Empty LLM payloads for {subreddit_key} on {date_key}. Writing empty parquet."
+            )
+            empty_df = pd.DataFrame(columns=empty_columns)  # noqa: F841
+            con.execute(f"COPY (SELECT * FROM empty_df) TO '{target_parquet}' (FORMAT PARQUET)")
+            return MaterializeResult(
+                metadata={
+                    "target_file": target_parquet,
+                    "data_preview": MetadataValue.md("No data generated (empty upstream)."),
+                }
             )
 
     records = df.to_dict("records")

@@ -36,7 +36,6 @@ def main():
     )
     args = parser.parse_args()
 
-    con = get_duckdb_connection()
     source_results = get_read_path("silver/reddit_entity_resolution/*/*/*.parquet")
 
     query = f"""
@@ -45,7 +44,8 @@ def main():
     """
 
     try:
-        df = con.execute(query).fetchdf()
+        with get_duckdb_connection() as con:
+            df = con.execute(query).fetchdf()
     except Exception as e:
         print(f"Failed to load sample from prod resolution results: {e}")
         return
@@ -75,7 +75,7 @@ def main():
             "You have three grading rules to enforce:\n"
             "1. Brand Plausibility: Are the extracted brands real commercial entities? If the pipeline classified a "
             "generic material (e.g., 'cast iron', 'wood') or a non-commercial term as a brand, grade it FAIL. "
-            "Conversely, if it correctly returned brand=null for non-commercial terms, that is correct.\n"
+            "Non-commercial terms should have been omitted entirely from the output.\n"
             "2. Specificity Accuracy: Does the specificity_level match what's actually described in the text? "
             'If the user only said "I love my KitchenAid" with no product name, it should be BRAND_ONLY, not '
             "PRODUCT_LINE. If a specific marketing name is used (e.g., 'Artisan'), PRODUCT_LINE is correct.\n"

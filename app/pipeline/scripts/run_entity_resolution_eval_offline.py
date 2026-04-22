@@ -30,8 +30,6 @@ def main():
     total_brand_checks = 0
     total_specificity_matches = 0
     total_specificity_checks = 0
-    total_null_brand_correct = 0
-    total_null_brand_checks = 0
     total_cost_usd = 0.0
 
     # Filter to labeled cases only
@@ -104,24 +102,12 @@ def main():
             # Check brand
             exp_brand = exp.get("brand")
             llm_brand = matched.get("brand")
-            if exp_brand is None and llm_brand is None:
-                total_null_brand_correct += 1
-                total_null_brand_checks += 1
-            elif exp_brand is None and llm_brand is not None:
-                print(f"  [FAIL] Expected brand=null for '{exp_quote}', got '{llm_brand}'")
-                total_null_brand_checks += 1
-                case_passed = False
-            elif exp_brand is not None and llm_brand is None:
-                print(f"  [FAIL] Expected brand='{exp_brand}' for '{exp_quote}', got null")
-                total_brand_checks += 1
-                case_passed = False
+            total_brand_checks += 1
+            if exp_brand and llm_brand and exp_brand.lower().strip() == llm_brand.lower().strip():
+                total_brand_matches += 1
             else:
-                total_brand_checks += 1
-                if exp_brand.lower().strip() == llm_brand.lower().strip():
-                    total_brand_matches += 1
-                else:
-                    print(f"  [FAIL] Brand mismatch for '{exp_quote}': expected '{exp_brand}', got '{llm_brand}'")
-                    case_passed = False
+                print(f"  [FAIL] Brand mismatch for '{exp_quote}': expected '{exp_brand}', got '{llm_brand}'")
+                case_passed = False
 
             # Check specificity
             exp_spec = exp.get("specificity_level")
@@ -145,13 +131,11 @@ def main():
 
     brand_rate = total_brand_matches / total_brand_checks * 100 if total_brand_checks > 0 else 0.0
     spec_rate = total_specificity_matches / total_specificity_checks * 100 if total_specificity_checks > 0 else 0.0
-    null_rate = total_null_brand_correct / total_null_brand_checks * 100 if total_null_brand_checks > 0 else 0.0
 
     print("\n--- OFFLINE EVAL RESULTS ---")
     print(f"Total Graded Cases:       {total_tests}")
     print(f"Brand Match Rate:         {brand_rate:.1f}% ({total_brand_matches}/{total_brand_checks})")
     print(f"Specificity Match Rate:   {spec_rate:.1f}% ({total_specificity_matches}/{total_specificity_checks})")
-    print(f"Null-Brand Accuracy:      {null_rate:.1f}% ({total_null_brand_correct}/{total_null_brand_checks})")
     print("----------------------------")
     print(f"Total LLM Cost:           ${total_cost_usd:.4f}")
 

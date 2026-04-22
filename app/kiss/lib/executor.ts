@@ -22,14 +22,14 @@ export interface AssetSummaryPayload {
 
 export async function executeMaterialization(
   target: MaterializationTarget,
-  jobId?: string
+  jobId?: string,
 ): Promise<AssetSummaryPayload> {
   const asset = AssetRegistry[target.assetId];
   if (!asset) {
     throw new Error(`Asset ${target.assetId} not found in registry.`);
   }
 
-  // 1. Resolve R2 Path 
+  // 1. Resolve R2 Path
   // e.g. "s3://[bucket]/bronze/reddit_comments/2024-04.parquet"
   let dataPath = "";
   if (asset.storagePathTemplate) {
@@ -56,11 +56,17 @@ export async function executeMaterialization(
     // ----------------------------------------------------
     // Step A: DUCKDB SUMMARIZE
     // ----------------------------------------------------
-    const resCount = await queryDuckDB(db, `SELECT COUNT(*) as count FROM read_parquet('${dataPath}')`);
+    const resCount = await queryDuckDB(
+      db,
+      `SELECT COUNT(*) as count FROM read_parquet('${dataPath}')`,
+    );
     const totalRows: number = Number(resCount[0]?.count) || 0;
 
-    const summaryData = await queryDuckDB(db, `SUMMARIZE SELECT * FROM read_parquet('${dataPath}')`);
-    
+    const summaryData = await queryDuckDB(
+      db,
+      `SUMMARIZE SELECT * FROM read_parquet('${dataPath}')`,
+    );
+
     // ----------------------------------------------------
     // Step B: AUTOMATED QA ENGINE
     // ----------------------------------------------------
@@ -71,19 +77,19 @@ export async function executeMaterialization(
         try {
           const sql = rule.sqlTemplate.replace(/\{\{target\}\}/g, dataPath);
           const qaQuery = await queryDuckDB(db, sql);
-          
+
           const passed = Boolean(qaQuery[0]?.passed); // assumes 'AS passed' output
           qaResults.push({
             ruleName: rule.name,
             severity: rule.severity,
-            passed
+            passed,
           });
         } catch (e: any) {
           console.error(`[EXECUTOR] QA Rule Failed: ${rule.name}`, e.message);
           qaResults.push({
             ruleName: rule.name,
             severity: rule.severity,
-            passed: false 
+            passed: false,
           });
         }
       }
@@ -92,7 +98,7 @@ export async function executeMaterialization(
     const payload: AssetSummaryPayload = {
       totalRows,
       columns: summaryData,
-      qaResults
+      qaResults,
     };
 
     // ----------------------------------------------------
@@ -107,7 +113,7 @@ export async function executeMaterialization(
         data: {
           status: finalStatus,
           completedAt: new Date(),
-        }
+        },
       });
 
       if (finalStatus === "COMPLETED") {
@@ -116,14 +122,13 @@ export async function executeMaterialization(
             jobId,
             assetId: target.assetId,
             partitionKey: target.partitionKey,
-            summaryPayload: payload as any
-          }
+            summaryPayload: payload as any,
+          },
         });
       }
     }
 
     return payload;
-
   } catch (error: any) {
     if (jobId) {
       await prisma.kissJob.update({
@@ -131,8 +136,8 @@ export async function executeMaterialization(
         data: {
           status: "FAILED",
           completedAt: new Date(),
-          errorTrace: error.message
-        }
+          errorTrace: error.message,
+        },
       });
     }
     throw error;

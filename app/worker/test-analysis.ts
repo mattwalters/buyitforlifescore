@@ -10,7 +10,7 @@ async function main() {
   };
   console.log("Connecting to Redis...");
   const _q = new Queue("analysis", { connection });
-  
+
   // Create a worker that only processes ONE job for test purposes
   const worker = new Worker(
     "analysis",
@@ -20,7 +20,7 @@ async function main() {
       console.log(`Job ${job.id} completed successfully!`);
       worker.close();
     },
-    { connection, concurrency: 1 }
+    { connection, concurrency: 1 },
   );
 
   worker.on("failed", (job, err) => {

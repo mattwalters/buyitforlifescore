@@ -4,11 +4,11 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class LlmResolvedEntity(BaseModel):
-    """The constrained JSON schema the LLM must output — one per verbatim quote."""
+    """The constrained JSON schema the LLM must output — one per commercial verbatim quote."""
 
     verbatim_quote: str = Field(description="Echo back the exact verbatim quote this classification is for.")
-    brand: str | None = Field(
-        default=None, description="The brand or manufacturer name, or null if not a real commercial brand."
+    brand: str = Field(
+        description="The brand or manufacturer name. Only real commercial brands should be returned."
     )
     product_line: str | None = Field(
         default=None, description="The marketed product family or series name (e.g., 'Baggies', 'Artisan', 'D5')."
@@ -23,15 +23,15 @@ class LlmResolvedEntity(BaseModel):
 
 
 class EntityResolutionResult(BaseModel):
-    """One row per node_id — mirrors DiscoveryResult's nested pattern."""
+    """One row per node_id — stores the raw LLM output and cost metadata."""
 
     model_config = ConfigDict(extra="ignore")
 
     node_id: str = Field(description="The reddit node (submission or comment) ID that was analyzed.")
     submission_id: str = Field(description="The parent submission ID.")
     node_text: str = Field(description="The original Reddit post or comment text that was classified.")
-    items: list[LlmResolvedEntity] = Field(description="Nested list of resolved entities for this node.")
     raw_json: str = Field(description="The raw JSON string returned by the LLM.")
+    resolved_count: int = Field(description="Number of entities resolved from this node.")
     cost_usd: float = Field(description="Total cost of the LLM call for this node.")
     prompt_tokens: int = Field(description="Prompt tokens consumed.")
     completion_tokens: int = Field(description="Completion tokens generated.")

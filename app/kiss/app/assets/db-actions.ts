@@ -8,7 +8,7 @@ export async function getAssetHistory(assetId: string) {
       where: { assetId },
       orderBy: { createdAt: "desc" },
     });
-    
+
     // We stringify/parse to handle Next.js Server Actions serialization (Dates, JsonB objects)
     return { success: true, data: JSON.parse(JSON.stringify(materializations)) };
   } catch (error: any) {
@@ -22,7 +22,7 @@ export async function getJobs(assetId: string) {
     const jobs = await prisma.kissJob.findMany({
       where: { assetId },
       orderBy: { requestedAt: "desc" },
-      take: 20
+      take: 20,
     });
     return { success: true, data: JSON.parse(JSON.stringify(jobs)) };
   } catch (error: any) {

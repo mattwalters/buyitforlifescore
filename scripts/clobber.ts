@@ -30,7 +30,9 @@ async function doClobber(tiers: Set<string>) {
     const resProducts = await prisma.goldProduct.deleteMany({});
     const resLines = await prisma.goldProductLine.deleteMany({});
     const resBrands = await prisma.goldBrand.deleteMany({});
-    summary.push(`[GOLD]: Deleted ${resBrands.count} Brands, ${resLines.count} Lines, and ${resProducts.count} Products.`);
+    summary.push(
+      `[GOLD]: Deleted ${resBrands.count} Brands, ${resLines.count} Lines, and ${resProducts.count} Products.`,
+    );
     spin.stop("GOLD Tier Clobbered");
   }
 
@@ -39,25 +41,35 @@ async function doClobber(tiers: Set<string>) {
     const resIdea = await prisma.silverCategoryIdea.deleteMany({});
     const resCat = await prisma.goldCategory.deleteMany({});
     const resDept = await prisma.goldDepartment.deleteMany({});
-    summary.push(`[TAXONOMY]: Deleted ${resDept.count} Departments, ${resCat.count} Categories, and ${resIdea.count} Ideas.`);
+    summary.push(
+      `[TAXONOMY]: Deleted ${resDept.count} Departments, ${resCat.count} Categories, and ${resIdea.count} Ideas.`,
+    );
     spin.stop("TAXONOMY Tier Clobbered");
   }
 
   if (tiers.has("silver")) {
     spin.start("Clobbering SILVER tier...");
     const res = await prisma.silverProductMention.deleteMany({});
-    
+
     // Always reset bronze if we clear silver so it can be re-run
-    const subRes = await prisma.bronzeRedditSubmission.updateMany({ where: { isProcessed: true }, data: { isProcessed: false } });
-    const comRes = await prisma.bronzeRedditComment.updateMany({ where: { isProcessed: true }, data: { isProcessed: false } });
-    
-    summary.push(`[SILVER]: Deleted ${res.count} Mentions. Un-processed ${subRes.count} Bronze Submissions and ${comRes.count} Comments.`);
+    const subRes = await prisma.bronzeRedditSubmission.updateMany({
+      where: { isProcessed: true },
+      data: { isProcessed: false },
+    });
+    const comRes = await prisma.bronzeRedditComment.updateMany({
+      where: { isProcessed: true },
+      data: { isProcessed: false },
+    });
+
+    summary.push(
+      `[SILVER]: Deleted ${res.count} Mentions. Un-processed ${subRes.count} Bronze Submissions and ${comRes.count} Comments.`,
+    );
     spin.stop("SILVER Tier Clobbered");
   }
 
   if (tiers.has("bronze")) {
     spin.start("Clobbering BRONZE tier (Raw TRUNCATE)...");
-    
+
     // Use TRUNCATE CASCADE to drop 300k+ rows instantly instead of Prisma row-scanning deleteMany
     await prisma.$executeRawUnsafe(`TRUNCATE TABLE "BronzeRedditSubmission" CASCADE;`);
     summary.push(`[BRONZE]: Truncated Submissions, Comments, and cascading dependencies.`);
@@ -69,7 +81,7 @@ async function doClobber(tiers: Set<string>) {
 
 async function main() {
   const args = process.argv.slice(2);
-  let tiers = new Set(args.map(a => a.toLowerCase()));
+  let tiers = new Set(args.map((a) => a.toLowerCase()));
 
   // Headless mode for pipeline execution
   if (tiers.size > 0) {
@@ -88,41 +100,58 @@ async function main() {
   const selectedTiers = await multiselect({
     message: "Select which data tiers you would like to permanently delete:",
     options: [
-       { value: "bronze", label: "Bronze (Submissions/Comments)", hint: "The absolute raw data." },
-       { value: "silver", label: "Silver (Mentions)", hint: "The extracted mentions. Deleting will un-process Bronze." },
-       { value: "gold", label: "Gold (Brands/Lines/Products)", hint: "The rolled up hierarchical entities." },
-       { value: "taxonomy", label: "Taxonomy (Categories/Departments)", hint: "The organic mapping tables." },
-       { value: "ai", label: "AI Spend (Audit Logs)", hint: "The financial tracking records." },
-       { value: "all", label: "Nuclear Option (ALL TIERS)", hint: "Wipe everything." }
+      { value: "bronze", label: "Bronze (Submissions/Comments)", hint: "The absolute raw data." },
+      {
+        value: "silver",
+        label: "Silver (Mentions)",
+        hint: "The extracted mentions. Deleting will un-process Bronze.",
+      },
+      {
+        value: "gold",
+        label: "Gold (Brands/Lines/Products)",
+        hint: "The rolled up hierarchical entities.",
+      },
+      {
+        value: "taxonomy",
+        label: "Taxonomy (Categories/Departments)",
+        hint: "The organic mapping tables.",
+      },
+      { value: "ai", label: "AI Spend (Audit Logs)", hint: "The financial tracking records." },
+      { value: "all", label: "Nuclear Option (ALL TIERS)", hint: "Wipe everything." },
     ],
-    required: false
+    required: false,
   });
 
-  if (!selectedTiers || typeof selectedTiers === "symbol" || (Array.isArray(selectedTiers) && selectedTiers.length === 0)) {
-     cancel("Operation cancelled by user.");
-     process.exit(0);
+  if (
+    !selectedTiers ||
+    typeof selectedTiers === "symbol" ||
+    (Array.isArray(selectedTiers) && selectedTiers.length === 0)
+  ) {
+    cancel("Operation cancelled by user.");
+    process.exit(0);
   }
 
   tiers = new Set(selectedTiers as string[]);
 
   if (tiers.has("all")) {
-     const isSure = await confirm({
-        message: "☢️ WARNING: You selected the Nuclear Option. This will completely wipe all Bronze, Silver, Gold, Taxonomy, and AI data. Are you absolutely sure?",
-        active: 'Yes, Nuke it',
-        inactive: 'Cancel'
-     });
+    const isSure = await confirm({
+      message:
+        "☢️ WARNING: You selected the Nuclear Option. This will completely wipe all Bronze, Silver, Gold, Taxonomy, and AI data. Are you absolutely sure?",
+      active: "Yes, Nuke it",
+      inactive: "Cancel",
+    });
 
-     if (!isSure || typeof isSure === "symbol") {
-        cancel("Nuclear clobber aborted. Database is safe.");
-        process.exit(0);
-     }
+    if (!isSure || typeof isSure === "symbol") {
+      cancel("Nuclear clobber aborted. Database is safe.");
+      process.exit(0);
+    }
   }
 
   const summary = await doClobber(tiers);
-  
+
   let formattedSummary = "Results:\n";
-  summary.forEach(s => formattedSummary += `  -> ${s}\n`);
-  
+  summary.forEach((s) => (formattedSummary += `  -> ${s}\n`));
+
   outro(formattedSummary + "\n✅ Clobber Complete!");
 }
 

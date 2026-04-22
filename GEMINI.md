@@ -60,7 +60,8 @@ The AI Agent is explicitly authorized to run any `npm` command defined in `packa
 
 ## Python Environment (uv)
 
-The monorepo contains Python workspaces (e.g., `app/pipeline`). We use **`uv`** as our Python package and project manager. 
+The monorepo contains Python workspaces (e.g., `app/pipeline`). We use **`uv`** as our Python package and project manager.
+
 - You MUST use `uv run <script>` instead of `.venv/bin/python` to ensure the correct virtual environment and dependencies are automatically resolved.
 
 ## Code Formatting

@@ -1,5 +1,3 @@
-
-
 // Enum for supported AI Models
 export enum AiModel {
   GEMINI_3_FLASH = "gemini-3-flash-preview",
@@ -13,22 +11,25 @@ export enum AiModel {
 
 export type ThinkingLevel = "low" | "medium" | "high" | "off";
 
-export function getThinkingConfig(model: AiModel, level: ThinkingLevel): { thinkingLevel?: string; thinkingBudget?: number } | undefined {
+export function getThinkingConfig(
+  model: AiModel,
+  level: ThinkingLevel,
+): { thinkingLevel?: string; thinkingBudget?: number } | undefined {
   if (level === "off") {
-     if (model.startsWith("gemini-3")) return undefined; 
-     return { thinkingBudget: 0 };
+    if (model.startsWith("gemini-3")) return undefined;
+    return { thinkingBudget: 0 };
   }
 
   const isGemini3 = model.startsWith("gemini-3");
   if (isGemini3) {
-      return { thinkingLevel: level };
+    return { thinkingLevel: level };
   } else {
-      let budget = 1024;
-      if (level === "low") budget = 1024;
-      if (level === "medium") budget = 4096;
-      if (level === "high") budget = -1; 
-      
-      return { thinkingBudget: budget };
+    let budget = 1024;
+    if (level === "low") budget = 1024;
+    if (level === "medium") budget = 4096;
+    if (level === "high") budget = -1;
+
+    return { thinkingBudget: budget };
   }
 }
 
@@ -59,30 +60,30 @@ const GEMINI_3_PRO_PRICING: ModelPricing = {
 export const PRICING: Record<AiModel, ModelPricing> = {
   [AiModel.GEMINI_3_FLASH]: {
     // Exact rates derived from Gemini 3 Flash Preview pricing image
-    input: 0.50 / 1_000_000,
-    output: 3.00 / 1_000_000,
+    input: 0.5 / 1_000_000,
+    output: 3.0 / 1_000_000,
     inputCached: 0.05 / 1_000_000,
-    inputAudio: 1.00 / 1_000_000,
-    inputAudioCached: 0.10 / 1_000_000,
+    inputAudio: 1.0 / 1_000_000,
+    inputAudioCached: 0.1 / 1_000_000,
   },
   [AiModel.GEMINI_3_PRO]: GEMINI_3_PRO_PRICING,
   [AiModel.GEMINI_3_PRO_IMAGE]: GEMINI_3_PRO_PRICING,
   [AiModel.GEMINI_EMBEDDING_2_PREVIEW]: {
     // Pricing based on Gemini Embedding 2 Preview Docs
-    input: 0.20 / 1_000_000,
+    input: 0.2 / 1_000_000,
     output: 0.0 / 1_000_000,
   },
   [AiModel.GEMINI_3_1_FLASH_LITE]: {
     input: 0.25 / 1_000_000,
-    output: 1.50 / 1_000_000,
+    output: 1.5 / 1_000_000,
   },
   [AiModel.GEMINI_2_5_FLASH]: {
-    input: 0.30 / 1_000_000,
-    output: 2.50 / 1_000_000,
+    input: 0.3 / 1_000_000,
+    output: 2.5 / 1_000_000,
   },
   [AiModel.GEMINI_2_5_FLASH_LITE]: {
-    input: 0.10 / 1_000_000,
-    output: 0.40 / 1_000_000,
+    input: 0.1 / 1_000_000,
+    output: 0.4 / 1_000_000,
   },
 } as const;
 
@@ -97,7 +98,7 @@ export function calculateCost(model: AiModel, usage: any): number {
 
   const promptTokens = usage.promptTokenCount || 0;
   const cachedTokens = usage.cachedContentTokenCount || 0;
-  
+
   // The Gemini/Vertex APIs separate these dynamically. We must sum them!
   const responseTokens = (usage.candidatesTokenCount || 0) + (usage.thoughtsTokenCount || 0);
 

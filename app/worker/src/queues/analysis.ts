@@ -10,40 +10,102 @@ export interface AnalysisJobData {
   id: string;
 }
 
-const MOCK_OPTS = env.AI_MOCK_URL ? { apiKey: "mock-key", baseUrl: env.AI_MOCK_URL } : { apiKey: env.GEMINI_API_KEY || "missing_key" };
-const ai = (env.GEMINI_API_KEY || env.AI_MOCK_URL) ? new GoogleGenAI(MOCK_OPTS) : null;
+const MOCK_OPTS = env.AI_MOCK_URL
+  ? { apiKey: "mock-key", baseUrl: env.AI_MOCK_URL }
+  : { apiKey: env.GEMINI_API_KEY || "missing_key" };
+const ai = env.GEMINI_API_KEY || env.AI_MOCK_URL ? new GoogleGenAI(MOCK_OPTS) : null;
 
-  // The Raw Identity Data
+// The Raw Identity Data
 const MENTION_ITEM_SCHEMA = {
   type: Type.OBJECT,
   properties: {
-    sourceId: { type: Type.INTEGER, description: "The EXACT integer source index from the text block where it was mentioned (e.g. 0, 1, 2)." },
-    brand: { type: Type.STRING, description: "The stated brand name. You MUST normalize misspellings and casing to the canonical proper spelling (e.g. 'All-Clad' instead of 'all clad', 'Allen Edmonds' instead of 'allen edmond')." },
-    productName: { type: Type.STRING, description: "The specific marketed product line or model name (e.g., 'Artisan', 'F-150', 'Aeron'). DO NOT extract generic product categories (e.g., 'mixer', 'backpack', 'pan'). If the mention is BRAND_ONLY, you MUST return an empty string \"\" for this field." },
-    specificityLevel: { type: Type.STRING, enum: ["EXACT_MODEL", "PRODUCT_LINE", "BRAND_ONLY"], description: "If a specific, identifiable unit is named (e.g. 'iPad 3 64GB', 'Higgins Mill boot') use EXACT_MODEL. If a marketed product family or series is named (e.g. 'Neuro Fuzzy', 'MacBook', 'Camry', 'Artisan') use PRODUCT_LINE. If they only mention the brand or a generic category (e.g. 'buy an Acura', 'Acura car', 'Apple computer', 'KitchenAid mixer') use BRAND_ONLY." },
-    acquiredPrice: { type: Type.NUMBER, nullable: true, description: "The price paid if mentioned. Only the numeric value." },
-    ownershipDurationMonths: { type: Type.INTEGER, nullable: true, description: "Standardize ownership time mentioned into months (e.g. '3 years' -> 36)." },
-    usageFrequency: { 
-      type: Type.STRING, 
-      nullable: true, 
-      enum: ["DAILY", "WEEKLY", "MONTHLY", "SEASONAL", "RARELY"],
-      description: "How often they mention using it." 
+    sourceId: {
+      type: Type.INTEGER,
+      description:
+        "The EXACT integer source index from the text block where it was mentioned (e.g. 0, 1, 2).",
     },
-    durability: { type: Type.STRING, nullable: true, enum: ["POSITIVE", "NEUTRAL", "NEGATIVE"], description: "If durability is mentioned, what is the sentiment? (e.g. good=POSITIVE)" },
-    repairability: { type: Type.STRING, nullable: true, enum: ["POSITIVE", "NEUTRAL", "NEGATIVE"], description: "If repairability or fixing is mentioned, how easy/affordable is it? (e.g. easy=POSITIVE)" },
-    maintenance: { type: Type.STRING, nullable: true, enum: ["POSITIVE", "NEUTRAL", "NEGATIVE"], description: "If maintenance/cleaning is mentioned, how easy is it? (e.g. easy=POSITIVE)" },
-    warranty: { type: Type.STRING, nullable: true, enum: ["POSITIVE", "NEUTRAL", "NEGATIVE"], description: "If warranty/support is mentioned, how good is it? (e.g. excellent=POSITIVE)" },
-    value: { type: Type.STRING, nullable: true, enum: ["POSITIVE", "NEUTRAL", "NEGATIVE"], description: "If they discuss whether the product was worth the price. (e.g. worth it=POSITIVE)" },
-    sentiment: { type: Type.STRING, enum: ["POSITIVE", "NEUTRAL", "NEGATIVE"], description: "Overall sentiment about the product." },
-    flawOrCaveat: { type: Type.STRING, nullable: true, description: "Even if they love it, any specific flaws, quirks, or complaints they listed?" }
+    brand: {
+      type: Type.STRING,
+      description:
+        "The stated brand name. You MUST normalize misspellings and casing to the canonical proper spelling (e.g. 'All-Clad' instead of 'all clad', 'Allen Edmonds' instead of 'allen edmond').",
+    },
+    productName: {
+      type: Type.STRING,
+      description:
+        "The specific marketed product line or model name (e.g., 'Artisan', 'F-150', 'Aeron'). DO NOT extract generic product categories (e.g., 'mixer', 'backpack', 'pan'). If the mention is BRAND_ONLY, you MUST return an empty string \"\" for this field.",
+    },
+    specificityLevel: {
+      type: Type.STRING,
+      enum: ["EXACT_MODEL", "PRODUCT_LINE", "BRAND_ONLY"],
+      description:
+        "If a specific, identifiable unit is named (e.g. 'iPad 3 64GB', 'Higgins Mill boot') use EXACT_MODEL. If a marketed product family or series is named (e.g. 'Neuro Fuzzy', 'MacBook', 'Camry', 'Artisan') use PRODUCT_LINE. If they only mention the brand or a generic category (e.g. 'buy an Acura', 'Acura car', 'Apple computer', 'KitchenAid mixer') use BRAND_ONLY.",
+    },
+    acquiredPrice: {
+      type: Type.NUMBER,
+      nullable: true,
+      description: "The price paid if mentioned. Only the numeric value.",
+    },
+    ownershipDurationMonths: {
+      type: Type.INTEGER,
+      nullable: true,
+      description: "Standardize ownership time mentioned into months (e.g. '3 years' -> 36).",
+    },
+    usageFrequency: {
+      type: Type.STRING,
+      nullable: true,
+      enum: ["DAILY", "WEEKLY", "MONTHLY", "SEASONAL", "RARELY"],
+      description: "How often they mention using it.",
+    },
+    durability: {
+      type: Type.STRING,
+      nullable: true,
+      enum: ["POSITIVE", "NEUTRAL", "NEGATIVE"],
+      description: "If durability is mentioned, what is the sentiment? (e.g. good=POSITIVE)",
+    },
+    repairability: {
+      type: Type.STRING,
+      nullable: true,
+      enum: ["POSITIVE", "NEUTRAL", "NEGATIVE"],
+      description:
+        "If repairability or fixing is mentioned, how easy/affordable is it? (e.g. easy=POSITIVE)",
+    },
+    maintenance: {
+      type: Type.STRING,
+      nullable: true,
+      enum: ["POSITIVE", "NEUTRAL", "NEGATIVE"],
+      description: "If maintenance/cleaning is mentioned, how easy is it? (e.g. easy=POSITIVE)",
+    },
+    warranty: {
+      type: Type.STRING,
+      nullable: true,
+      enum: ["POSITIVE", "NEUTRAL", "NEGATIVE"],
+      description: "If warranty/support is mentioned, how good is it? (e.g. excellent=POSITIVE)",
+    },
+    value: {
+      type: Type.STRING,
+      nullable: true,
+      enum: ["POSITIVE", "NEUTRAL", "NEGATIVE"],
+      description:
+        "If they discuss whether the product was worth the price. (e.g. worth it=POSITIVE)",
+    },
+    sentiment: {
+      type: Type.STRING,
+      enum: ["POSITIVE", "NEUTRAL", "NEGATIVE"],
+      description: "Overall sentiment about the product.",
+    },
+    flawOrCaveat: {
+      type: Type.STRING,
+      nullable: true,
+      description: "Even if they love it, any specific flaws, quirks, or complaints they listed?",
+    },
   },
-  required: ["sourceId", "brand", "productName", "specificityLevel", "sentiment"]
+  required: ["sourceId", "brand", "productName", "specificityLevel", "sentiment"],
 };
 
 const THREAD_EXTRACTION_SCHEMA = {
   type: Type.ARRAY,
   items: MENTION_ITEM_SCHEMA,
-  description: "An array of all distinct product mentions found in the thread."
+  description: "An array of all distinct product mentions found in the thread.",
 };
 
 export default async function analysisProcessor(job: Job<AnalysisJobData>) {
@@ -61,9 +123,9 @@ export default async function analysisProcessor(job: Job<AnalysisJobData>) {
     return { processed: 0, reason: "ignored_non_thread" };
   }
 
-  const sub = await prisma.bronzeRedditSubmission.findUnique({ 
+  const sub = await prisma.bronzeRedditSubmission.findUnique({
     where: { id },
-    include: { comments: { select: { id: true, body: true } } }
+    include: { comments: { select: { id: true, body: true } } },
   });
 
   if (!sub || sub.isProcessed) return { processed: 0, reason: "skip" };
@@ -74,7 +136,7 @@ export default async function analysisProcessor(job: Job<AnalysisJobData>) {
 
   const threadText = [
     `[SOURCE INDEX: 0] Title: ${sub.title} | Body: ${sub.selftext || ""}`,
-    ...sub.comments.map((c, index) => `[SOURCE INDEX: ${index + 1}] Body: ${c.body}`)
+    ...sub.comments.map((c, index) => `[SOURCE INDEX: ${index + 1}] Body: ${c.body}`),
   ].join("\n\n");
 
   // SIGNAL GATEWAY: Drop low-value threads to save AI token processing costs
@@ -107,24 +169,34 @@ ${threadText}`;
     config: {
       responseMimeType: "application/json",
       responseJsonSchema: THREAD_EXTRACTION_SCHEMA,
-    }
+    },
   });
 
   const rawJson = response.text;
   if (rawJson) {
     try {
       const parsedArray = JSON.parse(rawJson);
-      
+
       if (Array.isArray(parsedArray) && parsedArray.length > 0) {
-        const validMentions = parsedArray.filter(m => m.sourceId !== undefined && m.sourceId !== null && m.brand && m.productName && m.brand !== "null");
-        
+        const validMentions = parsedArray.filter(
+          (m) =>
+            m.sourceId !== undefined &&
+            m.sourceId !== null &&
+            m.brand &&
+            m.productName &&
+            m.brand !== "null",
+        );
+
         if (validMentions.length > 0) {
           // create a list of data models
-          const dataToInsert = validMentions.map(parsed => {
-            const sourceIndex = typeof parsed.sourceId === 'number' ? parsed.sourceId : parseInt(String(parsed.sourceId), 10);
-            
+          const dataToInsert = validMentions.map((parsed) => {
+            const sourceIndex =
+              typeof parsed.sourceId === "number"
+                ? parsed.sourceId
+                : parseInt(String(parsed.sourceId), 10);
+
             let commentId: string | null = null;
-            
+
             // Map integer index back to actual comment ID. Index 0 is the submission itself.
             if (!isNaN(sourceIndex) && sourceIndex > 0 && sourceIndex <= sub.comments.length) {
               commentId = sub.comments[sourceIndex - 1].id;
@@ -158,7 +230,7 @@ ${threadText}`;
             preparedItems.push({
               item,
               vectorValue,
-              embedText
+              embedText,
             });
           }
 
@@ -168,10 +240,10 @@ ${threadText}`;
               const created = await tx.silverProductMention.create({
                 data: prepared.item,
               });
-              
+
               if (prepared.vectorValue.length > 0) {
                 const vectorLiteral = `[${prepared.vectorValue.join(",")}]`;
-                
+
                 await tx.$executeRaw`
                   UPDATE "SilverProductMention" 
                   SET embedding = ${vectorLiteral}::vector
@@ -183,7 +255,10 @@ ${threadText}`;
         }
       }
     } catch (err: unknown) {
-      console.error("Failed to parse LLM structured output or generate embeddings. Failing job to prevent silent data drops.", err);
+      console.error(
+        "Failed to parse LLM structured output or generate embeddings. Failing job to prevent silent data drops.",
+        err,
+      );
       throw err; // <--- This throws to BullMQ so the job actually fails and eventually retries!
     }
   }
@@ -191,7 +266,7 @@ ${threadText}`;
   const usage = response.usageMetadata;
   if (usage) {
     const cost = calculateCost(AiModel.GEMINI_3_FLASH, usage);
-    
+
     await prisma.aiSpend.create({
       data: {
         jobName: "SILVER_EXTRACTION",
@@ -202,7 +277,7 @@ ${threadText}`;
         cachedTokens: usage.cachedContentTokenCount || 0,
         responseTokens: usage.candidatesTokenCount || 0,
         totalTokens: usage.totalTokenCount || 0,
-      }
+      },
     });
   }
 

@@ -1,26 +1,28 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:ital,wght@0,300;0,700;1,300&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:ital,wght@0,300;0,700;1,300&display=swap");
 
 :root {
   /* Heritage Ledger Theme Variables */
-  --bifl-canvas: #F9F8F6;
-  --bifl-card-bg: #FFFFFF;
-  --bifl-charcoal: #2A2A2D;
-  --bifl-body-text: #4A4A4D;
-  
-  --bifl-brand-green: #2B4C3F;
-  --bifl-brand-green-hover: #1E372D;
-  --bifl-accent-rust: #8B4513;
-  --bifl-border-color: #E6E1D8;
-  
-  --font-heading: 'Merriweather', serif;
-  --font-body: 'Inter', sans-serif;
-  
+  --bifl-canvas: #f9f8f6;
+  --bifl-card-bg: #ffffff;
+  --bifl-charcoal: #2a2a2d;
+  --bifl-body-text: #4a4a4d;
+
+  --bifl-brand-green: #2b4c3f;
+  --bifl-brand-green-hover: #1e372d;
+  --bifl-accent-rust: #8b4513;
+  --bifl-border-color: #e6e1d8;
+
+  --font-heading: "Merriweather", serif;
+  --font-body: "Inter", sans-serif;
+
   --container-max: 1200px;
   --border-radius: 4px;
 }
 
 /* CSS Reset */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
@@ -35,7 +37,12 @@ body {
 }
 
 /* Typography Base */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-heading);
   color: var(--bifl-charcoal);
   margin-top: 2rem;
@@ -43,8 +50,15 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1.3;
 }
 
-h1 { font-size: clamp(2rem, 5vw, 3rem); margin-top: 0; }
-h2 { font-size: clamp(1.5rem, 3vw, 2rem); border-bottom: 1px solid var(--bifl-border-color); padding-bottom: 0.5rem; }
+h1 {
+  font-size: clamp(2rem, 5vw, 3rem);
+  margin-top: 0;
+}
+h2 {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  border-bottom: 1px solid var(--bifl-border-color);
+  padding-bottom: 0.5rem;
+}
 
 p {
   margin-top: 0;
@@ -89,7 +103,10 @@ body > header .container {
   color: var(--bifl-brand-green);
   text-decoration: none;
 }
-.site-logo:hover { text-decoration: none; color: var(--bifl-brand-green); }
+.site-logo:hover {
+  text-decoration: none;
+  color: var(--bifl-brand-green);
+}
 
 main.container {
   margin-top: 2rem;
@@ -124,10 +141,11 @@ nav.breadcrumbs a {
   border-radius: var(--border-radius);
   padding: 1.5rem;
   margin-bottom: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
-.button, .cta-button {
+.button,
+.cta-button {
   display: inline-block;
   background-color: var(--bifl-brand-green);
   color: #fff;
@@ -139,7 +157,8 @@ nav.breadcrumbs a {
   cursor: pointer;
   margin-top: 1rem;
 }
-.button:hover, .cta-button:hover {
+.button:hover,
+.cta-button:hover {
   background-color: var(--bifl-brand-green-hover);
   color: #fff;
   text-decoration: none;
@@ -168,7 +187,8 @@ table {
   margin-bottom: 2rem;
 }
 
-th, td {
+th,
+td {
   padding: 1rem;
   text-align: left;
   border-bottom: 1px solid var(--bifl-border-color);
@@ -189,4 +209,6 @@ th {
   margin-bottom: 2rem;
 }
 
-.data-grid .bifl-card { margin-bottom: 0; }
+.data-grid .bifl-card {
+  margin-bottom: 0;
+}

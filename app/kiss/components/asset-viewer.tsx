@@ -12,7 +12,7 @@ type SchemaRow = {
 type AssetSummary = {
   totalRows: number;
   schema: SchemaRow[];
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   preview: any[];
 };
 

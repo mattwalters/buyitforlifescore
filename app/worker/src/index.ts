@@ -32,8 +32,8 @@ async function start() {
       concurrency: 10,
       limiter: {
         max: 14, // 15 RPM is the Gemini 3 Flash free tier limit. 14 leaves a small buffer
-        duration: 60000, 
-      }
+        duration: 60000,
+      },
     });
 
     analysisWorker.on("completed", (job) => {

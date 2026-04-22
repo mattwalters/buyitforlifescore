@@ -17,8 +17,6 @@ def main():
     parser.add_argument("-n", "--num-samples", type=int, default=20, help="Number of unique nodes to sample.")
     args = parser.parse_args()
 
-    con = get_duckdb_connection()
-
     # Read from entity discovery results (flat table: bundle_id, submission_id, verbatim_quote, node_id)
     source_results = get_read_path("silver/reddit_entity_discovery_results/*/*/*.parquet")
     source_submissions = get_read_path("bronze/reddit_*_submissions.parquet")
@@ -26,59 +24,60 @@ def main():
 
     print(f"Loading discovery results from {source_results}...")
 
-    try:
-        # Sample N unique node_ids, then pull all their quotes
-        discovery_query = f"""
-            WITH sampled_nodes AS (
-                SELECT DISTINCT node_id
-                FROM read_parquet('{source_results}', union_by_name=true)
-                USING SAMPLE {args.num_samples}
+    with get_duckdb_connection() as con:
+        try:
+            # Sample N unique node_ids, then pull all their quotes
+            discovery_query = f"""
+                WITH sampled_nodes AS (
+                    SELECT DISTINCT node_id
+                    FROM read_parquet('{source_results}', union_by_name=true)
+                    USING SAMPLE {args.num_samples}
+                )
+                SELECT dr.*
+                FROM read_parquet('{source_results}', union_by_name=true) dr
+                SEMI JOIN sampled_nodes sn ON dr.node_id = sn.node_id
+            """
+            discovery_df = con.execute(discovery_query).fetchdf()
+        except Exception as e:
+            print(f"Failed to load discovery results: {e}")
+            return
+
+        if discovery_df.empty:
+            print("No discovery results found. Ensure upstream assets are materialized.")
+            return
+
+        # Group by node_id
+        grouped = (
+            discovery_df.groupby("node_id")
+            .agg(
+                submission_id=("submission_id", "first"),
+                verbatim_quotes=("verbatim_quote", list),
             )
-            SELECT dr.*
-            FROM read_parquet('{source_results}', union_by_name=true) dr
-            SEMI JOIN sampled_nodes sn ON dr.node_id = sn.node_id
+            .reset_index()
+        )
+
+        unique_node_ids = grouped["node_id"].tolist()
+        print(f"Sampled {len(unique_node_ids)} unique nodes with {len(discovery_df)} total quotes.")
+
+        # Join to bronze for original text
+        node_ids_df = pd.DataFrame({"node_id": unique_node_ids})  # noqa: F841
+        text_query = f"""
+            WITH target_nodes AS (
+                SELECT node_id FROM node_ids_df
+            )
+            SELECT n.node_id, COALESCE(s.title || ' ' || COALESCE(s.selftext, ''), c.body, '') AS full_text
+            FROM target_nodes n
+            LEFT JOIN read_parquet('{source_submissions}') s
+                ON COALESCE(CAST(s.name AS VARCHAR), 't3_' || CAST(s.id AS VARCHAR)) = n.node_id
+            LEFT JOIN read_parquet('{source_comments}') c
+                ON COALESCE(CAST(c.name AS VARCHAR), 't1_' || CAST(c.id AS VARCHAR)) = n.node_id
         """
-        discovery_df = con.execute(discovery_query).fetchdf()
-    except Exception as e:
-        print(f"Failed to load discovery results: {e}")
-        return
 
-    if discovery_df.empty:
-        print("No discovery results found. Ensure upstream assets are materialized.")
-        return
-
-    # Group by node_id
-    grouped = (
-        discovery_df.groupby("node_id")
-        .agg(
-            submission_id=("submission_id", "first"),
-            verbatim_quotes=("verbatim_quote", list),
-        )
-        .reset_index()
-    )
-
-    unique_node_ids = grouped["node_id"].tolist()
-    print(f"Sampled {len(unique_node_ids)} unique nodes with {len(discovery_df)} total quotes.")
-
-    # Join to bronze for original text
-    node_ids_df = pd.DataFrame({"node_id": unique_node_ids})  # noqa: F841
-    text_query = f"""
-        WITH target_nodes AS (
-            SELECT node_id FROM node_ids_df
-        )
-        SELECT n.node_id, COALESCE(s.title || ' ' || COALESCE(s.selftext, ''), c.body, '') AS full_text
-        FROM target_nodes n
-        LEFT JOIN read_parquet('{source_submissions}') s
-            ON COALESCE(CAST(s.name AS VARCHAR), 't3_' || CAST(s.id AS VARCHAR)) = n.node_id
-        LEFT JOIN read_parquet('{source_comments}') c
-            ON COALESCE(CAST(c.name AS VARCHAR), 't1_' || CAST(c.id AS VARCHAR)) = n.node_id
-    """
-
-    try:
-        text_df = con.execute(text_query).fetchdf()
-    except Exception as e:
-        print(f"Failed to join node text: {e}")
-        return
+        try:
+            text_df = con.execute(text_query).fetchdf()
+        except Exception as e:
+            print(f"Failed to join node text: {e}")
+            return
 
     node_text_map = dict(zip(text_df["node_id"], text_df["full_text"]))
 

@@ -23,7 +23,9 @@ export async function getDuckDB() {
         db.run(`SET s3_secret_access_key='${env.R2_SECRET_ACCESS_KEY}';`);
         db.run("SET s3_url_style='vhost';");
       } else {
-        console.warn("⚠️ Missing Cloudflare R2 Credentials in ENV. Using local files. Skipping S3 SET config.");
+        console.warn(
+          "⚠️ Missing Cloudflare R2 Credentials in ENV. Using local files. Skipping S3 SET config.",
+        );
       }
 
       resolve(db);

@@ -34,8 +34,8 @@ The application will be available at `http://localhost:3000`.
 
 The project is split into three main workspaces in the `app/` directory:
 
-| `app/admin`  | **Admin**  | The admin application.      |
-| `app/worker` | **Worker**  | Background process for handling async tasks.      |
+| `app/admin` | **Admin** | The admin application. |
+| `app/worker` | **Worker** | Background process for handling async tasks. |
 
 ## 🛠️ Key Commands
 

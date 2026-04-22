@@ -2,11 +2,11 @@ export interface QualityRule {
   name: string;
   severity: "warn" | "error";
   /**
-   * Raw SQL executed against the duckdb target. 
+   * Raw SQL executed against the duckdb target.
    * Must return exactly one row with a boolean column `passed`.
    * Use '{{target}}' for the R2 target to be swapped at runtime.
    */
-  sqlTemplate: string; 
+  sqlTemplate: string;
 }
 
 export interface PipelineAsset {
@@ -15,7 +15,7 @@ export interface PipelineAsset {
   isPartitioned: boolean;
   dependencies: string[];
   /**
-   * The R2 path expression. 
+   * The R2 path expression.
    * Defaults to 's3://${process.env.R2_BUCKET_NAME}/${layer}/${id}{{suffix}}'.
    * Suffix is conditionally '.parquet' or '/partitionKey.parquet'.
    */
@@ -28,7 +28,6 @@ export interface PipelineAsset {
 // -----------------------------------------------------------------------------
 
 export const AssetRegistry: Record<string, PipelineAsset> = {
-  
   reddit_buyitforlife_submissions: {
     id: "reddit_buyitforlife_submissions",
     layer: "bronze",
@@ -42,11 +41,11 @@ export const AssetRegistry: Record<string, PipelineAsset> = {
           SELECT COUNT(*) = 0 AS passed 
           FROM read_parquet('{{target}}') 
           WHERE url IS NULL
-        `
-      }
-    ]
+        `,
+      },
+    ],
   },
-  
+
   reddit_buyitforlife_comments: {
     id: "reddit_buyitforlife_comments",
     layer: "bronze",
@@ -60,7 +59,7 @@ export const AssetRegistry: Record<string, PipelineAsset> = {
           SELECT COUNT(*) = 0 AS passed 
           FROM read_parquet('{{target}}') 
           WHERE author IS NULL
-        `
+        `,
       },
       {
         name: "Upvotes Cannot Be Anomalously Negative",
@@ -69,9 +68,9 @@ export const AssetRegistry: Record<string, PipelineAsset> = {
           SELECT COUNT(*) = 0 AS passed 
           FROM read_parquet('{{target}}') 
           WHERE score < -100
-        `
-      }
-    ]
+        `,
+      },
+    ],
   },
 
   // Example Silver Asset for Lineage
@@ -88,9 +87,8 @@ export const AssetRegistry: Record<string, PipelineAsset> = {
           SELECT COUNT(*) = 0 AS passed 
           FROM read_parquet('{{target}}') 
           WHERE summary IS NULL OR length(summary) < 5
-        `
-      }
-    ]
-  }
-
+        `,
+      },
+    ],
+  },
 };

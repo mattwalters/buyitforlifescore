@@ -13,13 +13,15 @@ from dagster import (
     define_asset_job,
     multiprocess_executor,
 )
-from pydantic import TypeAdapter
 
 from pipeline.defs.silver.chains import chains_partitions_def
 from pipeline.schemas.reddit_entity_resolution import EntityResolutionResult
 from pipeline.utils.ai import get_client, invoke_entity_resolution
 from pipeline.utils.db import get_duckdb_connection
 from pipeline.utils.paths import get_read_path, get_write_path
+
+# If more than this fraction of nodes fail, the asset raises instead of writing partial data.
+FAILURE_THRESHOLD = 0.2
 
 
 @asset(
@@ -71,6 +73,8 @@ def silver_reddit_entity_resolution(context: AssetExecutionContext) -> Materiali
             }
         )
 
+    empty_columns = list(EntityResolutionResult.model_fields.keys())
+
     with get_duckdb_connection() as con:
         # Check if upstream discovery results exist
         try:
@@ -79,7 +83,7 @@ def silver_reddit_entity_resolution(context: AssetExecutionContext) -> Materiali
             context.log.info(
                 f"No discovery results found for {subreddit_key} on {date_key}. Skipping entity resolution."
             )
-            empty_df = pd.DataFrame(columns=list(EntityResolutionResult.model_fields.keys()))  # noqa: F841
+            empty_df = pd.DataFrame(columns=empty_columns)  # noqa: F841
             con.execute(f"COPY (SELECT * FROM empty_df) TO '{target_parquet}' (FORMAT PARQUET)")
             return MaterializeResult(
                 metadata={
@@ -90,7 +94,7 @@ def silver_reddit_entity_resolution(context: AssetExecutionContext) -> Materiali
 
         if discovery_df.empty:
             context.log.info(f"Empty discovery results for {subreddit_key} on {date_key}. Skipping.")
-            empty_df = pd.DataFrame(columns=list(EntityResolutionResult.model_fields.keys()))  # noqa: F841
+            empty_df = pd.DataFrame(columns=empty_columns)  # noqa: F841
             con.execute(f"COPY (SELECT * FROM empty_df) TO '{target_parquet}' (FORMAT PARQUET)")
             return MaterializeResult(
                 metadata={
@@ -131,6 +135,7 @@ def silver_reddit_entity_resolution(context: AssetExecutionContext) -> Materiali
     results: list[EntityResolutionResult] = []
     total_nodes = len(unique_node_ids)
     total_cost = 0.0
+    failed_count = 0
 
     context.log.info(f"Processing {total_nodes} nodes with ThreadPoolExecutor (max_workers=4)")
 
@@ -154,31 +159,47 @@ def silver_reddit_entity_resolution(context: AssetExecutionContext) -> Materiali
                 result = future.result()
                 results.append(result)
                 total_cost += result.cost_usd
-                context.log.info(f"[{i}/{total_nodes}] ✅ {nid} — {len(result.items)} entities, ${result.cost_usd:.6f}")
+                context.log.info(
+                    f"[{i}/{total_nodes}] ✅ {nid} — {result.resolved_count} entities, ${result.cost_usd:.6f}"
+                )
             except Exception as e:
+                failed_count += 1
                 context.log.error(f"[{i}/{total_nodes}] ❌ {nid} — {e}")
 
-    context.log.info(f"Entity resolution complete. Total cost for this partition: ${total_cost:.6f}")
+    success_count = len(results)
+    context.log.info(
+        f"Entity resolution complete. {success_count} succeeded, {failed_count} failed. "
+        f"Total cost: ${total_cost:.6f}"
+    )
 
-    # Pydantic Validation
-    out_records = [r.model_dump() for r in results]
-    TypeAdapter(list[EntityResolutionResult]).validate_python(out_records)
+    # Threshold gate: fail the asset if too many nodes errored out
+    if total_nodes > 0 and (failed_count / total_nodes) > FAILURE_THRESHOLD:
+        raise RuntimeError(
+            f"Entity resolution failure rate {failed_count}/{total_nodes} "
+            f"({failed_count / total_nodes:.0%}) exceeds {FAILURE_THRESHOLD:.0%} threshold. "
+            f"Aborting to prevent writing incomplete data."
+        )
 
-    if not out_records:
-        out_df = pd.DataFrame(columns=list(EntityResolutionResult.model_fields.keys()))  # noqa: F841
+    if not results:
+        out_df = pd.DataFrame(columns=empty_columns)  # noqa: F841
     else:
+        out_records = [r.model_dump() for r in results]
         out_df = pd.DataFrame(out_records)  # noqa: F841
 
     with get_duckdb_connection() as con:
         con.execute(f"COPY (SELECT * FROM out_df) TO '{target_parquet}' (FORMAT PARQUET)")
 
-        preview_df = con.execute(f"SELECT node_id, submission_id, cost_usd FROM '{target_parquet}' LIMIT 10").fetchdf()
+        preview_df = con.execute(
+            f"SELECT node_id, submission_id, resolved_count, cost_usd FROM '{target_parquet}' LIMIT 10"
+        ).fetchdf()
         preview_md = preview_df.to_markdown()
 
     return MaterializeResult(
         metadata={
             "target_file": target_parquet,
             "cost_usd": MetadataValue.float(float(total_cost)),
+            "success_nodes": MetadataValue.int(success_count),
+            "failed_nodes": MetadataValue.int(failed_count),
             "data_preview": MetadataValue.md(preview_md),
         }
     )

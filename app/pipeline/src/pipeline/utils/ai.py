@@ -1,4 +1,3 @@
-import json
 import logging
 from enum import Enum
 from typing import Any
@@ -202,6 +201,7 @@ def invoke_entity_discovery(
 
         return out_text
 
+    raw_json = "[]"
     try:
         raw_json = _attempt_call()
         llm_entities = TypeAdapter(list[LlmDiscoveredEntity]).validate_json(raw_json)
@@ -283,11 +283,8 @@ def invoke_entity_resolution(
         "You will be given the full text of a Reddit post or comment inside <node_text> tags, along with a list of "
         "verbatim quotes inside <verbatim_quotes> tags that were previously identified as potential commercial "
         "product or brand references.\n\n"
-        "For EACH verbatim quote, classify it into:\n"
-        "- brand: The brand or manufacturer name. "
-        "Return null if this is NOT a real commercial brand "
-        '(e.g., generic materials like "cast iron", "wood", "copper", '
-        'or generic objects like "adapter", "propane tank").\n'
+        "For each verbatim quote that IS a real commercial brand, classify it into:\n"
+        "- brand: The brand or manufacturer name.\n"
         '- product_line: The marketed product family or series name (e.g., "Baggies", "Artisan", "D5"). '
         "Return null if only a brand is mentioned with no specific product family.\n"
         '- product_model: A specific identifiable unit or model (e.g., "Iron Ranger 8111", "iPad 3 64GB"). '
@@ -303,9 +300,10 @@ def invoke_entity_resolution(
         "1. Do NOT classify generic product categories as product_line or product_model. "
         '"KitchenAid mixer" → brand="KitchenAid", product_line=null, specificity="BRAND_ONLY". '
         "Only use PRODUCT_LINE or EXACT_MODEL for proper nouns / marketing names.\n"
-        "2. If the verbatim quote is not a real commercial brand at all, return brand=null and "
-        'specificity_level="BRAND_ONLY".\n'
-        "3. You MUST return exactly one classification object per verbatim quote provided."
+        "2. If a verbatim quote is NOT a real commercial brand (e.g., generic materials like "
+        '"cast iron", "wood", "copper", or generic objects like "adapter", "propane tank"), '
+        "simply OMIT it from your output entirely. Do not return a result for it.\n"
+        "3. Only return classifications for genuine commercial brands."
     )
 
     config = types.GenerateContentConfig(
@@ -358,6 +356,7 @@ def invoke_entity_resolution(
 
         return out_text
 
+    raw_json = "[]"
     try:
         raw_json = _attempt_call()
         resolved_items = TypeAdapter(list[LlmResolvedEntity]).validate_json(raw_json)
@@ -387,8 +386,8 @@ def invoke_entity_resolution(
         node_id=node_id,
         submission_id=submission_id,
         node_text=node_text,
-        items=resolved_items,
         raw_json=raw_json,
+        resolved_count=len(resolved_items),
         cost_usd=accumulated_cost_usd,
         prompt_tokens=accumulated_prompt_tokens,
         completion_tokens=accumulated_completion_tokens,

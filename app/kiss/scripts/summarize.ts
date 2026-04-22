@@ -17,7 +17,7 @@ async function main() {
       },
       jobId: {
         type: "string", // Optionally pass a job ID to log to postgres
-      }
+      },
     },
   });
 
@@ -29,21 +29,24 @@ async function main() {
   try {
     console.log(`🚀 Starting Materialization for Asset: ${values.asset}`);
     if (values.partition) console.log(`👉 Partition: ${values.partition}`);
-    
+
     // We await the abstracted execute block.
-    const result = await executeMaterialization({
-      assetId: values.asset,
-      partitionKey: values.partition,
-    }, values.jobId);
-    
+    const result = await executeMaterialization(
+      {
+        assetId: values.asset,
+        partitionKey: values.partition,
+      },
+      values.jobId,
+    );
+
     console.log("\n✅ Materialization Successful!");
     console.log(`📊 Rows Analyzed: ${result.totalRows.toLocaleString()}`);
     console.log(`📊 Columns Handled: ${result.columns.length}`);
-    
+
     if (result.qaResults.length > 0) {
       console.log(`\n🧪 QA Results:`);
-      result.qaResults.forEach(qa => {
-        const icon = qa.passed ? "✅" : (qa.severity === "error" ? "❌" : "⚠️");
+      result.qaResults.forEach((qa) => {
+        const icon = qa.passed ? "✅" : qa.severity === "error" ? "❌" : "⚠️";
         console.log(`${icon} [${qa.severity.toUpperCase()}] ${qa.ruleName}`);
       });
     }
